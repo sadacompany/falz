@@ -1,0 +1,453 @@
+'use client'
+
+import { useState, useCallback, useEffect } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
+import { signOut } from 'next-auth/react'
+import {
+  LayoutDashboard,
+  Building2,
+  Users,
+  BarChart3,
+  FileText,
+  MessageSquare,
+  UserPlus,
+  Settings,
+  Search,
+  Bell,
+  Globe,
+  Menu,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+  User,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ExternalLink,
+  CreditCard,
+  UserCheck,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Logo } from '@/components/shared/Logo'
+import type { Role } from '@prisma/client'
+
+// ─── Types ──────────────────────────────────────────────────
+
+interface DashboardShellProps {
+  user: {
+    id: string
+    name: string
+    email: string
+    isSuperAdmin: boolean
+  }
+  office: {
+    id: string
+    name: string
+    nameAr: string | null
+    slug: string
+    logo: string | null
+  }
+  role: Role
+  children: React.ReactNode
+}
+
+interface NavItem {
+  label: string
+  labelAr: string
+  href: string
+  icon: React.ElementType
+  roles?: Role[]
+}
+
+// ─── Nav Items ──────────────────────────────────────────────
+
+const navItems: NavItem[] = [
+  {
+    label: 'Overview',
+    labelAr: 'نظرة عامة',
+    href: '/dashboard',
+    icon: LayoutDashboard,
+  },
+  {
+    label: 'Properties',
+    labelAr: 'العقارات',
+    href: '/dashboard/properties',
+    icon: Building2,
+  },
+  {
+    label: 'Leads',
+    labelAr: 'العملاء',
+    href: '/dashboard/leads',
+    icon: Users,
+  },
+  {
+    label: 'Requests',
+    labelAr: 'الطلبات',
+    href: '/dashboard/requests',
+    icon: MessageSquare,
+    roles: ['OWNER', 'MANAGER'],
+  },
+  {
+    label: 'Visitors',
+    labelAr: 'الزوار',
+    href: '/dashboard/visitors',
+    icon: UserCheck,
+    roles: ['OWNER', 'MANAGER'],
+  },
+  {
+    label: 'Analytics',
+    labelAr: 'التحليلات',
+    href: '/dashboard/analytics',
+    icon: BarChart3,
+    roles: ['OWNER', 'MANAGER'],
+  },
+  {
+    label: 'Team',
+    labelAr: 'الفريق',
+    href: '/dashboard/team',
+    icon: UserPlus,
+    roles: ['OWNER', 'MANAGER'],
+  },
+  {
+    label: 'Billing',
+    labelAr: 'الفوترة',
+    href: '/dashboard/billing',
+    icon: CreditCard,
+    roles: ['OWNER', 'MANAGER'],
+  },
+  {
+    label: 'Settings',
+    labelAr: 'الإعدادات',
+    href: '/dashboard/settings',
+    icon: Settings,
+    roles: ['OWNER', 'MANAGER'],
+  },
+]
+
+// ─── Component ──────────────────────────────────────────────
+
+export function DashboardShell({
+  user,
+  office,
+  role,
+  children,
+}: DashboardShellProps) {
+  const pathname = usePathname()
+  const [locale, setLocale] = useState<'ar' | 'en'>('ar')
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const isRtl = locale === 'ar'
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClick = () => setUserMenuOpen(false)
+    if (userMenuOpen) {
+      document.addEventListener('click', handleClick)
+      return () => document.removeEventListener('click', handleClick)
+    }
+  }, [userMenuOpen])
+
+  const toggleLocale = useCallback(() => {
+    setLocale((l) => (l === 'ar' ? 'en' : 'ar'))
+    document.cookie = `falz-locale=${locale === 'ar' ? 'en' : 'ar'}; path=/; max-age=31536000`
+  }, [locale])
+
+  const filteredNavItems = navItems.filter(
+    (item) => !item.roles || item.roles.includes(role)
+  )
+
+  const isActive = (href: string) => {
+    if (href === '/dashboard') return pathname === '/dashboard'
+    return pathname.startsWith(href)
+  }
+
+  // ─── Sidebar Content ────────────────────────────────────
+
+  const SidebarContent = () => (
+    <div className="flex h-full flex-col">
+      {/* Logo Section */}
+      <div className="flex items-center gap-3 border-b border-[#E2E8F0] px-4 py-5">
+        <Logo size="sm" variant="dark" />
+        {!sidebarCollapsed && (
+          <span className="text-lg font-bold text-[#1E3A5F] tracking-wide">
+            FALZ
+          </span>
+        )}
+      </div>
+
+      {/* Office Info */}
+      <div className="border-b border-[#E2E8F0] px-4 py-4">
+        <div className="flex items-center gap-3">
+          {office.logo ? (
+            <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-lg border border-[#E2E8F0]">
+              <Image
+                src={office.logo}
+                alt={office.nameAr || office.name}
+                fill
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-[#E2E8F0] bg-[#FAF5EB] text-[#C8A96E]">
+              <Building2 className="h-4 w-4" />
+            </div>
+          )}
+          {!sidebarCollapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-[#2D3748]">
+                {locale === 'ar' ? (office.nameAr || office.name) : office.name}
+              </p>
+              <p className="truncate text-xs text-[#A0AEC0]">
+                {office.slug}.falz.sa
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <ul className="space-y-1">
+          {filteredNavItems.map((item) => {
+            const active = isActive(item.href)
+            const Icon = item.icon
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                    active
+                      ? 'bg-[#FAF5EB] text-[#C8A96E] border-e-2 border-[#C8A96E]'
+                      : 'text-[#718096] hover:bg-[#F7F7F2] hover:text-[#1E3A5F]',
+                    sidebarCollapsed && 'justify-center px-2'
+                  )}
+                  title={sidebarCollapsed ? (locale === 'ar' ? item.labelAr : item.label) : undefined}
+                >
+                  <Icon
+                    className={cn(
+                      'h-5 w-5 flex-shrink-0 transition-colors',
+                      active
+                        ? 'text-[#C8A96E]'
+                        : 'text-[#A0AEC0] group-hover:text-[#1E3A5F]'
+                    )}
+                  />
+                  {!sidebarCollapsed && (
+                    <span>{locale === 'ar' ? item.labelAr : item.label}</span>
+                  )}
+                  {active && !sidebarCollapsed && (
+                    <div className="ms-auto h-1.5 w-1.5 rounded-full bg-[#C8A96E]" />
+                  )}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+
+      {/* View Public Site */}
+      <div className="border-t border-[#E2E8F0] px-3 py-3">
+        <Link
+          href={`/o/${office.slug}`}
+          target="_blank"
+          className={cn(
+            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]',
+            sidebarCollapsed && 'justify-center px-2'
+          )}
+        >
+          <ExternalLink className="h-4 w-4" />
+          {!sidebarCollapsed && (
+            <span>{locale === 'ar' ? 'عرض الموقع' : 'View Public Site'}</span>
+          )}
+        </Link>
+      </div>
+
+      {/* Collapse Toggle (Desktop) */}
+      <div className="hidden border-t border-[#E2E8F0] px-3 py-3 lg:block">
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]"
+        >
+          {sidebarCollapsed ? (
+            <PanelLeftOpen className="h-4 w-4" />
+          ) : (
+            <>
+              <PanelLeftClose className="h-4 w-4" />
+              <span>{locale === 'ar' ? 'طي القائمة' : 'Collapse'}</span>
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div
+      dir={isRtl ? 'rtl' : 'ltr'}
+      className="flex h-screen overflow-hidden bg-[#FAFAF7]"
+    >
+      {/* ── Desktop Sidebar ──────────────────────────── */}
+      <aside
+        className={cn(
+          'hidden lg:flex flex-col border-e border-[#E2E8F0] bg-white transition-all duration-300',
+          sidebarCollapsed ? 'w-[72px]' : 'w-64'
+        )}
+      >
+        <SidebarContent />
+      </aside>
+
+      {/* ── Mobile Sidebar Overlay ────────────────────── */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* ── Mobile Sidebar Drawer ─────────────────────── */}
+      <aside
+        className={cn(
+          'fixed top-0 z-50 h-full w-64 border-e border-[#E2E8F0] bg-white transition-transform duration-300 lg:hidden',
+          isRtl ? 'right-0' : 'left-0',
+          mobileMenuOpen
+            ? 'translate-x-0'
+            : isRtl
+              ? 'translate-x-full'
+              : '-translate-x-full'
+        )}
+      >
+        <SidebarContent />
+      </aside>
+
+      {/* ── Main Content ─────────────────────────────── */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Top Bar */}
+        <header className="flex h-16 items-center justify-between border-b border-[#E2E8F0] bg-white px-4 lg:px-6">
+          {/* Left side */}
+          <div className="flex items-center gap-3">
+            {/* Mobile menu toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] lg:hidden"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+
+            {/* Search */}
+            <div className="hidden items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 sm:flex">
+              <Search className="h-4 w-4 text-[#A0AEC0]" />
+              <input
+                type="text"
+                placeholder={locale === 'ar' ? 'بحث...' : 'Search...'}
+                className="w-48 bg-transparent text-sm text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none lg:w-64"
+              />
+            </div>
+          </div>
+
+          {/* Right side */}
+          <div className="flex items-center gap-2">
+            {/* Language Toggle */}
+            <button
+              onClick={toggleLocale}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]"
+            >
+              <Globe className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {locale === 'ar' ? 'EN' : 'AR'}
+              </span>
+            </button>
+
+            {/* Notifications */}
+            <button className="relative rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]">
+              <Bell className="h-5 w-5" />
+              <span className="absolute end-1 top-1 h-2 w-2 rounded-full bg-[#C8A96E]" />
+            </button>
+
+            {/* User Menu */}
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setUserMenuOpen(!userMenuOpen)
+                }}
+                className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-[#F7F7F2]"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EBF0F7] text-[#1E3A5F]">
+                  <User className="h-4 w-4" />
+                </div>
+                <div className="hidden text-start sm:block">
+                  <p className="text-sm font-medium text-[#2D3748]">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-[#A0AEC0]">
+                    {role === 'OWNER'
+                      ? locale === 'ar'
+                        ? 'مالك'
+                        : 'Owner'
+                      : role === 'MANAGER'
+                        ? locale === 'ar'
+                          ? 'مدير'
+                          : 'Manager'
+                        : locale === 'ar'
+                          ? 'وكيل'
+                          : 'Agent'}
+                  </p>
+                </div>
+              </button>
+
+              {/* Dropdown */}
+              {userMenuOpen && (
+                <div
+                  className={cn(
+                    'absolute top-full mt-2 w-56 rounded-xl border border-[#E2E8F0] bg-white py-1 shadow-lg',
+                    isRtl ? 'left-0' : 'right-0'
+                  )}
+                >
+                  <div className="border-b border-[#E2E8F0] px-4 py-3">
+                    <p className="text-sm font-medium text-[#2D3748]">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-[#A0AEC0]">{user.email}</p>
+                  </div>
+
+                  <Link
+                    href="/dashboard/settings"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]"
+                  >
+                    <Settings className="h-4 w-4" />
+                    {locale === 'ar' ? 'الإعدادات' : 'Settings'}
+                  </Link>
+
+                  <div className="border-t border-[#E2E8F0]">
+                    <button
+                      onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-500 transition-colors hover:bg-red-50"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      {locale === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,24 @@
+import { NextResponse } from 'next/server'
+import { getPlans } from '@/lib/actions/admin'
+
+export async function GET() {
+  try {
+    const plans = await getPlans()
+
+    return NextResponse.json({ success: true, data: plans })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'An unexpected error occurred'
+
+    if (message === 'Super admin access required' || message === 'Authentication required') {
+      return NextResponse.json(
+        { success: false, error: message },
+        { status: 403 }
+      )
+    }
+
+    return NextResponse.json(
+      { success: false, error: message },
+      { status: 500 }
+    )
+  }
+}

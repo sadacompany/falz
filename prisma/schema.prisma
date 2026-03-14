@@ -1,0 +1,679 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── PLANS & BILLING ──────────────────────────────────────
+
+model Plan {
+  id                String         @id @default(cuid())
+  name              String         // Basic, Pro, Enterprise
+  slug              String         @unique
+  priceMonthly      Int            @default(0) // in smallest currency unit (halalas)
+  priceYearly       Int            @default(0)
+  currency          String         @default("SAR")
+  maxListings       Int            @default(10)
+  maxAgents         Int            @default(2)
+  maxMediaPerListing Int           @default(5)
+  features          Json           @default("{}") // { customDomain: false, advancedAnalytics: false, pdfReports: false, blogEnabled: true, ... }
+  isActive          Boolean        @default(true)
+  sortOrder         Int            @default(0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  subscriptions     Subscription[]
+}
+
+model Subscription {
+  id              String             @id @default(cuid())
+  officeId        String
+  office          Office             @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  planId          String
+  plan            Plan               @relation(fields: [planId], references: [id])
+  status          SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelledAt     DateTime?
+  gracePeriodEnd  DateTime?
+  paymentProvider String?           // stripe, moyasar, tap, etc.
+  externalId      String?           // provider subscription ID
+  metadata        Json?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  invoices        Invoice[]
+
+  @@index([officeId])
+  @@index([status])
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  GRACE_PERIOD
+  EXPIRED
+  TRIALING
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  subscriptionId  String
+  subscription    Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  officeId        String
+  office          Office        @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  amount          Int
+  currency        String        @default("SAR")
+  status          InvoiceStatus @default(PENDING)
+  paidAt          DateTime?
+  externalId      String?
+  invoiceUrl      String?
+  metadata        Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([officeId])
+  @@index([subscriptionId])
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// ─── OFFICE (TENANT) ──────────────────────────────────────
+
+model Office {
+  id              String    @id @default(cuid())
+  name            String
+  nameAr          String?
+  slug            String    @unique
+  logo            String?   // URL to uploaded logo
+  description     String?   @db.Text
+  descriptionAr   String?   @db.Text
+  falLicenseNo    String?
+  phone           String?
+  email           String?
+  whatsapp        String?
+  website         String?
+  address         String?
+  addressAr       String?
+  city            String?
+  cityAr          String?
+  district        String?
+  districtAr      String?
+  lat             Float?
+  lng             Float?
+  customDomain    String?   @unique
+  subdomain       String?   @unique
+  defaultLanguage String    @default("ar")
+  socialLinks     Json?     // { twitter, instagram, snapchat, linkedin, tiktok }
+  seoTitle        String?
+  seoTitleAr      String?
+  seoDescription  String?   @db.Text
+  seoDescriptionAr String?  @db.Text
+  ogImage         String?
+  pageSections    Json?     // Array of PageSectionConfig
+  pageVisibility  Json?     // PageVisibilityConfig: { about, contact, agents, blog }
+  isApproved      Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  memberships     Membership[]
+  properties      Property[]
+  leads           Lead[]
+  blogPosts       BlogPost[]
+  blogCategories  BlogCategory[]
+  blogTags        BlogTag[]
+  themeSettings   ThemeSettings?
+  analyticsEvents AnalyticsEvent[]
+  auditLogs       AuditLog[]
+  subscriptions   Subscription[]
+  invoices        Invoice[]
+  invitations     Invitation[]
+  notifications   Notification[]
+  agentProfiles   AgentProfile[]
+  visitors        Visitor[]
+
+  @@index([slug])
+  @@index([customDomain])
+  @@index([subdomain])
+}
+
+// ─── THEME ──────────────────────────────────────────────
+
+model ThemeSettings {
+  id              String  @id @default(cuid())
+  officeId        String  @unique
+  office          Office  @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  preset          String  @default("navy-gold") // navy-gold, deep-green-gold, charcoal-sand
+  primaryColor    String?
+  accentColor     String?
+  backgroundColor String?
+  textColor       String?
+  mutedTextColor  String?
+  fontFamily      String? @default("Inter, Noto Sans Arabic")
+  fontFamilyAr    String? @default("Noto Sans Arabic, Inter")
+  borderRadius    String? @default("md") // sm, md, lg, full
+  cardStyle       String? @default("elevated") // flat, elevated, bordered
+  footerColor     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ─── USERS & RBAC ───────────────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  phone           String    @unique
+  email           String?   @unique
+  emailVerified   DateTime?
+  passwordHash    String?
+  name            String
+  nameAr          String?
+  avatar          String?
+  isSuperAdmin    Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  memberships     Membership[]
+  agentProfile    AgentProfile?
+  auditLogs       AuditLog[]
+  notifications   Notification[]
+  leadsAssigned   Lead[]       @relation("AssignedAgent")
+  leadsCreated    Lead[]       @relation("LeadCreator")
+  leadActivities  LeadActivity[]
+
+  @@index([phone])
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  officeId  String
+  office    Office   @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  role      Role     @default(AGENT)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, officeId])
+  @@index([officeId])
+  @@index([userId])
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  AGENT
+}
+
+model Invitation {
+  id        String           @id @default(cuid())
+  officeId  String
+  office    Office           @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  email     String
+  role      Role             @default(AGENT)
+  token     String           @unique @default(cuid())
+  status    InvitationStatus @default(PENDING)
+  expiresAt DateTime
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([officeId])
+  @@index([token])
+  @@index([email])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}
+
+// ─── AGENT PROFILE ──────────────────────────────────────
+
+model AgentProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  officeId    String
+  office      Office  @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  bio         String? @db.Text
+  bioAr       String? @db.Text
+  phone       String?
+  whatsapp    String?
+  email       String?
+  photo       String?
+  specialties Json?   // ["residential", "commercial", "land"]
+  languages   Json?   // ["ar", "en"]
+  isPublic    Boolean @default(true)
+  slug        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([officeId, slug])
+  @@index([officeId])
+}
+
+// ─── PROPERTY ───────────────────────────────────────────
+
+model Property {
+  id              String         @id @default(cuid())
+  officeId        String
+  office          Office         @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  title           String
+  titleAr         String?
+  slug            String
+  description     String?        @db.Text
+  descriptionAr   String?        @db.Text
+  price           BigInt         @default(0)
+  currency        String         @default("SAR")
+  dealType        DealType       @default(SALE)
+  propertyType    PropertyType   @default(APARTMENT)
+  area            Float?         // sqm
+  bedrooms        Int?
+  bathrooms       Int?
+  amenities       Json?          // ["parking", "pool", "gym", ...]
+  tags            String[]       @default([])
+  isFeatured      Boolean        @default(false)
+  // Address
+  city            String?
+  cityAr          String?
+  district        String?
+  districtAr      String?
+  street          String?
+  streetAr        String?
+  lat             Float?
+  lng             Float?
+  // Status
+  status          PropertyStatus @default(DRAFT)
+  availability    Availability   @default(AVAILABLE)
+  // Media
+  videoUrl        String?
+  videoFile       String?
+  tour360Url      String?
+  // SEO
+  seoTitle        String?
+  seoDescription  String?        @db.Text
+  ogImage         String?
+  // Visibility
+  isPrivate       Boolean        @default(false)
+  previewToken    String?        @unique
+  // Agent
+  agentId         String?
+  // Timestamps
+  publishedAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  media            PropertyMedia[]
+  leads            Lead[]
+  analyticsEvents  AnalyticsEvent[]
+  favorites        Favorite[]
+  propertyRequests PropertyRequest[]
+
+  @@unique([officeId, slug])
+  @@index([officeId])
+  @@index([officeId, status])
+  @@index([officeId, dealType])
+  @@index([officeId, propertyType])
+  @@index([officeId, isFeatured])
+  @@index([previewToken])
+}
+
+enum DealType {
+  SALE
+  RENT
+}
+
+enum PropertyType {
+  APARTMENT
+  VILLA
+  LAND
+  OFFICE
+  COMMERCIAL
+  BUILDING
+  COMPOUND
+  FARM
+  OTHER
+}
+
+enum PropertyStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Availability {
+  AVAILABLE
+  SOLD
+  RENTED
+}
+
+model PropertyMedia {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String
+  type       MediaType @default(IMAGE)
+  alt        String?
+  altAr      String?
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([propertyId])
+  @@index([propertyId, sortOrder])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+// ─── BLOG ───────────────────────────────────────────────
+
+model BlogPost {
+  id              String          @id @default(cuid())
+  officeId        String
+  office          Office          @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  title           String
+  titleAr         String?
+  slug            String
+  excerpt         String?         @db.Text
+  excerptAr       String?         @db.Text
+  content         String          @db.Text
+  contentAr       String?         @db.Text
+  featuredImage   String?
+  status          PostStatus      @default(DRAFT)
+  authorId        String?
+  seoTitle        String?
+  seoDescription  String?         @db.Text
+  ogImage         String?
+  publishedAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  categories      BlogPostCategory[]
+  tags            BlogPostTag[]
+
+  @@unique([officeId, slug])
+  @@index([officeId])
+  @@index([officeId, status])
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model BlogCategory {
+  id        String   @id @default(cuid())
+  officeId  String
+  office    Office   @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  name      String
+  nameAr    String?
+  slug      String
+  createdAt DateTime @default(now())
+
+  posts     BlogPostCategory[]
+
+  @@unique([officeId, slug])
+  @@index([officeId])
+}
+
+model BlogPostCategory {
+  postId     String
+  post       BlogPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([postId, categoryId])
+}
+
+model BlogTag {
+  id        String   @id @default(cuid())
+  officeId  String
+  office    Office   @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  name      String
+  nameAr    String?
+  slug      String
+  createdAt DateTime @default(now())
+
+  posts     BlogPostTag[]
+
+  @@unique([officeId, slug])
+  @@index([officeId])
+}
+
+model BlogPostTag {
+  postId String
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tagId  String
+  tag    BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+
+// ─── LEADS ──────────────────────────────────────────────
+
+model Lead {
+  id          String     @id @default(cuid())
+  officeId    String
+  office      Office     @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  propertyId  String?
+  property    Property?  @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  agentId     String?
+  agent       User?      @relation("AssignedAgent", fields: [agentId], references: [id], onDelete: SetNull)
+  createdById String?
+  createdBy   User?      @relation("LeadCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  name        String
+  phone       String?
+  email       String?
+  message     String?    @db.Text
+  source      LeadSource @default(CONTACT_FORM)
+  status      LeadStatus @default(NEW)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  activities  LeadActivity[]
+
+  @@index([officeId])
+  @@index([officeId, status])
+  @@index([agentId])
+  @@index([propertyId])
+}
+
+enum LeadSource {
+  CONTACT_FORM
+  PROPERTY_INQUIRY
+  WHATSAPP_CLICK
+  PHONE_CLICK
+  MANUAL
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CLOSED
+}
+
+model LeadActivity {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  type      String   // note, status_change, assignment, email_sent
+  content   String?  @db.Text
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+}
+
+// ─── ANALYTICS ──────────────────────────────────────────
+
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  officeId    String
+  office      Office   @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  eventType   String   // page_view, property_view, lead_submit, whatsapp_click, phone_click
+  sessionId   String?
+  visitorId   String?  // cookie-based
+  referrer    String?
+  referrerType String? // direct, social, search, referral
+  userAgent   String?
+  ip          String?
+  city        String?
+  district    String?
+  page        String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([officeId])
+  @@index([officeId, eventType])
+  @@index([officeId, createdAt])
+  @@index([officeId, propertyId])
+  @@index([visitorId])
+}
+
+// ─── NOTIFICATIONS ──────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  officeId  String
+  office    Office   @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // lead_new, lead_assigned, property_published, etc.
+  title     String
+  titleAr   String?
+  message   String?  @db.Text
+  messageAr String?  @db.Text
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([officeId])
+}
+
+// ─── VISITORS ──────────────────────────────────────────
+
+model Visitor {
+  id           String    @id @default(cuid())
+  officeId     String
+  office       Office    @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  name         String
+  phone        String
+  email        String?
+  passwordHash String?
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  favorites    Favorite[]
+  requests     PropertyRequest[]
+
+  @@unique([officeId, phone])
+  @@index([officeId])
+  @@index([phone])
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  visitorId  String
+  visitor    Visitor  @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([visitorId, propertyId])
+  @@index([visitorId])
+  @@index([propertyId])
+}
+
+model PropertyRequest {
+  id         String              @id @default(cuid())
+  visitorId  String
+  visitor    Visitor             @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property            @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  type        PropertyRequestType @default(INTEREST)
+  message     String?             @db.Text
+  response    String?             @db.Text
+  respondedAt DateTime?
+  status      RequestStatus       @default(PENDING)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([visitorId])
+  @@index([propertyId])
+}
+
+enum PropertyRequestType {
+  INTEREST
+  VIEWING
+  INFO
+}
+
+enum RequestStatus {
+  PENDING
+  RESPONDED
+  CLOSED
+}
+
+// ─── CONTACT MESSAGES ──────────────────────────────────
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// ─── AUDIT LOG ──────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  officeId  String
+  office    Office   @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // user_created, property_published, theme_changed, etc.
+  entity    String?  // Property, User, ThemeSettings, etc.
+  entityId  String?
+  details   Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([officeId])
+  @@index([officeId, action])
+  @@index([officeId, createdAt])
+}

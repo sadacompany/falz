@@ -1,0 +1,204 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FFFDF5;
+  --foreground: #2E2506;
+  --theme-primary: #44360E;
+  --theme-accent: #B8860B;
+  --theme-accent-hover: #9A7209;
+  --theme-background: #FFFDF5;
+  --theme-surface: #FFFFFF;
+  --theme-surface-hover: #F9F3E3;
+  --theme-border: #E8DFC4;
+  --theme-text: #2E2506;
+  --theme-muted: #6B5D3A;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter), "Noto Sans Arabic", system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), "Noto Sans Arabic", system-ui, -apple-system, sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F9F3E3;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4C9A8;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9A8E6E;
+}
+
+/* RTL-specific utilities */
+[dir="rtl"] .rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* Selection color — gold tint */
+::selection {
+  background-color: rgba(184, 134, 11, 0.25);
+  color: #44360E;
+}
+
+/* Focus visible */
+*:focus-visible {
+  outline: 2px solid var(--theme-accent);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  scroll-behavior: smooth;
+}
+
+/* ===== Landing Page Animations ===== */
+
+/* Hero staggered fade-in-up */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.7s ease-out both;
+}
+
+/* Stagger delays for hero elements */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.25s; }
+.stagger-3 { animation-delay: 0.4s; }
+.stagger-4 { animation-delay: 0.55s; }
+.stagger-5 { animation-delay: 0.7s; }
+.stagger-6 { animation-delay: 0.85s; }
+
+/* Floating gradient orbs */
+@keyframes orbFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -20px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 15px) scale(0.95);
+  }
+}
+
+.animate-orb {
+  animation: orbFloat 8s ease-in-out infinite;
+}
+
+.animate-orb-reverse {
+  animation: orbFloat 10s ease-in-out infinite reverse;
+}
+
+/* Scroll-triggered animations */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scroll stagger delays */
+.animate-on-scroll.stagger-1 { transition-delay: 0.1s; }
+.animate-on-scroll.stagger-2 { transition-delay: 0.2s; }
+.animate-on-scroll.stagger-3 { transition-delay: 0.3s; }
+.animate-on-scroll.stagger-4 { transition-delay: 0.4s; }
+.animate-on-scroll.stagger-5 { transition-delay: 0.5s; }
+.animate-on-scroll.stagger-6 { transition-delay: 0.6s; }
+
+/* Snap scroll for carousels */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-center {
+  scroll-snap-align: center;
+}
+
+/* Marquee animation for partner logos */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Staggered children animation on scroll */
+.animate-on-scroll-children > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.animate-on-scroll-children.is-visible > *:nth-child(1) { opacity: 1; transform: translateY(0); transition-delay: 0.05s; }
+.animate-on-scroll-children.is-visible > *:nth-child(2) { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
+.animate-on-scroll-children.is-visible > *:nth-child(3) { opacity: 1; transform: translateY(0); transition-delay: 0.15s; }
+.animate-on-scroll-children.is-visible > *:nth-child(4) { opacity: 1; transform: translateY(0); transition-delay: 0.2s; }
+.animate-on-scroll-children.is-visible > *:nth-child(5) { opacity: 1; transform: translateY(0); transition-delay: 0.25s; }
+.animate-on-scroll-children.is-visible > *:nth-child(6) { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
+.animate-on-scroll-children.is-visible > *:nth-child(7) { opacity: 1; transform: translateY(0); transition-delay: 0.35s; }
+.animate-on-scroll-children.is-visible > *:nth-child(8) { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
+
+/* Count-up animation helper */
+.count-up {
+  display: inline-block;
+}
+
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-orb,
+  .animate-orb-reverse {
+    animation: none;
+  }
+
+  .animate-on-scroll,
+  .animate-on-scroll-children > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .animate-marquee {
+    animation: none;
+  }
+
+  * {
+    scroll-behavior: auto;
+  }
+}
