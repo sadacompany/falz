@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import prisma from '@/lib/db'
 import { getThemeForOffice } from '@/lib/theme'
 import { resolveLocale, getDictionary, type Locale } from '@/i18n'
@@ -60,16 +60,8 @@ export default async function PublicOfficeLayout({ children, params }: LayoutPro
 
   const theme = getThemeForOffice(office.themeSettings)
 
-  // Resolve locale from cookie, or Accept-Language header, or office default
-  const cookieStore = await cookies()
-  const headerStore = await headers()
-  const cookieLocale = cookieStore.get('locale')?.value
-  const acceptLang = headerStore.get('accept-language')
-  const browserLocale = acceptLang?.startsWith('ar') ? 'ar' : acceptLang?.startsWith('en') ? 'en' : undefined
-
-  const locale = resolveLocale(
-    cookieLocale || browserLocale || office.defaultLanguage
-  )
+  // Force Arabic locale for all office websites
+  const locale: Locale = 'ar'
 
   const dict = await getDictionary(locale)
 
