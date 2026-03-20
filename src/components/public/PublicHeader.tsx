@@ -17,7 +17,7 @@ export function PublicHeader() {
   const { visitor, loading: visitorLoading, setShowAuthModal } = useVisitorAuth()
 
   const officeName = locale === 'ar' && office.nameAr ? office.nameAr : office.name
-  const base = `/o/${office.slug}`
+  const base = `/${office.slug}`
 
   const navLinks = [
     { href: base, label: dict.nav.home },

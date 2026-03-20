@@ -16,7 +16,7 @@ export async function GET(
     return new NextResponse('Not found', { status: 404 })
   }
 
-  const baseUrl = `${request.nextUrl.protocol}//${request.nextUrl.host}/o/${slug}`
+  const baseUrl = `${request.nextUrl.protocol}//${request.nextUrl.host}/${slug}`
 
   // Fetch all published properties
   const properties = await prisma.property.findMany({

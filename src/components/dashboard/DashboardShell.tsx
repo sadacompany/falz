@@ -256,7 +256,7 @@ export function DashboardShell({
       {/* View Public Site */}
       <div className="border-t border-[#E2E8F0] px-3 py-3">
         <Link
-          href={`/o/${office.slug}`}
+          href={`/${office.slug}`}
           target="_blank"
           className={cn(
             'flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]',

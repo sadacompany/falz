@@ -44,7 +44,7 @@ export function BlogPostClient({ officeSlug, post, relatedPosts }: BlogPostClien
     <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 lg:py-16">
       {/* Back */}
       <Link
-        href={`/o/${officeSlug}/blog`}
+        href={`/${officeSlug}/blog`}
         className="inline-flex items-center gap-1.5 text-sm mb-8 transition-colors hover:underline text-[#718096] hover:text-[#1E3A5F]"
       >
         <BackArrow className="h-4 w-4" />
@@ -68,7 +68,7 @@ export function BlogPostClient({ officeSlug, post, relatedPosts }: BlogPostClien
           {post.categories.map((cat) => (
             <Link
               key={cat.slug}
-              href={`/o/${officeSlug}/blog?category=${cat.slug}`}
+              href={`/${officeSlug}/blog?category=${cat.slug}`}
               className="px-3 py-1 rounded-full text-xs font-semibold transition-colors hover:opacity-80 bg-[#FAF5EB] text-[#C8A96E]"
             >
               {cat.name}
@@ -134,7 +134,7 @@ export function BlogPostClient({ officeSlug, post, relatedPosts }: BlogPostClien
             {relatedPosts.map((rp) => (
               <Link
                 key={rp.id}
-                href={`/o/${officeSlug}/blog/${rp.slug}`}
+                href={`/${officeSlug}/blog/${rp.slug}`}
                 className="group rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-white border border-[#E2E8F0]"
               >
                 <div className="aspect-[16/10] overflow-hidden">

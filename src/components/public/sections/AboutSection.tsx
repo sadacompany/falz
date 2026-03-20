@@ -45,7 +45,7 @@ export function AboutSection({ config, officeSlug, description }: Props) {
               {body}
             </p>
             <Link
-              href={`/o/${officeSlug}/about`}
+              href={`/${officeSlug}/about`}
               className="inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:opacity-80"
               style={{ color: 'var(--theme-accent)' }}
             >

@@ -120,7 +120,7 @@ export function PropertyDetailClient({
         officeId,
         eventType: 'property_view',
         propertyId: property.id,
-        page: `/o/${officeSlug}/properties/${property.slug}`,
+        page: `/${officeSlug}/properties/${property.slug}`,
         referrer: document.referrer || null,
         visitorId: getVisitorId(),
       }),
@@ -132,7 +132,7 @@ export function PropertyDetailClient({
       {/* ─── Back Navigation ──────────────────────────── */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
         <Link
-          href={`/o/${officeSlug}/properties`}
+          href={`/${officeSlug}/properties`}
           className="inline-flex items-center gap-1.5 text-sm transition-colors hover:underline text-[#718096] hover:text-[#1E3A5F]"
         >
           <BackArrow className="h-4 w-4" />

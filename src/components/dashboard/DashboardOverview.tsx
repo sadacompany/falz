@@ -187,7 +187,7 @@ export function DashboardOverview({
               إضافة عقار
             </Button>
           </Link>
-          <Link href={`/o/${officeSlug}`} target="_blank">
+          <Link href={`/${officeSlug}`} target="_blank">
             <Button variant="outline" size="sm">
               <ExternalLink className="h-4 w-4" />
               عرض الموقع

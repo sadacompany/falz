@@ -60,7 +60,7 @@ export function PropertyCard({ property, officeSlug, showFavorite = true }: Prop
 
   return (
     <Link
-      href={`/o/${officeSlug}/properties/${property.slug}`}
+      href={`/${officeSlug}/properties/${property.slug}`}
       className="group block rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-lg"
       style={{
         backgroundColor: 'var(--theme-surface)',

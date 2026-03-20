@@ -33,10 +33,23 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // ─── Path-based Office Detection: /o/{slug}/... ─────────────
-  const officePathMatch = pathname.match(/^\/o\/([^/]+)/)
-  if (officePathMatch) {
-    response.headers.set('x-office-slug', officePathMatch[1])
+  // ─── Legacy /o/{slug} Redirect (301 for SEO) ────────────────
+  const legacyOfficeMatch = pathname.match(/^\/o\/([^/]+)(.*)$/)
+  if (legacyOfficeMatch) {
+    const [, slug, rest] = legacyOfficeMatch
+    const newUrl = new URL(`/${slug}${rest || ''}`, request.url)
+    newUrl.search = request.nextUrl.search
+    return NextResponse.redirect(newUrl, 301)
+  }
+
+  // ─── Path-based Office Detection: /{slug}/... ──────────────
+  const RESERVED = new Set([
+    'dashboard', 'admin', 'auth', 'api', 'sada', 'contact',
+    '_next', 'favicon.ico', 'images', 'uploads',
+  ])
+  const firstSegment = pathname.split('/')[1]
+  if (firstSegment && !RESERVED.has(firstSegment)) {
+    response.headers.set('x-office-slug', firstSegment)
   }
 
   // ─── Dashboard Auth Check ───────────────────────────────────

@@ -66,7 +66,7 @@ export function CtaSection({ config, officeSlug, whatsapp }: Props) {
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
-            href={`/o/${officeSlug}/contact`}
+            href={`/${officeSlug}/contact`}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-base font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
             style={{
               backgroundColor: 'var(--theme-primary)',

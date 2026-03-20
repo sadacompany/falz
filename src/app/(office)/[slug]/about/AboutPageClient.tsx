@@ -102,7 +102,7 @@ export function AboutPageClient({
               return (
                 <Link
                   key={agent.id}
-                  href={agent.slug ? `/o/${officeSlug}/agents/${agent.slug}` : `/o/${officeSlug}/agents`}
+                  href={agent.slug ? `/${officeSlug}/agents/${agent.slug}` : `/${officeSlug}/agents`}
                   className="group text-center rounded-xl p-6 transition-all hover:-translate-y-1 hover:shadow-lg bg-white border border-[#E2E8F0]"
                 >
                   {agent.photo ? (

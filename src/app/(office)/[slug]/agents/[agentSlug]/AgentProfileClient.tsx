@@ -39,7 +39,7 @@ export function AgentProfileClient({
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 lg:py-16">
       {/* Back */}
       <Link
-        href={`/o/${officeSlug}/agents`}
+        href={`/${officeSlug}/agents`}
         className="inline-flex items-center gap-1.5 text-sm mb-8 transition-colors hover:underline text-[#718096] hover:text-[#1E3A5F]"
       >
         <BackArrow className="h-4 w-4" />

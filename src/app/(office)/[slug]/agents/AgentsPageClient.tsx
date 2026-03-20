@@ -61,7 +61,7 @@ export function AgentsPageClient({ officeSlug, agents }: AgentsPageClientProps) 
                 <h3 className="text-lg font-semibold mb-1 text-[#1E3A5F]">
                   {agent.slug ? (
                     <Link
-                      href={`/o/${officeSlug}/agents/${agent.slug}`}
+                      href={`/${officeSlug}/agents/${agent.slug}`}
                       className="hover:underline hover:text-[#C8A96E] transition-colors"
                     >
                       {agent.name}

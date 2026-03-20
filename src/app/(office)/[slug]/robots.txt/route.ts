@@ -24,7 +24,7 @@ Disallow: /`
     })
   }
 
-  const baseUrl = `${request.nextUrl.protocol}//${request.nextUrl.host}/o/${slug}`
+  const baseUrl = `${request.nextUrl.protocol}//${request.nextUrl.host}/${slug}`
 
   const robotsTxt = `User-agent: *
 Allow: /

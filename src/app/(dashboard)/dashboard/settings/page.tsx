@@ -733,7 +733,7 @@ export default function SettingsPage() {
                   {office?.slug && (
                     <iframe
                       ref={iframeRef}
-                      src={`/o/${office.slug}?preview=1`}
+                      src={`/${office.slug}?preview=1`}
                       className="w-full h-full border-0"
                       onLoad={() => {
                         postSectionsToIframe()

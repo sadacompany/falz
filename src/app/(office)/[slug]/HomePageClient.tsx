@@ -54,7 +54,7 @@ export function HomePageClient({
       body: JSON.stringify({
         officeId,
         eventType: 'page_view',
-        page: `/o/${officeSlug}`,
+        page: `/${officeSlug}`,
         referrer: document.referrer || null,
         visitorId: getVisitorId(),
       }),

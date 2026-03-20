@@ -32,7 +32,7 @@ export function VisitorAvatar() {
               <p className="text-xs" style={{ color: 'var(--theme-muted)' }}>{visitor.email}</p>
             </div>
             <Link
-              href={`/o/${office.slug}/profile`}
+              href={`/${office.slug}/profile`}
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:bg-[#F7F7F2]"
               style={{ color: 'var(--theme-muted)' }}
@@ -41,7 +41,7 @@ export function VisitorAvatar() {
               طلباتي
             </Link>
             <Link
-              href={`/o/${office.slug}/favorites`}
+              href={`/${office.slug}/favorites`}
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:bg-[#F7F7F2]"
               style={{ color: 'var(--theme-muted)' }}

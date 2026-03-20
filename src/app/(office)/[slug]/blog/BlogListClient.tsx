@@ -56,7 +56,7 @@ export function BlogListClient({
       {categories.length > 0 && (
         <div className="flex flex-wrap justify-center gap-2 mb-10">
           <button
-            onClick={() => router.push(`/o/${officeSlug}/blog`)}
+            onClick={() => router.push(`/${officeSlug}/blog`)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
               !currentCategory
                 ? 'bg-[#C8A96E] text-white border-[#C8A96E]'
@@ -68,7 +68,7 @@ export function BlogListClient({
           {categories.map((cat) => (
             <button
               key={cat.slug}
-              onClick={() => router.push(`/o/${officeSlug}/blog?category=${cat.slug}`)}
+              onClick={() => router.push(`/${officeSlug}/blog?category=${cat.slug}`)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
                 currentCategory === cat.slug
                   ? 'bg-[#C8A96E] text-white border-[#C8A96E]'
@@ -87,7 +87,7 @@ export function BlogListClient({
           {posts.map((post) => (
             <Link
               key={post.id}
-              href={`/o/${officeSlug}/blog/${post.slug}`}
+              href={`/${officeSlug}/blog/${post.slug}`}
               className="group rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-white border border-[#E2E8F0]"
             >
               {/* Featured Image */}
@@ -164,7 +164,7 @@ export function BlogListClient({
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-12">
           <button
-            onClick={() => router.push(`/o/${officeSlug}/blog?${currentCategory ? `category=${currentCategory}&` : ''}page=${page - 1}`)}
+            onClick={() => router.push(`/${officeSlug}/blog?${currentCategory ? `category=${currentCategory}&` : ''}page=${page - 1}`)}
             disabled={page <= 1}
             className="h-10 w-10 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30 bg-white text-[#2D3748] border border-[#E2E8F0] hover:border-[#C8A96E]"
           >
@@ -174,7 +174,7 @@ export function BlogListClient({
             {dict.common.page} {page} / {totalPages}
           </span>
           <button
-            onClick={() => router.push(`/o/${officeSlug}/blog?${currentCategory ? `category=${currentCategory}&` : ''}page=${page + 1}`)}
+            onClick={() => router.push(`/${officeSlug}/blog?${currentCategory ? `category=${currentCategory}&` : ''}page=${page + 1}`)}
             disabled={page >= totalPages}
             className="h-10 w-10 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30 bg-white text-[#2D3748] border border-[#E2E8F0] hover:border-[#C8A96E]"
           >

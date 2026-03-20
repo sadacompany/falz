@@ -299,7 +299,7 @@ export default function AdminOfficeDetailPage({
               الدخول كمكتب
             </Button>
 
-            <Link href={`/o/${office.slug}`} target="_blank" className="block">
+            <Link href={`/${office.slug}`} target="_blank" className="block">
               <Button variant="outline" className="w-full">
                 <ExternalLink className="h-4 w-4" />
                 عرض الموقع العام

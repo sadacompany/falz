@@ -59,11 +59,11 @@ export function PropertiesPageClient({
 
     if (updates.page) params.set('page', updates.page)
 
-    router.push(`/o/${officeSlug}/properties?${params.toString()}`)
+    router.push(`/${officeSlug}/properties?${params.toString()}`)
   }, [currentFilters, officeSlug, router])
 
   const clearFilters = useCallback(() => {
-    router.push(`/o/${officeSlug}/properties`)
+    router.push(`/${officeSlug}/properties`)
   }, [officeSlug, router])
 
   const hasActiveFilters = currentFilters.dealType || currentFilters.propertyType ||

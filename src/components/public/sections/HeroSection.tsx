@@ -24,7 +24,7 @@ export function HeroSection({ config, officeSlug, officeName, description, whats
   const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || officeName
   const subtitle = (locale === 'ar' ? config.content.subtitleAr : config.content.subtitle) || description
   const buttonText = (locale === 'ar' ? config.content.buttonTextAr : config.content.buttonText) || dict.nav.properties
-  const buttonUrl = config.content.buttonUrl || `/o/${officeSlug}/properties`
+  const buttonUrl = config.content.buttonUrl || `/${officeSlug}/properties`
   const bgImage = config.content.backgroundImage
   const layout = config.content.layout || 'centered'
 

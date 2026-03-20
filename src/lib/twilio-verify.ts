@@ -4,11 +4,19 @@ const TWILIO_VERIFY_SERVICE_SID = process.env.TWILIO_VERIFY_SERVICE_SID!
 
 /**
  * Test accounts that bypass real Twilio OTP.
- * Any phone starting with +96650 can use OTP "123456" in development.
+ * Specific test phone numbers always use OTP "123456".
  */
 const TEST_OTP = '123456'
-const isTestPhone = (phone: string) =>
-  process.env.NODE_ENV !== 'production' && phone.startsWith('+96650')
+const TEST_PHONES = new Set([
+  '+966500000001',
+  '+966500000002',
+  '+966501234567',
+  '+966501111111',
+  '+966502222222',
+  '+966503333333',
+  '+966504444444',
+])
+const isTestPhone = (phone: string) => TEST_PHONES.has(phone)
 
 /**
  * Normalize phone numbers to E.164 format.

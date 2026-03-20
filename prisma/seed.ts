@@ -661,7 +661,7 @@ async function main() {
   await prisma.analyticsEvent.deleteMany({ where: { officeId: office1.id } });
 
   const eventTypes = ["page_view", "page_view", "page_view", "property_view", "property_view", "whatsapp_click", "phone_click", "lead_submit"];
-  const o1Pages = ["/o/dar-al-aseel", "/o/dar-al-aseel/properties", "/o/dar-al-aseel/about", "/o/dar-al-aseel/contact"];
+  const o1Pages = ["/dar-al-aseel", "/dar-al-aseel/properties", "/dar-al-aseel/about", "/dar-al-aseel/contact"];
   const referrers = [
     { referrer: null, referrerType: "direct" },
     { referrer: "https://www.google.com", referrerType: "search" },
@@ -695,7 +695,7 @@ async function main() {
       userAgent: pickRandom(userAgents),
       ip: `${randomBetween(1, 255)}.${randomBetween(0, 255)}.${randomBetween(0, 255)}.${randomBetween(1, 254)}`,
       city: "Riyadh",
-      page: eventType === "property_view" ? `/o/dar-al-aseel/properties/${pickRandom(o1Properties).slug}` : pickRandom(o1Pages),
+      page: eventType === "property_view" ? `/dar-al-aseel/properties/${pickRandom(o1Properties).slug}` : pickRandom(o1Pages),
       metadata: {},
       createdAt,
     });
@@ -1141,7 +1141,7 @@ async function main() {
       userAgent: pickRandom(userAgents),
       ip: `${randomBetween(1, 255)}.${randomBetween(0, 255)}.${randomBetween(0, 255)}.${randomBetween(1, 254)}`,
       city: "Jeddah",
-      page: eventType === "property_view" ? `/o/al-fares-properties/properties/${pickRandom(o2Properties).slug}` : `/o/al-fares-properties`,
+      page: eventType === "property_view" ? `/al-fares-properties/properties/${pickRandom(o2Properties).slug}` : `/al-fares-properties`,
       metadata: {},
       createdAt,
     });

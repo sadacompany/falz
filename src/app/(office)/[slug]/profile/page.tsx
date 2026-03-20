@@ -184,7 +184,7 @@ export default function ProfilePage() {
                 تصفح العقارات وقدم طلبك
               </p>
               <Link
-                href={`/o/${office.slug}/properties`}
+                href={`/${office.slug}/properties`}
                 className="inline-block rounded-lg px-6 py-3 text-sm font-semibold text-white transition-colors"
                 style={{ backgroundColor: 'var(--theme-accent)' }}
               >
@@ -208,7 +208,7 @@ export default function ProfilePage() {
                   >
                     <div className="flex gap-4 p-4">
                       {/* Property image */}
-                      <Link href={`/o/${office.slug}/properties/${req.property.slug}`} className="shrink-0">
+                      <Link href={`/${office.slug}/properties/${req.property.slug}`} className="shrink-0">
                         <img
                           src={imageUrl}
                           alt={title}
@@ -220,7 +220,7 @@ export default function ProfilePage() {
                         {/* Property title + badges */}
                         <div className="flex flex-wrap items-center gap-2">
                           <Link
-                            href={`/o/${office.slug}/properties/${req.property.slug}`}
+                            href={`/${office.slug}/properties/${req.property.slug}`}
                             className="text-sm font-semibold hover:underline"
                             style={{ color: 'var(--theme-text)' }}
                           >
@@ -286,7 +286,7 @@ export default function ProfilePage() {
                 تصفح العقارات وأضف المفضلة لديك
               </p>
               <Link
-                href={`/o/${office.slug}/properties`}
+                href={`/${office.slug}/properties`}
                 className="inline-block rounded-lg px-6 py-3 text-sm font-semibold text-white transition-colors"
                 style={{ backgroundColor: 'var(--theme-accent)' }}
               >
@@ -310,7 +310,7 @@ export default function ProfilePage() {
                     className="group relative rounded-2xl overflow-hidden border bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
                     style={{ borderColor: 'var(--theme-border)' }}
                   >
-                    <Link href={`/o/${office.slug}/properties/${p.slug}`}>
+                    <Link href={`/${office.slug}/properties/${p.slug}`}>
                       <div className="relative aspect-[4/3] overflow-hidden">
                         <img
                           src={imageUrl}

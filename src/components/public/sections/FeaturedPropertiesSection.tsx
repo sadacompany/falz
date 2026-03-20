@@ -67,7 +67,7 @@ export function FeaturedPropertiesSection({ config, officeSlug, properties, stat
         {/* Show More Button */}
         <div className="text-center mt-10">
           <Link
-            href={`/o/${officeSlug}/properties`}
+            href={`/${officeSlug}/properties`}
             className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:scale-105 border-2"
             style={{
               borderColor: 'var(--theme-accent)',

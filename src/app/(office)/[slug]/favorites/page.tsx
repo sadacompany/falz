@@ -114,7 +114,7 @@ export default function FavoritesPage() {
             تصفح العقارات وأضف المفضلة لديك
           </p>
           <Link
-            href={`/o/${office.slug}/properties`}
+            href={`/${office.slug}/properties`}
             className="inline-block rounded-lg px-6 py-3 text-sm font-semibold text-white transition-colors"
             style={{ backgroundColor: 'var(--theme-accent)' }}
           >
@@ -138,7 +138,7 @@ export default function FavoritesPage() {
                 className="group relative rounded-2xl overflow-hidden border bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
                 style={{ borderColor: 'var(--theme-border)' }}
               >
-                <Link href={`/o/${office.slug}/properties/${p.slug}`}>
+                <Link href={`/${office.slug}/properties/${p.slug}`}>
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img
                       src={imageUrl}

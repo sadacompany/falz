@@ -94,7 +94,7 @@ export default function LandingPage() {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <Link
-              href="/o/dar-al-aseel"
+              href="/dar-al-aseel"
               className="flex items-center gap-2 rounded-lg border border-[#E8DFC4] bg-white px-8 py-3.5 text-base font-semibold text-[#44360E] shadow-sm transition-all hover:border-[#B8860B]/40 hover:bg-[#F9F3E3]"
             >
               شاهد مثال حي
@@ -452,7 +452,7 @@ export default function LandingPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/o/dar-al-aseel" className="transition-colors hover:text-[#C8A96E]">
+                  <Link href="/dar-al-aseel" className="transition-colors hover:text-[#C8A96E]">
                     مثال حي
                   </Link>
                 </li>

@@ -23,7 +23,7 @@ export function PublicFooter({ footerConfig }: PublicFooterProps) {
   const { locale } = useDirection()
 
   const officeName = locale === 'ar' && office.nameAr ? office.nameAr : office.name
-  const base = `/o/${office.slug}`
+  const base = `/${office.slug}`
   const year = new Date().getFullYear()
   const address = locale === 'ar' && office.addressAr ? office.addressAr : office.address
   const city = locale === 'ar' && office.cityAr ? office.cityAr : office.city
