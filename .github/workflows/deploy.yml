@@ -25,5 +25,6 @@ jobs:
               --link falz-postgres \
               -p 3000:3000 \
               --env-file /opt/falz/.env \
+              -e NEXTAUTH_URL=http://falzapp.duckdns.org:3000 \
               falz-app
             docker image prune -f

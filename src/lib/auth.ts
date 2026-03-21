@@ -3,11 +3,6 @@ import Credentials from 'next-auth/providers/credentials'
 import prisma from '@/lib/db'
 import { normalizePhone } from '@/lib/twilio-verify'
 
-const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith('https://') ?? false
-const cookieDomain = process.env.NEXTAUTH_URL
-  ? new URL(process.env.NEXTAUTH_URL).hostname
-  : undefined
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   providers: [
@@ -52,38 +47,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-
-  cookies: {
-    sessionToken: {
-      name: useSecureCookies ? '__Secure-authjs.session-token' : 'authjs.session-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: useSecureCookies,
-        domain: cookieDomain,
-      },
-    },
-    callbackUrl: {
-      name: useSecureCookies ? '__Secure-authjs.callback-url' : 'authjs.callback-url',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: useSecureCookies,
-        domain: cookieDomain,
-      },
-    },
-    csrfToken: {
-      name: useSecureCookies ? '__Host-authjs.csrf-token' : 'authjs.csrf-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: useSecureCookies,
-      },
-    },
-  },
 
   session: {
     strategy: 'jwt',
