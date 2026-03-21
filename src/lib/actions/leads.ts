@@ -224,6 +224,56 @@ export async function getLeadStats() {
   return { total, new: newCount, contacted, qualified, closed }
 }
 
+// ─── Get Linked Visitor Data ────────────────────────────
+
+export async function getLinkedVisitorData(leadId: string) {
+  const officeId = await getOfficeId()
+
+  const lead = await prisma.lead.findFirst({
+    where: { id: leadId, ...tenantWhere(officeId) },
+    select: { phone: true },
+  })
+
+  if (!lead?.phone) return null
+
+  const visitor = await prisma.visitor.findFirst({
+    where: { officeId, phone: lead.phone },
+    include: {
+      favorites: {
+        include: {
+          property: {
+            select: { id: true, title: true, titleAr: true, slug: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
+      requests: {
+        include: {
+          property: {
+            select: { id: true, title: true, titleAr: true, slug: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
+    },
+  })
+
+  if (!visitor) return null
+
+  return {
+    visitor: {
+      id: visitor.id,
+      name: visitor.name,
+      phone: visitor.phone,
+      email: visitor.email,
+      createdAt: visitor.createdAt,
+      lastLoginAt: visitor.lastLoginAt,
+    },
+    favorites: visitor.favorites,
+    requests: visitor.requests,
+  }
+}
+
 // ─── Delete Lead ────────────────────────────────────────────
 
 export async function deleteLead(id: string) {

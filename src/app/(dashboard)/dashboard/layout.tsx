@@ -12,7 +12,13 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const user = await getCurrentUser()
+  let user: Awaited<ReturnType<typeof getCurrentUser>>
+
+  try {
+    user = await getCurrentUser()
+  } catch {
+    redirect('/auth/signin')
+  }
 
   if (!user) {
     redirect('/auth/signin')

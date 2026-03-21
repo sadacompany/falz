@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, User, Phone, Mail, Building2, MessageSquare, Send, Clock } from 'lucide-react'
+import { ArrowLeft, User, Phone, Mail, Building2, MessageSquare, Send, Clock, Heart, FileText, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getLead, updateLeadStatus, assignLeadAgent, addLeadNote } from '@/lib/actions/leads'
+import { getLead, updateLeadStatus, assignLeadAgent, addLeadNote, getLinkedVisitorData } from '@/lib/actions/leads'
 import { getAgents } from '@/lib/actions/properties'
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'success' | 'warning'> = {
@@ -44,6 +44,7 @@ export default function LeadDetailPage() {
   const [loading, setLoading] = useState(true)
   const [noteContent, setNoteContent] = useState('')
   const [submittingNote, setSubmittingNote] = useState(false)
+  const [visitorData, setVisitorData] = useState<Awaited<ReturnType<typeof getLinkedVisitorData>>>(null)
 
   const loadData = async () => {
     try {
@@ -53,6 +54,10 @@ export default function LeadDetailPage() {
       ])
       setLead(leadData)
       setAgents(agentData)
+      // Load linked visitor data after lead is available
+      if (leadData?.phone) {
+        getLinkedVisitorData(leadId).then(setVisitorData).catch(() => {})
+      }
     } catch (error) {
       console.error('Failed to load lead:', error)
     } finally {
@@ -240,10 +245,120 @@ export default function LeadDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Visitor Favorites */}
+          {visitorData && visitorData.favorites.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Heart className="h-4 w-4 text-[#C8A96E]" />
+                  العقارات المفضلة ({visitorData.favorites.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {visitorData.favorites.map((fav) => (
+                    <Link
+                      key={fav.id}
+                      href={`/dashboard/properties/${fav.property.id}`}
+                      className="flex items-center gap-3 rounded-lg border border-[#E2E8F0] p-3 transition-colors hover:border-[#C8A96E]/30"
+                    >
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FAF5EB]">
+                        <Heart className="h-4 w-4 text-[#C8A96E]" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-[#2D3748]">{fav.property.titleAr || fav.property.title}</p>
+                        <p className="text-xs text-[#718096]">{new Date(fav.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Visitor Requests */}
+          {visitorData && visitorData.requests.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FileText className="h-4 w-4 text-[#1E3A5F]" />
+                  طلبات العقارات ({visitorData.requests.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {visitorData.requests.map((req) => (
+                    <div key={req.id} className="rounded-lg border border-[#E2E8F0] p-3">
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={`/dashboard/properties/${req.property.id}`}
+                          className="text-sm font-medium text-[#2D3748] hover:text-[#C8A96E]"
+                        >
+                          {req.property.titleAr || req.property.title}
+                        </Link>
+                        <Badge variant={req.status === 'PENDING' ? 'warning' : req.status === 'RESPONDED' ? 'success' : 'secondary'}>
+                          {req.status === 'PENDING' ? 'معلق' : req.status === 'RESPONDED' ? 'تم الرد' : 'مغلق'}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-xs text-[#718096]">
+                        {req.type === 'VIEWING' ? 'طلب معاينة' : req.type === 'INFO' ? 'طلب معلومات' : 'إبداء اهتمام'}
+                      </p>
+                      {req.message && (
+                        <p className="mt-1 text-sm text-[#718096]">{req.message}</p>
+                      )}
+                      {req.response && (
+                        <div className="mt-2 rounded border-s-2 border-[#C8A96E] bg-[#FAF5EB] p-2 text-sm text-[#2D3748]">
+                          {req.response}
+                        </div>
+                      )}
+                      <p className="mt-1 text-xs text-[#A0AEC0]">{new Date(req.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Visitor Summary */}
+          {visitorData && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Eye className="h-4 w-4 text-[#C8A96E]" />
+                  حساب الزائر
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-[#2D3748]">
+                  <User className="h-3.5 w-3.5 text-[#718096]" />
+                  {visitorData.visitor.name}
+                </div>
+                {visitorData.visitor.email && (
+                  <div className="flex items-center gap-2 text-[#718096]">
+                    <Mail className="h-3.5 w-3.5" />
+                    {visitorData.visitor.email}
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-xs text-[#718096]">
+                  <Clock className="h-3 w-3" />
+                  مسجّل منذ {new Date(visitorData.visitor.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}
+                </div>
+                <div className="flex gap-3 pt-1 text-xs">
+                  <span className="flex items-center gap-1 text-[#C8A96E]">
+                    <Heart className="h-3 w-3" /> {visitorData.favorites.length} مفضلة
+                  </span>
+                  <span className="flex items-center gap-1 text-[#1E3A5F]">
+                    <FileText className="h-3 w-3" /> {visitorData.requests.length} طلب
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Status Change */}
           <Card>
             <CardHeader>

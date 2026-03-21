@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import {
   Building2,
   Globe,
@@ -190,7 +191,22 @@ const SECTIONS_WITH_ITEMS = new Set<string>(['testimonials', 'team', 'partners',
 // ─── Component ──────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>('general')
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const initialTab = (TABS.find(t => t.key === searchParams.get('tab'))?.key || 'general') as TabKey
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab)
+
+  const handleTabChange = useCallback((tab: TabKey) => {
+    setActiveTab(tab)
+    const params = new URLSearchParams(searchParams.toString())
+    if (tab === 'general') {
+      params.delete('tab')
+    } else {
+      params.set('tab', tab)
+    }
+    const qs = params.toString()
+    router.replace(`/dashboard/settings${qs ? `?${qs}` : ''}`, { scroll: false })
+  }, [searchParams, router])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -651,7 +667,7 @@ export default function SettingsPage() {
                   <button
                     key={tab.key}
                     onClick={() => {
-                      setActiveTab(tab.key)
+                      handleTabChange(tab.key)
                       setError(null)
                     }}
                     className={cn(
@@ -1265,7 +1281,7 @@ export default function SettingsPage() {
                 <button
                   key={tab.key}
                   onClick={() => {
-                    setActiveTab(tab.key)
+                    handleTabChange(tab.key)
                     setError(null)
                   }}
                   className={cn(

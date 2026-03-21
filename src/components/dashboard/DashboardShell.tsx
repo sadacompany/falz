@@ -21,6 +21,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   LogOut,
   User,
   PanelLeftClose,
@@ -53,12 +54,19 @@ interface DashboardShellProps {
   children: React.ReactNode
 }
 
+interface NavSubItem {
+  label: string
+  labelAr: string
+  href: string
+}
+
 interface NavItem {
   label: string
   labelAr: string
   href: string
   icon: React.ElementType
   roles?: Role[]
+  subItems?: NavSubItem[]
 }
 
 // ─── Nav Items ──────────────────────────────────────────────
@@ -123,6 +131,13 @@ const navItems: NavItem[] = [
     href: '/dashboard/settings',
     icon: Settings,
     roles: ['OWNER', 'MANAGER'],
+    subItems: [
+      { label: 'General', labelAr: 'عام', href: '/dashboard/settings' },
+      { label: 'Visual Editor', labelAr: 'المحرر المرئي', href: '/dashboard/settings?tab=editor' },
+      { label: 'Domain', labelAr: 'النطاق', href: '/dashboard/settings?tab=domain' },
+      { label: 'SEO', labelAr: 'تحسين محركات البحث', href: '/dashboard/settings?tab=seo' },
+      { label: 'Social', labelAr: 'التواصل الاجتماعي', href: '/dashboard/settings?tab=social' },
+    ],
   },
 ]
 
@@ -139,11 +154,21 @@ export function DashboardShell({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [expandedNav, setExpandedNav] = useState<string | null>(
+    // Auto-expand if we're on a settings page
+    null
+  )
   const isRtl = locale === 'ar'
 
-  // Close mobile menu on route change
+  // Close mobile menu on route change, auto-expand active sub-nav
   useEffect(() => {
     setMobileMenuOpen(false)
+    // Auto-expand nav items with sub-items when active
+    for (const item of navItems) {
+      if (item.subItems && pathname.startsWith(item.href)) {
+        setExpandedNav(item.href)
+      }
+    }
   }, [pathname])
 
   // Close user menu when clicking outside
@@ -219,34 +244,90 @@ export function DashboardShell({
           {filteredNavItems.map((item) => {
             const active = isActive(item.href)
             const Icon = item.icon
+            const hasSubItems = item.subItems && !sidebarCollapsed
+            const isExpanded = expandedNav === item.href
+
             return (
               <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                    active
-                      ? 'bg-[#FAF5EB] text-[#C8A96E] border-e-2 border-[#C8A96E]'
-                      : 'text-[#718096] hover:bg-[#F7F7F2] hover:text-[#1E3A5F]',
-                    sidebarCollapsed && 'justify-center px-2'
-                  )}
-                  title={sidebarCollapsed ? (locale === 'ar' ? item.labelAr : item.label) : undefined}
-                >
-                  <Icon
-                    className={cn(
-                      'h-5 w-5 flex-shrink-0 transition-colors',
-                      active
-                        ? 'text-[#C8A96E]'
-                        : 'text-[#A0AEC0] group-hover:text-[#1E3A5F]'
+                {hasSubItems ? (
+                  <>
+                    <button
+                      onClick={() => setExpandedNav(isExpanded ? null : item.href)}
+                      className={cn(
+                        'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                        active
+                          ? 'bg-[#FAF5EB] text-[#C8A96E] border-e-2 border-[#C8A96E]'
+                          : 'text-[#718096] hover:bg-[#F7F7F2] hover:text-[#1E3A5F]'
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          'h-5 w-5 flex-shrink-0 transition-colors',
+                          active
+                            ? 'text-[#C8A96E]'
+                            : 'text-[#A0AEC0] group-hover:text-[#1E3A5F]'
+                        )}
+                      />
+                      <span>{locale === 'ar' ? item.labelAr : item.label}</span>
+                      <ChevronDown
+                        className={cn(
+                          'ms-auto h-4 w-4 transition-transform duration-200',
+                          isExpanded && 'rotate-180'
+                        )}
+                      />
+                    </button>
+                    {isExpanded && (
+                      <ul className="mt-1 space-y-0.5 ps-8">
+                        {item.subItems!.map((sub) => {
+                          const subActive = pathname + (typeof window !== 'undefined' ? window.location.search : '') === sub.href
+                            || (sub.href === item.href && pathname === item.href && (typeof window === 'undefined' || !window.location.search.includes('tab=')))
+                          return (
+                            <li key={sub.href}>
+                              <Link
+                                href={sub.href}
+                                className={cn(
+                                  'block rounded-lg px-3 py-2 text-sm transition-all duration-200',
+                                  subActive
+                                    ? 'text-[#C8A96E] font-medium'
+                                    : 'text-[#718096] hover:bg-[#F7F7F2] hover:text-[#1E3A5F]'
+                                )}
+                              >
+                                {locale === 'ar' ? sub.labelAr : sub.label}
+                              </Link>
+                            </li>
+                          )
+                        })}
+                      </ul>
                     )}
-                  />
-                  {!sidebarCollapsed && (
-                    <span>{locale === 'ar' ? item.labelAr : item.label}</span>
-                  )}
-                  {active && !sidebarCollapsed && (
-                    <div className="ms-auto h-1.5 w-1.5 rounded-full bg-[#C8A96E]" />
-                  )}
-                </Link>
+                  </>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                      active
+                        ? 'bg-[#FAF5EB] text-[#C8A96E] border-e-2 border-[#C8A96E]'
+                        : 'text-[#718096] hover:bg-[#F7F7F2] hover:text-[#1E3A5F]',
+                      sidebarCollapsed && 'justify-center px-2'
+                    )}
+                    title={sidebarCollapsed ? (locale === 'ar' ? item.labelAr : item.label) : undefined}
+                  >
+                    <Icon
+                      className={cn(
+                        'h-5 w-5 flex-shrink-0 transition-colors',
+                        active
+                          ? 'text-[#C8A96E]'
+                          : 'text-[#A0AEC0] group-hover:text-[#1E3A5F]'
+                      )}
+                    />
+                    {!sidebarCollapsed && (
+                      <span>{locale === 'ar' ? item.labelAr : item.label}</span>
+                    )}
+                    {active && !sidebarCollapsed && (
+                      <div className="ms-auto h-1.5 w-1.5 rounded-full bg-[#C8A96E]" />
+                    )}
+                  </Link>
+                )}
               </li>
             )
           })}
