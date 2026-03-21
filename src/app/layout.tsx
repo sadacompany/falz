@@ -1,10 +1,17 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Tajawal } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+})
+
+const tajawal = Tajawal({
+  subsets: ['arabic'],
+  weight: ['400', '500', '700', '800', '900'],
+  variable: '--font-tajawal',
   display: 'swap',
 })
 
@@ -27,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased bg-[#FFFDF5] text-[#2E2506]`}>
+      <body className={`${inter.variable} ${tajawal.variable} font-sans antialiased bg-[#FFFDF5] text-[#2E2506]`}>
         {children}
       </body>
     </html>
