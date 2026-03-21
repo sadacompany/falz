@@ -1,6 +1,5 @@
 'use client'
 
-import { useDirection } from '@/components/shared/DirectionProvider'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import type { PageSectionConfig } from '@/types/sections'
 
@@ -9,10 +8,9 @@ interface Props {
 }
 
 export function PartnersSection({ config }: Props) {
-  const { locale } = useDirection()
   const ref = useScrollAnimation<HTMLElement>()
 
-  const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || (locale === 'ar' ? 'شركاؤنا' : 'Our Partners')
+  const title = config.content.titleAr || config.content.title || 'شركاؤنا'
   const items = config.content.items || []
 
   if (!items.length) return null
@@ -43,14 +41,14 @@ export function PartnersSection({ config }: Props) {
             <div className="animate-marquee flex items-center gap-12" style={{ width: 'max-content' }}>
               {/* Duplicate for seamless loop */}
               {[...items, ...items].map((partner, i) => (
-                <PartnerLogo key={i} partner={partner} locale={locale} />
+                <PartnerLogo key={i} partner={partner} />
               ))}
             </div>
           </div>
         ) : (
           <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
             {items.map((partner, i) => (
-              <PartnerLogo key={i} partner={partner} locale={locale} />
+              <PartnerLogo key={i} partner={partner} />
             ))}
           </div>
         )}
@@ -59,8 +57,8 @@ export function PartnersSection({ config }: Props) {
   )
 }
 
-function PartnerLogo({ partner, locale }: { partner: any; locale: string }) {
-  const name = (locale === 'ar' ? partner.nameAr : partner.name) || ''
+function PartnerLogo({ partner }: { partner: any }) {
+  const name = partner.nameAr || partner.name || ''
   const logo = partner.logoUrl
   const url = partner.url
 

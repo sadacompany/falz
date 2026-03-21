@@ -16,13 +16,13 @@ interface Props {
 
 export function CtaSection({ config, officeSlug, whatsapp }: Props) {
   const { dict } = usePublicOffice()
-  const { locale, isRtl } = useDirection()
+  const { isRtl } = useDirection()
   const ref = useScrollAnimation<HTMLElement>()
   const Arrow = isRtl ? ArrowLeft : ArrowRight
 
-  const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || dict.nav.contact
-  const subtitle = (locale === 'ar' ? config.content.subtitleAr : config.content.subtitle) || dict.property.interestedIn
-  const buttonText = (locale === 'ar' ? config.content.buttonTextAr : config.content.buttonText) || dict.nav.contact
+  const title = config.content.titleAr || config.content.title || dict.nav.contact
+  const subtitle = config.content.subtitleAr || config.content.subtitle || dict.property.interestedIn
+  const buttonText = config.content.buttonTextAr || config.content.buttonText || dict.nav.contact
   const bgImage = config.content.backgroundImage
 
   return (

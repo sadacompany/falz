@@ -17,8 +17,8 @@ export function AboutSection({ config, officeSlug, description }: Props) {
   const ref = useScrollAnimation<HTMLElement>()
   const Arrow = isRtl ? ArrowLeft : ArrowRight
 
-  const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || (locale === 'ar' ? 'من نحن' : 'About Us')
-  const body = (locale === 'ar' ? config.content.bodyAr : config.content.body) || description
+  const title = config.content.titleAr || config.content.title || 'من نحن'
+  const body = config.content.bodyAr || config.content.body || description
   const imageUrl = config.content.imageUrl
 
   if (!body) return null
@@ -49,7 +49,7 @@ export function AboutSection({ config, officeSlug, description }: Props) {
               className="inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:opacity-80"
               style={{ color: 'var(--theme-accent)' }}
             >
-              {locale === 'ar' ? 'اقرأ المزيد' : 'Read More'}
+              اقرأ المزيد
               <Arrow className="h-4 w-4" />
             </Link>
           </div>

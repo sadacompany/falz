@@ -21,9 +21,9 @@ export function HeroSection({ config, officeSlug, officeName, description, whats
   const ref = useScrollAnimation<HTMLElement>()
   const Arrow = isRtl ? ArrowLeft : ArrowRight
 
-  const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || officeName
-  const subtitle = (locale === 'ar' ? config.content.subtitleAr : config.content.subtitle) || description
-  const buttonText = (locale === 'ar' ? config.content.buttonTextAr : config.content.buttonText) || dict.nav.properties
+  const title = config.content.titleAr || config.content.title || officeName
+  const subtitle = config.content.subtitleAr || config.content.subtitle || description
+  const buttonText = config.content.buttonTextAr || config.content.buttonText || dict.nav.properties
   const buttonUrl = config.content.buttonUrl || `/${officeSlug}/properties`
   const bgImage = config.content.backgroundImage
   const layout = config.content.layout || 'centered'

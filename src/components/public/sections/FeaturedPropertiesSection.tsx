@@ -17,13 +17,13 @@ interface Props {
 
 export function FeaturedPropertiesSection({ config, officeSlug, properties, stats }: Props) {
   const { dict } = usePublicOffice()
-  const { locale, isRtl } = useDirection()
+  const { isRtl } = useDirection()
   const ref = useScrollAnimation<HTMLElement>()
   const Arrow = isRtl ? ArrowLeft : ArrowRight
 
   if (!properties.length) return null
 
-  const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || `${dict.common.featured} ${dict.nav.properties}`
+  const title = config.content.titleAr || config.content.title || `${dict.common.featured} ${dict.nav.properties}`
 
   return (
     <section

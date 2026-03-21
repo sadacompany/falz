@@ -6,7 +6,6 @@ import {
   Globe,
   Search,
   Share2,
-  Languages,
   Save,
   Check,
   Loader2,
@@ -57,7 +56,6 @@ const TABS = [
   { key: 'domain', label: 'النطاق', icon: Globe },
   { key: 'seo', label: 'تحسين محركات البحث', icon: Search },
   { key: 'social', label: 'التواصل الاجتماعي', icon: Share2 },
-  { key: 'language', label: 'اللغة', icon: Languages },
 ] as const
 
 type TabKey = (typeof TABS)[number]['key']
@@ -134,74 +132,55 @@ interface FieldConfig {
 
 const SECTION_FIELDS: Partial<Record<SectionType, FieldConfig[]>> = {
   hero: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
-    { key: 'subtitle', label: 'Subtitle', labelAr: 'العنوان الفرعي', type: 'text', contentKey: 'subtitle' },
-    { key: 'subtitleAr', label: 'Subtitle (Arabic)', labelAr: 'العنوان الفرعي (عربي)', type: 'text', contentKey: 'subtitleAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
+    { key: 'subtitleAr', label: 'Subtitle', labelAr: 'العنوان الفرعي', type: 'text', contentKey: 'subtitleAr' },
     { key: 'backgroundImage', label: 'Background Image', labelAr: 'صورة الخلفية', type: 'text', contentKey: 'backgroundImage' },
-    { key: 'buttonText', label: 'Button Text', labelAr: 'نص الزر', type: 'text', contentKey: 'buttonText' },
-    { key: 'buttonTextAr', label: 'Button Text (Arabic)', labelAr: 'نص الزر (عربي)', type: 'text', contentKey: 'buttonTextAr' },
+    { key: 'buttonTextAr', label: 'Button Text', labelAr: 'نص الزر', type: 'text', contentKey: 'buttonTextAr' },
   ],
   about: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
-    { key: 'body', label: 'Body', labelAr: 'المحتوى', type: 'textarea', contentKey: 'body' },
-    { key: 'bodyAr', label: 'Body (Arabic)', labelAr: 'المحتوى (عربي)', type: 'textarea', contentKey: 'bodyAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
+    { key: 'bodyAr', label: 'Body', labelAr: 'المحتوى', type: 'textarea', contentKey: 'bodyAr' },
     { key: 'imageUrl', label: 'Image URL', labelAr: 'رابط الصورة', type: 'text', contentKey: 'imageUrl' },
   ],
   services: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
-    { key: 'subtitle', label: 'Subtitle', labelAr: 'العنوان الفرعي', type: 'text', contentKey: 'subtitle' },
-    { key: 'subtitleAr', label: 'Subtitle (Arabic)', labelAr: 'العنوان الفرعي (عربي)', type: 'text', contentKey: 'subtitleAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
+    { key: 'subtitleAr', label: 'Subtitle', labelAr: 'العنوان الفرعي', type: 'text', contentKey: 'subtitleAr' },
   ],
   featured_properties: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
   ],
   stats: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
   ],
   cta: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
-    { key: 'subtitle', label: 'Subtitle', labelAr: 'العنوان الفرعي', type: 'text', contentKey: 'subtitle' },
-    { key: 'subtitleAr', label: 'Subtitle (Arabic)', labelAr: 'العنوان الفرعي (عربي)', type: 'text', contentKey: 'subtitleAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
+    { key: 'subtitleAr', label: 'Subtitle', labelAr: 'العنوان الفرعي', type: 'text', contentKey: 'subtitleAr' },
     { key: 'backgroundImage', label: 'Background Image', labelAr: 'صورة الخلفية', type: 'text', contentKey: 'backgroundImage' },
-    { key: 'buttonText', label: 'Button Text', labelAr: 'نص الزر', type: 'text', contentKey: 'buttonText' },
-    { key: 'buttonTextAr', label: 'Button Text (Arabic)', labelAr: 'نص الزر (عربي)', type: 'text', contentKey: 'buttonTextAr' },
+    { key: 'buttonTextAr', label: 'Button Text', labelAr: 'نص الزر', type: 'text', contentKey: 'buttonTextAr' },
   ],
   testimonials: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
   ],
   team: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
   ],
   partners: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
   ],
   contact: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
-    { key: 'subtitle', label: 'Subtitle', labelAr: 'العنوان الفرعي', type: 'text', contentKey: 'subtitle' },
-    { key: 'subtitleAr', label: 'Subtitle (Arabic)', labelAr: 'العنوان الفرعي (عربي)', type: 'text', contentKey: 'subtitleAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
+    { key: 'subtitleAr', label: 'Subtitle', labelAr: 'العنوان الفرعي', type: 'text', contentKey: 'subtitleAr' },
     { key: 'mapEmbed', label: 'Map Embed URL', labelAr: 'رابط خرائط جوجل', type: 'text', contentKey: 'mapEmbed' },
   ],
   gallery: [
-    { key: 'title', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Title (Arabic)', labelAr: 'العنوان (عربي)', type: 'text', contentKey: 'titleAr' },
+    { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
   ],
   footer: [
     { key: 'showLogo', label: 'Show Logo', labelAr: 'إظهار الشعار', type: 'toggle', contentKey: 'showLogo' },
     { key: 'showNavLinks', label: 'Show Navigation', labelAr: 'إظهار الروابط', type: 'toggle', contentKey: 'showNavLinks' },
     { key: 'showContactInfo', label: 'Show Contact', labelAr: 'إظهار التواصل', type: 'toggle', contentKey: 'showContactInfo' },
     { key: 'showSocialLinks', label: 'Show Social', labelAr: 'إظهار التواصل الاجتماعي', type: 'toggle', contentKey: 'showSocialLinks' },
-    { key: 'title', label: 'Copyright Text', labelAr: 'نص حقوق النشر', type: 'text', contentKey: 'title' },
-    { key: 'titleAr', label: 'Copyright (Arabic)', labelAr: 'نص حقوق النشر (عربي)', type: 'text', contentKey: 'titleAr' },
+    { key: 'titleAr', label: 'Copyright', labelAr: 'نص حقوق النشر', type: 'text', contentKey: 'titleAr' },
   ],
 }
 
@@ -265,8 +244,8 @@ export default function SettingsPage() {
   const [linkedin, setLinkedin] = useState('')
   const [tiktok, setTiktok] = useState('')
 
-  // ─── Language Fields ──────────────────────────────────────
-  const [defaultLanguage, setDefaultLanguage] = useState('ar')
+  // Language is always Arabic
+  const defaultLanguage = 'ar'
 
   // ─── Page Sections ───────────────────────────────────────────
   const [pageSections, setPageSections] = useState<PageSectionConfig[]>(getDefaultSections())
@@ -342,9 +321,6 @@ export default function SettingsPage() {
         setSnapchat(social.snapchat || '')
         setLinkedin(social.linkedin || '')
         setTiktok(social.tiktok || '')
-
-        // Language
-        setDefaultLanguage(data.defaultLanguage || 'ar')
 
         // Page Sections — merge with defaults to ensure new types appear
         const savedSections = data.pageSections && Array.isArray(data.pageSections) && (data.pageSections as any[]).length > 0
@@ -607,26 +583,12 @@ export default function SettingsPage() {
     }
   }
 
-  const handleSaveLanguage = async () => {
-    setSaving(true)
-    setError(null)
-    try {
-      await updateOfficeLanguage(defaultLanguage)
-      showSuccess()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'فشل في الحفظ')
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const saveHandlers: Record<TabKey, () => Promise<void>> = {
     general: handleSaveGeneral,
     editor: handleSaveEditor,
     domain: handleSaveDomain,
     seo: handleSaveSeo,
     social: handleSaveSocial,
-    language: handleSaveLanguage,
   }
 
   // ─── Loading State ───────────────────────────────────────
@@ -1701,82 +1663,6 @@ export default function SettingsPage() {
             </Card>
           )}
 
-          {/* ─── Language Tab ───────────────────────────────── */}
-          {activeTab === 'language' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">إعدادات اللغة</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>اللغة الافتراضية</Label>
-                  <p className="text-xs text-[#718096]">
-                    اختر اللغة الافتراضية لموقعك العام
-                  </p>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <button
-                    onClick={() => setDefaultLanguage('ar')}
-                    className={cn(
-                      'rounded-lg border p-4 text-start transition-all',
-                      defaultLanguage === 'ar'
-                        ? 'border-[#C8A96E] bg-[#C8A96E]/5 ring-1 ring-[#C8A96E]'
-                        : 'border-[#E2E8F0] hover:border-[#C8A96E]/30'
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-lg font-bold text-[#2D3748]">العربية</p>
-                        <p className="text-sm text-[#718096]">العربية (من اليمين لليسار)</p>
-                      </div>
-                      {defaultLanguage === 'ar' && (
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#C8A96E]">
-                          <Check className="h-4 w-4 text-[#1E3A5F]" />
-                        </div>
-                      )}
-                    </div>
-                    <p className="mt-2 text-xs text-[#718096]">
-                      تخطيط من اليمين لليسار. موصى به للسوق السعودي.
-                    </p>
-                  </button>
-
-                  <button
-                    onClick={() => setDefaultLanguage('en')}
-                    className={cn(
-                      'rounded-lg border p-4 text-start transition-all',
-                      defaultLanguage === 'en'
-                        ? 'border-[#C8A96E] bg-[#C8A96E]/5 ring-1 ring-[#C8A96E]'
-                        : 'border-[#E2E8F0] hover:border-[#C8A96E]/30'
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-lg font-bold text-[#2D3748]">English</p>
-                        <p className="text-sm text-[#718096]">الإنجليزية (من اليسار لليمين)</p>
-                      </div>
-                      {defaultLanguage === 'en' && (
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#C8A96E]">
-                          <Check className="h-4 w-4 text-[#1E3A5F]" />
-                        </div>
-                      )}
-                    </div>
-                    <p className="mt-2 text-xs text-[#718096]">
-                      تخطيط من اليسار لليمين. للجمهور الدولي.
-                    </p>
-                  </button>
-                </div>
-
-                <div className="rounded-lg border border-[#E2E8F0] bg-[#FAFAF7] p-4">
-                  <p className="text-sm text-[#718096]">
-                    يدعم موقعك العام اللغتين العربية والإنجليزية. يمكن للزوار التبديل
-                    بين اللغات باستخدام زر تبديل اللغة. يحدد هذا الإعداد اللغة الافتراضية
-                    التي تظهر للزوار الجدد.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
     </div>

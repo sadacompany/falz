@@ -6,7 +6,6 @@ import { usePublicOffice } from '@/components/public/PublicOfficeContext'
 import { useDirection } from '@/components/shared/DirectionProvider'
 import { PropertyGallery } from '@/components/public/PropertyGallery'
 import { PropertyCard, type PropertyCardData } from '@/components/public/PropertyCard'
-import { ContactForm } from '@/components/public/ContactForm'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { GoogleMapEmbed } from '@/components/shared/GoogleMapEmbed'
 import { FavoriteButton } from '@/components/public/FavoriteButton'
@@ -403,13 +402,6 @@ export function PropertyDetailClient({
               <RequestButtons propertyId={property.id} />
             </div>
 
-            {/* Contact Form */}
-            <div className="rounded-xl p-6 bg-white border border-[#E2E8F0] shadow-sm">
-              <h3 className="text-lg font-semibold mb-5 text-[#1E3A5F]">
-                {dict.property.contactForm}
-              </h3>
-              <ContactForm source="PROPERTY_INQUIRY" propertyId={property.id} />
-            </div>
           </div>
         </div>
 

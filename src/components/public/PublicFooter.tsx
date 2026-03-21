@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePublicOffice } from './PublicOfficeContext'
-import { useDirection } from '@/components/shared/DirectionProvider'
 import { Phone, Mail, MapPin } from 'lucide-react'
 
 export interface FooterConfig {
@@ -20,13 +19,11 @@ interface PublicFooterProps {
 
 export function PublicFooter({ footerConfig }: PublicFooterProps) {
   const { office, dict } = usePublicOffice()
-  const { locale } = useDirection()
-
-  const officeName = locale === 'ar' && office.nameAr ? office.nameAr : office.name
+  const officeName = office.nameAr || office.name
   const base = `/${office.slug}`
   const year = new Date().getFullYear()
-  const address = locale === 'ar' && office.addressAr ? office.addressAr : office.address
-  const city = locale === 'ar' && office.cityAr ? office.cityAr : office.city
+  const address = office.addressAr || office.address
+  const city = office.cityAr || office.city
 
   // Defaults: show everything
   const showLogo = footerConfig?.showLogo !== false
@@ -52,7 +49,7 @@ export function PublicFooter({ footerConfig }: PublicFooterProps) {
   }
 
   const copyrightLabel = footerConfig?.copyrightText
-    ? (locale === 'ar' && footerConfig.copyrightTextAr ? footerConfig.copyrightTextAr : footerConfig.copyrightText)
+    ? (footerConfig.copyrightTextAr || footerConfig.copyrightText)
     : undefined
 
   return (
@@ -207,7 +204,7 @@ export function PublicFooter({ footerConfig }: PublicFooterProps) {
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/50">
             &copy; {year} {copyrightLabel || officeName}.{' '}
-            {locale === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
+            جميع الحقوق محفوظة
           </p>
           <a
             href="https://falz.sa"

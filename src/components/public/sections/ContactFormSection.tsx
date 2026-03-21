@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { usePublicOffice } from '@/components/public/PublicOfficeContext'
-import { useDirection } from '@/components/shared/DirectionProvider'
 import { Phone, Mail, MapPin, Send, Loader2, CheckCircle } from 'lucide-react'
 import { WhatsAppIcon } from '@/components/public/WhatsAppIcon'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
@@ -15,14 +14,13 @@ interface Props {
 
 export function ContactFormSection({ config, officeSlug }: Props) {
   const { office, dict } = usePublicOffice()
-  const { locale } = useDirection()
   const ref = useScrollAnimation<HTMLElement>()
 
   const [formState, setFormState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '' })
 
-  const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || (locale === 'ar' ? 'تواصل معنا' : 'Contact Us')
-  const subtitle = (locale === 'ar' ? config.content.subtitleAr : config.content.subtitle) || (locale === 'ar' ? 'نسعد بتواصلكم' : 'We\'d love to hear from you')
+  const title = config.content.titleAr || config.content.title || 'تواصل معنا'
+  const subtitle = config.content.subtitleAr || config.content.subtitle || 'نسعد بتواصلكم'
   const mapEmbed = config.content.mapEmbed
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,8 +47,8 @@ export function ContactFormSection({ config, officeSlug }: Props) {
     }
   }
 
-  const address = locale === 'ar' && office.addressAr ? office.addressAr : office.address
-  const city = locale === 'ar' && office.cityAr ? office.cityAr : office.city
+  const address = office.addressAr || office.address
+  const city = office.cityAr || office.city
   const fullAddress = [address, city].filter(Boolean).join(', ')
 
   return (
@@ -80,7 +78,7 @@ export function ContactFormSection({ config, officeSlug }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--theme-primary)' }}>
-                  {locale === 'ar' ? 'الاسم' : 'Name'} *
+                  الاسم *
                 </label>
                 <input
                   type="text"
@@ -97,7 +95,7 @@ export function ContactFormSection({ config, officeSlug }: Props) {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--theme-primary)' }}>
-                  {locale === 'ar' ? 'رقم الهاتف' : 'Phone'} *
+                  رقم الهاتف *
                 </label>
                 <input
                   type="tel"
@@ -116,7 +114,7 @@ export function ContactFormSection({ config, officeSlug }: Props) {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--theme-primary)' }}>
-                {locale === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                البريد الإلكتروني
               </label>
               <input
                 type="email"
@@ -132,7 +130,7 @@ export function ContactFormSection({ config, officeSlug }: Props) {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--theme-primary)' }}>
-                {locale === 'ar' ? 'الرسالة' : 'Message'} *
+                الرسالة *
               </label>
               <textarea
                 required
@@ -161,10 +159,10 @@ export function ContactFormSection({ config, officeSlug }: Props) {
                 <Send className="h-4 w-4" />
               )}
               {formState === 'sent'
-                ? (locale === 'ar' ? 'تم الإرسال!' : 'Sent!')
+                ? 'تم الإرسال!'
                 : formState === 'error'
-                  ? (locale === 'ar' ? 'حدث خطأ' : 'Error')
-                  : (locale === 'ar' ? 'إرسال' : 'Send')}
+                  ? 'حدث خطأ'
+                  : 'إرسال'}
             </button>
           </form>
 

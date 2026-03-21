@@ -1,6 +1,5 @@
 'use client'
 
-import { useDirection } from '@/components/shared/DirectionProvider'
 import { Landmark, Key, HandshakeIcon, Lightbulb, Building2, FileText, Shield, TrendingUp } from 'lucide-react'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import type { PageSectionConfig, SectionItem } from '@/types/sections'
@@ -29,12 +28,11 @@ interface Props {
 }
 
 export function ServicesSection({ config }: Props) {
-  const { locale } = useDirection()
   const sectionRef = useScrollAnimation<HTMLElement>()
   const gridRef = useScrollAnimation<HTMLDivElement>()
 
-  const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || (locale === 'ar' ? 'خدماتنا' : 'Our Services')
-  const subtitle = (locale === 'ar' ? config.content.subtitleAr : config.content.subtitle) || (locale === 'ar' ? 'نقدم مجموعة شاملة من الخدمات العقارية' : 'Comprehensive real estate services')
+  const title = config.content.titleAr || config.content.title || 'خدماتنا'
+  const subtitle = config.content.subtitleAr || config.content.subtitle || 'نقدم مجموعة شاملة من الخدمات العقارية'
 
   // Use custom items if provided, otherwise fall back to defaults
   const hasCustomItems = config.content.items && config.content.items.length > 0
@@ -71,8 +69,8 @@ export function ServicesSection({ config }: Props) {
                   <ServiceCard
                     key={i}
                     icon={ICON_MAP[item.icon || ''] || fallback?.icon || Landmark}
-                    title={(locale === 'ar' ? (item.titleAr || fallback?.titleAr) : (item.title || fallback?.titleEn)) || ''}
-                    description={(locale === 'ar' ? (item.descriptionAr || fallback?.descAr) : (item.description || fallback?.descEn)) || ''}
+                    title={item.titleAr || fallback?.titleAr || item.title || fallback?.titleEn || ''}
+                    description={item.descriptionAr || fallback?.descAr || item.description || fallback?.descEn || ''}
                   />
                 )
               })
@@ -80,8 +78,8 @@ export function ServicesSection({ config }: Props) {
                 <ServiceCard
                   key={i}
                   icon={service.icon}
-                  title={locale === 'ar' ? service.titleAr : service.titleEn}
-                  description={locale === 'ar' ? service.descAr : service.descEn}
+                  title={service.titleAr || service.titleEn}
+                  description={service.descAr || service.descEn}
                 />
               ))
           }

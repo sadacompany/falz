@@ -11,11 +11,11 @@ interface Props {
 }
 
 export function GallerySection({ config }: Props) {
-  const { locale, isRtl } = useDirection()
+  const { isRtl } = useDirection()
   const ref = useScrollAnimation<HTMLElement>()
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
 
-  const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || (locale === 'ar' ? 'معرض الصور' : 'Gallery')
+  const title = config.content.titleAr || config.content.title || 'معرض الصور'
   const items = config.content.items || []
 
   if (!items.length) return null
@@ -46,7 +46,7 @@ export function GallerySection({ config }: Props) {
         {/* Masonry Grid */}
         <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
           {items.map((item, i) => {
-            const caption = (locale === 'ar' ? item.titleAr : item.title) || ''
+            const caption = item.titleAr || item.title || ''
             return (
               <div
                 key={i}
@@ -106,7 +106,7 @@ export function GallerySection({ config }: Props) {
 
           <img
             src={items[lightboxIdx]?.imageUrl || ''}
-            alt={(locale === 'ar' ? items[lightboxIdx]?.titleAr : items[lightboxIdx]?.title) || ''}
+            alt={items[lightboxIdx]?.titleAr || items[lightboxIdx]?.title || ''}
             className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />

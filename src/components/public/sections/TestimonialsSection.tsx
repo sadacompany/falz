@@ -35,25 +35,25 @@ const defaultTestimonials = [
 ]
 
 export function TestimonialsSection({ config }: Props) {
-  const { locale, isRtl } = useDirection()
+  const { isRtl } = useDirection()
   const sectionRef = useScrollAnimation<HTMLElement>()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeIdx, setActiveIdx] = useState(0)
 
-  const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || (locale === 'ar' ? 'آراء عملائنا' : 'What Our Clients Say')
+  const title = config.content.titleAr || config.content.title || 'آراء عملائنا'
 
   const items = config.content.items?.length
     ? config.content.items.map((item) => ({
-        name: (locale === 'ar' ? item.nameAr : item.name) || '',
-        role: (locale === 'ar' ? item.roleAr : item.role) || '',
-        text: (locale === 'ar' ? item.descriptionAr : item.description) || '',
+        name: item.nameAr || item.name || '',
+        role: item.roleAr || item.role || '',
+        text: item.descriptionAr || item.description || '',
         photo: item.photoUrl,
         rating: item.rating || 5,
       }))
     : defaultTestimonials.map((t) => ({
-        name: locale === 'ar' ? t.nameAr : t.nameEn,
-        role: locale === 'ar' ? t.roleAr : t.roleEn,
-        text: locale === 'ar' ? t.textAr : t.textEn,
+        name: t.nameAr || t.nameEn,
+        role: t.roleAr || t.roleEn,
+        text: t.textAr || t.textEn,
         photo: undefined as string | undefined,
         rating: t.rating,
       }))

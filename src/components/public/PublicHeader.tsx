@@ -11,12 +11,12 @@ import { VisitorAvatar } from './VisitorAvatar'
 
 export function PublicHeader() {
   const { office, dict } = usePublicOffice()
-  const { locale, isRtl } = useDirection()
+  const { isRtl } = useDirection()
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
   const { visitor, loading: visitorLoading, setShowAuthModal } = useVisitorAuth()
 
-  const officeName = locale === 'ar' && office.nameAr ? office.nameAr : office.name
+  const officeName = office.nameAr || office.name
   const base = `/${office.slug}`
 
   const navLinks = [

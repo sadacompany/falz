@@ -1,6 +1,5 @@
 'use client'
 
-import { useDirection } from '@/components/shared/DirectionProvider'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import type { PageSectionConfig } from '@/types/sections'
 
@@ -9,10 +8,9 @@ interface Props {
 }
 
 export function TeamSection({ config }: Props) {
-  const { locale } = useDirection()
   const ref = useScrollAnimation<HTMLElement>()
 
-  const title = (locale === 'ar' ? config.content.titleAr : config.content.title) || (locale === 'ar' ? 'فريقنا' : 'Our Team')
+  const title = config.content.titleAr || config.content.title || 'فريقنا'
   const items = config.content.items || []
 
   if (!items.length) return null
@@ -38,9 +36,9 @@ export function TeamSection({ config }: Props) {
         {/* Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-on-scroll-children">
           {items.map((member, i) => {
-            const name = (locale === 'ar' ? member.nameAr : member.name) || ''
-            const role = (locale === 'ar' ? member.roleAr : member.role) || ''
-            const bio = (locale === 'ar' ? member.descriptionAr : member.description) || ''
+            const name = member.nameAr || member.name || ''
+            const role = member.roleAr || member.role || ''
+            const bio = member.descriptionAr || member.description || ''
 
             return (
               <div key={i} className="group text-center">
