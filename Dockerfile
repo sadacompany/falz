@@ -18,6 +18,7 @@ COPY . .
 RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyAeQDZkqir3_v9VHCc0MJo6epR3r3H1gwg
 RUN npm run build
 
 # Production image
