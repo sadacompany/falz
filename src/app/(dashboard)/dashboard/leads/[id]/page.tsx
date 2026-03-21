@@ -3,10 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, User, Phone, Mail, Building2, MessageSquare, Send, Clock, Heart, FileText, Eye } from 'lucide-react'
+import { ArrowLeft, Phone, Mail, Building2, Send, Clock, Heart, FileText, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getLead, updateLeadStatus, assignLeadAgent, addLeadNote, getLinkedVisitorData } from '@/lib/actions/leads'
@@ -34,6 +33,12 @@ const sourceLabel: Record<string, string> = {
   MANUAL: 'يدوي',
 }
 
+const activityTypeLabel: Record<string, string> = {
+  note: 'ملاحظة',
+  status_change: 'تغيير حالة',
+  assignment: 'تعيين',
+}
+
 const STATUSES = ['NEW', 'CONTACTED', 'QUALIFIED', 'CLOSED'] as const
 
 export default function LeadDetailPage() {
@@ -44,6 +49,7 @@ export default function LeadDetailPage() {
   const [loading, setLoading] = useState(true)
   const [noteContent, setNoteContent] = useState('')
   const [submittingNote, setSubmittingNote] = useState(false)
+  const [changingStatus, setChangingStatus] = useState(false)
   const [visitorData, setVisitorData] = useState<Awaited<ReturnType<typeof getLinkedVisitorData>>>(null)
 
   const loadData = async () => {
@@ -54,9 +60,8 @@ export default function LeadDetailPage() {
       ])
       setLead(leadData)
       setAgents(agentData)
-      // Load linked visitor data after lead is available
       if (leadData?.phone) {
-        getLinkedVisitorData(leadId).then(setVisitorData).catch(() => {})
+        getLinkedVisitorData(leadId).then(setVisitorData).catch((err) => console.error('Failed to load visitor data:', err))
       }
     } catch (error) {
       console.error('Failed to load lead:', error)
@@ -70,11 +75,15 @@ export default function LeadDetailPage() {
   }, [leadId])
 
   const handleStatusChange = async (status: string) => {
+    if (changingStatus) return
+    setChangingStatus(true)
     try {
       await updateLeadStatus(leadId, status as (typeof STATUSES)[number])
-      loadData()
+      await loadData()
     } catch (error) {
       console.error('Failed to update status:', error)
+    } finally {
+      setChangingStatus(false)
     }
   }
 
@@ -120,34 +129,34 @@ export default function LeadDetailPage() {
     )
   }
 
+  const hasVisitorActivity = visitorData && (visitorData.favorites.length > 0 || visitorData.requests.length > 0)
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link href="/dashboard/leads">
-          <button className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]">
-            <ArrowLeft className="h-5 w-5" />
-          </button>
+        <Link
+          href="/dashboard/leads"
+          aria-label="العودة للعملاء المحتملين"
+          className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
+        >
+          <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-[#2D3748]">{lead.name}</h1>
-          <Badge variant={statusVariant[lead.status] || 'secondary'}>{statusLabel[lead.status] || lead.status}</Badge>
+          <div className="mt-1 flex items-center gap-2">
+            <Badge variant={statusVariant[lead.status] || 'secondary'}>{statusLabel[lead.status] || lead.status}</Badge>
+            <span className="text-xs text-[#A0AEC0]">{sourceLabel[lead.source] || lead.source}</span>
+          </div>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Lead Info */}
+          {/* Contact Info + Property (merged) */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">معلومات التواصل</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <User className="h-4 w-4 text-[#718096]" />
-                <span className="text-[#2D3748]">{lead.name}</span>
-              </div>
+            <CardContent className="space-y-3 pt-6">
               {lead.phone && (
                 <div className="flex items-center gap-3 text-sm">
                   <Phone className="h-4 w-4 text-[#718096]" />
@@ -160,42 +169,26 @@ export default function LeadDetailPage() {
                   <a href={`mailto:${lead.email}`} className="text-[#C8A96E] hover:underline">{lead.email}</a>
                 </div>
               )}
-              {lead.message && (
-                <div className="mt-3 rounded-lg border border-[#E2E8F0] bg-[#FAFAF7] p-3">
-                  <p className="text-xs font-medium text-[#718096]">الرسالة</p>
-                  <p className="mt-1 text-sm text-[#2D3748]">{lead.message}</p>
-                </div>
-              )}
-              <div className="flex items-center gap-2 pt-2 text-xs text-[#718096]">
-                <Clock className="h-3.5 w-3.5" />
-                {new Date(lead.createdAt).toLocaleString('ar-SA-u-nu-latn')}
-                <span className="ms-2">المصدر: {sourceLabel[lead.source] || lead.source}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Linked Property */}
-          {lead.property && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">العقار المرتبط</CardTitle>
-              </CardHeader>
-              <CardContent>
+              {lead.property && (
                 <Link
                   href={`/dashboard/properties/${lead.property.id}`}
-                  className="flex items-center gap-3 rounded-lg border border-[#E2E8F0] p-3 transition-colors hover:border-[#C8A96E]/30"
+                  className="flex items-center gap-3 text-sm hover:text-[#C8A96E]"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#EBF0F7]">
-                    <Building2 className="h-5 w-5 text-[#C8A96E]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#2D3748]">{lead.property.title}</p>
-                    <p className="text-xs text-[#718096]">{lead.property.slug}</p>
-                  </div>
+                  <Building2 className="h-4 w-4 text-[#718096]" />
+                  <span className="text-[#2D3748] hover:text-[#C8A96E]">{lead.property.titleAr || lead.property.title}</span>
                 </Link>
-              </CardContent>
-            </Card>
-          )}
+              )}
+              {lead.message && (
+                <div className="mt-2 rounded-lg bg-[#FAFAF7] p-3">
+                  <p className="text-sm text-[#2D3748]">{lead.message}</p>
+                </div>
+              )}
+              <p className="flex items-center gap-1.5 pt-1 text-xs text-[#A0AEC0]">
+                <Clock className="h-3 w-3" />
+                {new Date(lead.createdAt).toLocaleString('ar-SA-u-nu-latn')}
+              </p>
+            </CardContent>
+          </Card>
 
           {/* Activity Timeline */}
           <Card>
@@ -203,20 +196,19 @@ export default function LeadDetailPage() {
               <CardTitle className="text-base">سجل النشاط</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Add Note Form */}
               <div className="mb-4 flex gap-2">
                 <Input
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
                   placeholder="أضف ملاحظة..."
+                  aria-label="أضف ملاحظة"
                   onKeyDown={(e) => { if (e.key === 'Enter') handleAddNote() }}
                 />
-                <Button onClick={handleAddNote} isLoading={submittingNote} size="icon">
+                <Button onClick={handleAddNote} isLoading={submittingNote} size="icon" aria-label="إرسال ملاحظة">
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
 
-              {/* Timeline */}
               <div className="space-y-4">
                 {lead.activities && lead.activities.length > 0 ? (
                   lead.activities.map((activity) => (
@@ -227,13 +219,13 @@ export default function LeadDetailPage() {
                             {activity.user?.name || 'النظام'}
                           </span>
                           <Badge variant="outline" className="text-[10px]">
-                            {activity.type}
+                            {activityTypeLabel[activity.type] || activity.type}
                           </Badge>
                         </div>
                         {activity.content && (
                           <p className="mt-1 text-sm text-[#718096]">{activity.content}</p>
                         )}
-                        <p className="mt-1 text-xs text-[#718096]">
+                        <p className="mt-1 text-xs text-[#A0AEC0]">
                           {new Date(activity.createdAt).toLocaleString('ar-SA-u-nu-latn')}
                         </p>
                       </div>
@@ -246,159 +238,128 @@ export default function LeadDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Visitor Favorites */}
-          {visitorData && visitorData.favorites.length > 0 && (
+          {/* Visitor Activity (merged: favorites + requests) */}
+          {hasVisitorActivity && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Heart className="h-4 w-4 text-[#C8A96E]" />
-                  العقارات المفضلة ({visitorData.favorites.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {visitorData.favorites.map((fav) => (
-                    <Link
-                      key={fav.id}
-                      href={`/dashboard/properties/${fav.property.id}`}
-                      className="flex items-center gap-3 rounded-lg border border-[#E2E8F0] p-3 transition-colors hover:border-[#C8A96E]/30"
-                    >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FAF5EB]">
-                        <Heart className="h-4 w-4 text-[#C8A96E]" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-[#2D3748]">{fav.property.titleAr || fav.property.title}</p>
-                        <p className="text-xs text-[#718096]">{new Date(fav.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}</p>
-                      </div>
-                    </Link>
-                  ))}
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Eye className="h-4 w-4 text-[#C8A96E]" />
+                    نشاط الزائر
+                  </CardTitle>
+                  <p className="text-xs text-[#A0AEC0]">
+                    مسجّل منذ {new Date(visitorData!.visitor.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Visitor Requests */}
-          {visitorData && visitorData.requests.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <FileText className="h-4 w-4 text-[#1E3A5F]" />
-                  طلبات العقارات ({visitorData.requests.length})
-                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {visitorData.requests.map((req) => (
-                    <div key={req.id} className="rounded-lg border border-[#E2E8F0] p-3">
-                      <div className="flex items-center justify-between">
+              <CardContent className="space-y-4">
+                {/* Favorites */}
+                {visitorData!.favorites.length > 0 && (
+                  <div>
+                    <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-[#718096]">
+                      <Heart className="h-3 w-3" />
+                      المفضلة ({visitorData!.favorites.length})
+                    </p>
+                    <div className="space-y-1">
+                      {visitorData!.favorites.map((fav) => (
                         <Link
-                          href={`/dashboard/properties/${req.property.id}`}
-                          className="text-sm font-medium text-[#2D3748] hover:text-[#C8A96E]"
+                          key={fav.id}
+                          href={`/dashboard/properties/${fav.property.id}`}
+                          className="flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors hover:bg-[#FAFAF7]"
                         >
-                          {req.property.titleAr || req.property.title}
+                          <span className="truncate text-[#2D3748]">{fav.property.titleAr || fav.property.title}</span>
+                          <span className="ms-2 flex-shrink-0 text-xs text-[#A0AEC0]">{new Date(fav.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}</span>
                         </Link>
-                        <Badge variant={req.status === 'PENDING' ? 'warning' : req.status === 'RESPONDED' ? 'success' : 'secondary'}>
-                          {req.status === 'PENDING' ? 'معلق' : req.status === 'RESPONDED' ? 'تم الرد' : 'مغلق'}
-                        </Badge>
-                      </div>
-                      <p className="mt-1 text-xs text-[#718096]">
-                        {req.type === 'VIEWING' ? 'طلب معاينة' : req.type === 'INFO' ? 'طلب معلومات' : 'إبداء اهتمام'}
-                      </p>
-                      {req.message && (
-                        <p className="mt-1 text-sm text-[#718096]">{req.message}</p>
-                      )}
-                      {req.response && (
-                        <div className="mt-2 rounded border-s-2 border-[#C8A96E] bg-[#FAF5EB] p-2 text-sm text-[#2D3748]">
-                          {req.response}
-                        </div>
-                      )}
-                      <p className="mt-1 text-xs text-[#A0AEC0]">{new Date(req.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}</p>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+
+                {/* Requests */}
+                {visitorData!.requests.length > 0 && (
+                  <div>
+                    <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-[#718096]">
+                      <FileText className="h-3 w-3" />
+                      الطلبات ({visitorData!.requests.length})
+                    </p>
+                    <div className="space-y-2">
+                      {visitorData!.requests.map((req) => (
+                        <div key={req.id} className="rounded-lg bg-[#FAFAF7] p-3">
+                          <div className="flex items-center justify-between">
+                            <Link
+                              href={`/dashboard/properties/${req.property.id}`}
+                              className="text-sm font-medium text-[#2D3748] hover:text-[#C8A96E]"
+                            >
+                              {req.property.titleAr || req.property.title}
+                            </Link>
+                            <Badge variant={req.status === 'PENDING' ? 'warning' : req.status === 'RESPONDED' ? 'success' : 'secondary'}>
+                              {req.status === 'PENDING' ? 'معلق' : req.status === 'RESPONDED' ? 'تم الرد' : 'مغلق'}
+                            </Badge>
+                          </div>
+                          <p className="mt-1 text-xs text-[#718096]">
+                            {req.type === 'VIEWING' ? 'طلب معاينة' : req.type === 'INFO' ? 'طلب معلومات' : 'إبداء اهتمام'}
+                          </p>
+                          {req.message && (
+                            <p className="mt-1 text-sm text-[#718096]">{req.message}</p>
+                          )}
+                          {req.response && (
+                            <div className="mt-2 rounded border-s-2 border-[#C8A96E] bg-white p-2 text-sm text-[#2D3748]">
+                              {req.response}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
         </div>
 
-        {/* Sidebar */}
+        {/* Sidebar — merged status + agent into one card */}
         <div className="space-y-6">
-          {/* Visitor Summary */}
-          {visitorData && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Eye className="h-4 w-4 text-[#C8A96E]" />
-                  حساب الزائر
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-[#2D3748]">
-                  <User className="h-3.5 w-3.5 text-[#718096]" />
-                  {visitorData.visitor.name}
-                </div>
-                {visitorData.visitor.email && (
-                  <div className="flex items-center gap-2 text-[#718096]">
-                    <Mail className="h-3.5 w-3.5" />
-                    {visitorData.visitor.email}
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-xs text-[#718096]">
-                  <Clock className="h-3 w-3" />
-                  مسجّل منذ {new Date(visitorData.visitor.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}
-                </div>
-                <div className="flex gap-3 pt-1 text-xs">
-                  <span className="flex items-center gap-1 text-[#C8A96E]">
-                    <Heart className="h-3 w-3" /> {visitorData.favorites.length} مفضلة
-                  </span>
-                  <span className="flex items-center gap-1 text-[#1E3A5F]">
-                    <FileText className="h-3 w-3" /> {visitorData.requests.length} طلب
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Status Change */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">تغيير الحالة</CardTitle>
+              <CardTitle className="text-base">إدارة العميل</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-2">
-                {STATUSES.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => handleStatusChange(s)}
-                    className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
-                      lead.status === s
-                        ? 'border-[#C8A96E] bg-[#C8A96E]/10 text-[#C8A96E]'
-                        : 'border-[#E2E8F0] text-[#718096] hover:border-[#C8A96E]/30 hover:text-[#1E3A5F]'
-                    }`}
-                  >
-                    {statusLabel[s] || s}
-                  </button>
-                ))}
+            <CardContent className="space-y-5">
+              {/* Status */}
+              <div>
+                <p className="mb-2 text-xs font-medium text-[#718096]">الحالة</p>
+                <div className="flex flex-col gap-1.5">
+                  {STATUSES.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => handleStatusChange(s)}
+                      disabled={changingStatus}
+                      className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed ${
+                        lead.status === s
+                          ? 'border-[#C8A96E] bg-[#C8A96E]/10 text-[#C8A96E]'
+                          : 'border-[#E2E8F0] text-[#718096] hover:border-[#C8A96E]/30 hover:text-[#1E3A5F]'
+                      }`}
+                    >
+                      {statusLabel[s] || s}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Agent Assignment */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">تعيين وكيل</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <select
-                value={lead.agent?.id || ''}
-                onChange={(e) => handleAgentAssign(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748]"
-              >
-                <option value="">غير معين</option>
-                {agents.map((agent) => (
-                  <option key={agent.id} value={agent.id}>{agent.name}</option>
-                ))}
-              </select>
+              {/* Agent */}
+              <div>
+                <p className="mb-2 text-xs font-medium text-[#718096]">الوكيل</p>
+                <select
+                  value={lead.agent?.id || ''}
+                  onChange={(e) => handleAgentAssign(e.target.value)}
+                  aria-label="تعيين وكيل"
+                  className="flex h-10 w-full rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
+                >
+                  <option value="">غير معين</option>
+                  {agents.map((agent) => (
+                    <option key={agent.id} value={agent.id}>{agent.name}</option>
+                  ))}
+                </select>
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import {
   LayoutDashboard,
@@ -150,6 +150,7 @@ export function DashboardShell({
   children,
 }: DashboardShellProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [locale, setLocale] = useState<'ar' | 'en'>('ar')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -171,12 +172,18 @@ export function DashboardShell({
     }
   }, [pathname])
 
-  // Close user menu when clicking outside
+  // Close user menu when clicking outside or pressing Escape
   useEffect(() => {
+    if (!userMenuOpen) return
     const handleClick = () => setUserMenuOpen(false)
-    if (userMenuOpen) {
-      document.addEventListener('click', handleClick)
-      return () => document.removeEventListener('click', handleClick)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setUserMenuOpen(false)
+    }
+    document.addEventListener('click', handleClick)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('click', handleClick)
+      document.removeEventListener('keydown', handleKeyDown)
     }
   }, [userMenuOpen])
 
@@ -253,8 +260,9 @@ export function DashboardShell({
                   <>
                     <button
                       onClick={() => setExpandedNav(isExpanded ? null : item.href)}
+                      aria-expanded={isExpanded}
                       className={cn(
-                        'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                        'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1',
                         active
                           ? 'bg-[#FAF5EB] text-[#C8A96E] border-e-2 border-[#C8A96E]'
                           : 'text-[#718096] hover:bg-[#F7F7F2] hover:text-[#1E3A5F]'
@@ -279,8 +287,10 @@ export function DashboardShell({
                     {isExpanded && (
                       <ul className="mt-1 space-y-0.5 ps-8">
                         {item.subItems!.map((sub) => {
-                          const subActive = pathname + (typeof window !== 'undefined' ? window.location.search : '') === sub.href
-                            || (sub.href === item.href && pathname === item.href && (typeof window === 'undefined' || !window.location.search.includes('tab=')))
+                          const currentTab = searchParams.get('tab')
+                          const subUrl = new URL(sub.href, 'http://x')
+                          const subTab = subUrl.searchParams.get('tab')
+                          const subActive = pathname === subUrl.pathname && (currentTab || null) === (subTab || null)
                           return (
                             <li key={sub.href}>
                               <Link
@@ -355,7 +365,8 @@ export function DashboardShell({
       <div className="hidden border-t border-[#E2E8F0] px-3 py-3 lg:block">
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]"
+          aria-label={sidebarCollapsed ? (locale === 'ar' ? 'توسيع القائمة' : 'Expand sidebar') : (locale === 'ar' ? 'طي القائمة' : 'Collapse sidebar')}
+          className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
         >
           {sidebarCollapsed ? (
             <PanelLeftOpen className="h-4 w-4" />
@@ -417,7 +428,8 @@ export function DashboardShell({
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] lg:hidden"
+              aria-label={locale === 'ar' ? (mobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة') : (mobileMenuOpen ? 'Close menu' : 'Open menu')}
+              className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1 lg:hidden"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -432,6 +444,7 @@ export function DashboardShell({
               <input
                 type="text"
                 placeholder={locale === 'ar' ? 'بحث...' : 'Search...'}
+                aria-label={locale === 'ar' ? 'بحث' : 'Search'}
                 className="w-48 bg-transparent text-sm text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none lg:w-64"
               />
             </div>
@@ -451,7 +464,10 @@ export function DashboardShell({
             </button>
 
             {/* Notifications */}
-            <button className="relative rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]">
+            <button
+              aria-label={locale === 'ar' ? 'الإشعارات' : 'Notifications'}
+              className="relative rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
+            >
               <Bell className="h-5 w-5" />
               <span className="absolute end-1 top-1 h-2 w-2 rounded-full bg-[#C8A96E]" />
             </button>
@@ -463,7 +479,10 @@ export function DashboardShell({
                   e.stopPropagation()
                   setUserMenuOpen(!userMenuOpen)
                 }}
-                className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-[#F7F7F2]"
+                aria-expanded={userMenuOpen}
+                aria-haspopup="true"
+                aria-label={locale === 'ar' ? 'قائمة المستخدم' : 'User menu'}
+                className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-[#F7F7F2] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EBF0F7] text-[#1E3A5F]">
                   <User className="h-4 w-4" />
@@ -491,6 +510,7 @@ export function DashboardShell({
               {/* Dropdown */}
               {userMenuOpen && (
                 <div
+                  role="menu"
                   className={cn(
                     'absolute top-full mt-2 w-56 rounded-xl border border-[#E2E8F0] bg-white py-1 shadow-lg',
                     isRtl ? 'left-0' : 'right-0'
