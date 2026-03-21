@@ -53,9 +53,17 @@ export function SectionRenderer({
   stats,
   cities,
 }: SectionRendererProps) {
+  // Deduplicate by type and normalize legacy types
+  const seenTypes = new Set<string>()
   const enabledSections = sections
     .filter((s) => s.enabled && s.type !== 'footer')
     .sort((a, b) => a.order - b.order)
+    .filter((s) => {
+      const normalType = (s.type as string) === 'featured' ? 'featured_properties' : s.type
+      if (seenTypes.has(normalType)) return false
+      seenTypes.add(normalType)
+      return true
+    })
 
   // Track alternation index for sections without built-in backgrounds
   let altIndex = 0

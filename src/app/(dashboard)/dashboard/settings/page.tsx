@@ -322,16 +322,31 @@ export default function SettingsPage() {
         setLinkedin(social.linkedin || '')
         setTiktok(social.tiktok || '')
 
-        // Page Sections — merge with defaults to ensure new types appear
+        // Page Sections — merge with defaults, deduplicate by type
         const savedSections = data.pageSections && Array.isArray(data.pageSections) && (data.pageSections as any[]).length > 0
           ? data.pageSections as unknown as PageSectionConfig[]
           : []
         if (savedSections.length > 0) {
+          // Deduplicate saved sections by type (keep first of each type)
+          // and normalize IDs to match types for consistent toggling
+          const seenTypes = new Set<string>()
+          const deduped = savedSections
+            .map((s) => {
+              // Normalize legacy type names
+              const type = s.type === ('featured' as any) ? 'featured_properties' as const : s.type
+              return { ...s, type, id: type }
+            })
+            .filter((s) => {
+              if (seenTypes.has(s.type)) return false
+              seenTypes.add(s.type)
+              return true
+            })
+          // Add any default section types missing from saved data
           const defaults = getDefaultSections()
-          const savedIds = new Set(savedSections.map((s) => s.id))
+          const savedTypes = new Set(deduped.map((s) => s.type))
           const merged = [
-            ...savedSections,
-            ...defaults.filter((d) => !savedIds.has(d.id)),
+            ...deduped,
+            ...defaults.filter((d) => !savedTypes.has(d.type)),
           ]
           setPageSections(merged)
         }
