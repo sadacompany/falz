@@ -1,7 +1,12 @@
 import Link from 'next/link'
 import {
+  Building2,
   ArrowLeft,
+  ArrowRight,
   Globe,
+  BarChart3,
+  Palette,
+  Shield,
   UserPlus,
   Settings,
   Rocket,
@@ -9,8 +14,6 @@ import {
   ShieldCheck,
   Languages,
   Zap,
-  Check,
-  ChevronLeft,
   Mail,
   Phone,
 } from 'lucide-react'
@@ -19,298 +22,234 @@ import { FalzLogo } from '@/components/shared/FalzLogo'
 export default function LandingPage() {
   return (
     <div dir="rtl" className="min-h-screen bg-[#FFFDF5] text-[#2E2506]">
-      {/* ─── Header ─── */}
-      <header className="sticky top-0 z-50 bg-[#FFFDF5]/90 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between border-b border-[#E8DFC4]/60">
-            <div className="flex items-center gap-2.5">
-              <FalzLogo variant="dark" size="sm" />
-              <span className="text-lg font-bold tracking-tight text-[#44360E]">FALZ</span>
-            </div>
-            <nav className="hidden items-center gap-8 md:flex">
-              <a href="#features" className="text-sm text-[#6B5D3A] transition-colors hover:text-[#44360E]">
-                المميزات
-              </a>
-              <a href="#how-it-works" className="text-sm text-[#6B5D3A] transition-colors hover:text-[#44360E]">
-                كيف يعمل
-              </a>
-              <a href="#pricing" className="text-sm text-[#6B5D3A] transition-colors hover:text-[#44360E]">
-                الأسعار
-              </a>
-            </nav>
-            <div className="flex items-center gap-5">
-              <Link
-                href="/auth/signin"
-                className="text-sm font-medium text-[#44360E] transition-colors hover:text-[#B8860B]"
-              >
-                تسجيل الدخول
-              </Link>
-              <Link
-                href="/auth/signup"
-                className="rounded-[4px] bg-[#44360E] px-5 py-2 text-sm font-semibold text-[#FFFDF5] transition-colors hover:bg-[#2E2506]"
-              >
-                ابدأ الآن
-              </Link>
-            </div>
+      {/* ───── Header ───── */}
+      <header className="sticky top-0 z-50 border-b border-[#E8DFC4]/80 bg-[#FFFDF5]/80 backdrop-blur-lg">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <FalzLogo variant="dark" size="sm" />
+            <span className="text-xl font-bold tracking-tight text-[#44360E]">FALZ</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/auth/signin"
+              className="text-sm text-[#6B5D3A] transition-colors hover:text-[#44360E]"
+            >
+              تسجيل الدخول
+            </Link>
+            <Link
+              href="/auth/signup"
+              className="rounded-lg bg-[#B8860B] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#9A7209]"
+            >
+              ابدأ الآن
+            </Link>
           </div>
         </div>
       </header>
 
-      {/* ─── Hero ─── */}
-      <section className="relative overflow-hidden pb-28 pt-20 md:pb-36 md:pt-28 lg:pb-44 lg:pt-36">
-        {/* Subtle dot grid */}
+      {/* ───── Hero ───── */}
+      <section className="relative overflow-hidden py-24 md:py-32 lg:py-40">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#F9F3E3] via-transparent to-[#FBF6E1]/40" />
+        {/* Dot pattern */}
         <div
-          className="absolute inset-0 opacity-[0.025]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, #44360E 0.5px, transparent 0)',
-            backgroundSize: '32px 32px',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, #44360E 1px, transparent 0)',
+            backgroundSize: '40px 40px',
           }}
         />
-        {/* Geometric accents */}
-        <div className="absolute left-16 top-32 hidden h-32 w-32 rotate-45 border border-[#B8860B]/[0.08] lg:block" />
-        <div className="absolute bottom-24 left-32 hidden h-20 w-20 rotate-12 border border-[#B8860B]/[0.06] lg:block" />
-        <div className="absolute left-[55%] top-1/2 hidden h-[60%] w-px -translate-y-1/2 bg-gradient-to-b from-transparent via-[#B8860B]/15 to-transparent lg:block" />
+        {/* Floating orbs */}
+        <div className="animate-orb absolute -top-32 right-1/4 h-[420px] w-[420px] rounded-full bg-[#44360E]/[0.06] blur-3xl" />
+        <div className="animate-orb-reverse absolute -bottom-24 left-1/4 h-[340px] w-[340px] rounded-full bg-[#B8860B]/[0.08] blur-3xl" />
 
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="max-w-3xl">
-            {/* Label */}
-            <div className="animate-fade-in-up stagger-1 mb-10 flex items-center gap-3">
-              <span className="h-px w-10 bg-[#B8860B]" />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#B8860B]">
-                البنية الرقمية للمكاتب العقارية
-              </span>
-            </div>
+        <div className="relative mx-auto max-w-7xl px-6 text-center">
+          {/* Badge */}
+          <div className="animate-fade-in-up stagger-1 mb-6 inline-flex items-center gap-2 rounded-full border border-[#B8860B]/30 bg-[#FBF6E1] px-4 py-1.5 text-sm font-medium text-[#9A7209]">
+            <Building2 className="h-4 w-4" />
+            البنية الرقمية الاحترافية للمكاتب العقارية
+          </div>
 
-            {/* Headline */}
-            <h1 className="animate-fade-in-up stagger-2 text-[2.75rem] font-bold leading-[1.15] tracking-tight text-[#44360E] md:text-6xl md:leading-[1.1] lg:text-[4.75rem] lg:leading-[1.08]">
-              امنح مكتبك العقاري
-              <br />
-              حضوراً رقمياً
-              <br />
-              <span className="relative inline-block text-[#B8860B]">
-                استثنائياً
-                <span className="absolute -bottom-1.5 right-0 h-[3px] w-full rounded-full bg-[#B8860B]/25" />
-              </span>
-            </h1>
+          {/* Headline */}
+          <h1 className="animate-fade-in-up stagger-2 mx-auto max-w-4xl text-4xl font-bold leading-tight text-[#44360E] md:text-6xl md:leading-tight lg:text-7xl lg:leading-tight">
+            امنح مكتبك العقاري
+            <br />
+            <span className="bg-gradient-to-l from-[#B8860B] to-[#9A7209] bg-clip-text text-transparent">
+              حضوراً رقمياً استثنائياً
+            </span>
+          </h1>
 
-            {/* Subtitle */}
-            <p className="animate-fade-in-up stagger-3 mt-8 max-w-2xl text-lg leading-relaxed text-[#6B5D3A] md:text-xl">
-              موقعك الإلكتروني، إدارة عقاراتك، تتبع العملاء المحتملين، وتحليل أدائك —
-              كل ذلك تحت هويتك المستقلة
-            </p>
+          {/* Subtitle */}
+          <p className="animate-fade-in-up stagger-3 mx-auto mt-6 max-w-2xl text-lg text-[#6B5D3A] md:text-xl">
+            منصة فالز تمكّنك من بناء موقعك الإلكتروني الخاص، إدارة عقاراتك،
+            تتبع العملاء المحتملين، وتحليل أدائك — كل ذلك تحت هويتك المستقلة
+          </p>
 
-            {/* CTAs */}
-            <div className="animate-fade-in-up stagger-4 mt-10 flex flex-wrap items-center gap-6">
-              <Link
-                href="/auth/signup"
-                className="inline-flex items-center gap-2 rounded-[4px] bg-[#B8860B] px-7 py-3.5 font-semibold text-white shadow-sm transition-all hover:bg-[#9A7209] hover:shadow-md"
-              >
-                أنشئ موقعك الآن
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/dar-al-aseel"
-                className="group inline-flex items-center gap-1.5 text-sm font-medium text-[#44360E] transition-colors hover:text-[#B8860B]"
-              >
-                شاهد مثال حي
-                <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-              </Link>
-            </div>
+          {/* CTAs */}
+          <div className="animate-fade-in-up stagger-4 mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Link
+              href="/auth/signup"
+              className="flex items-center gap-2 rounded-lg bg-[#B8860B] px-8 py-3.5 text-base font-semibold text-white shadow-md transition-all hover:bg-[#9A7209] hover:shadow-lg"
+            >
+              أنشئ موقعك الآن
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <Link
+              href="/dar-al-aseel"
+              className="flex items-center gap-2 rounded-lg border border-[#E8DFC4] bg-white px-8 py-3.5 text-base font-semibold text-[#44360E] shadow-sm transition-all hover:border-[#B8860B]/40 hover:bg-[#F9F3E3]"
+            >
+              شاهد مثال حي
+              <ArrowRight className="h-5 w-5" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ─── Stats Strip ─── */}
-      <section className="border-t border-[#B8860B]/20 bg-[#2E2506] py-14 md:py-16">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="animate-on-scroll grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-4">
+      {/* ───── Social Proof Strip ───── */}
+      <section className="border-y border-[#E8DFC4] bg-white py-12">
+        <div className="mx-auto max-w-7xl px-6 text-center">
+          <p className="animate-on-scroll mb-8 text-sm font-medium uppercase tracking-wider text-[#6B5D3A]">
+            أكثر من 100 مكتب عقاري يثق بمنصة فالز
+          </p>
+          <div className="animate-on-scroll grid grid-cols-2 gap-8 md:grid-cols-4">
             {[
               { value: '+100', label: 'مكتب عقاري' },
               { value: '+2,500', label: 'عقار مُدرج' },
               { value: '+15,000', label: 'عميل محتمل' },
               { value: '99.9%', label: 'وقت التشغيل' },
             ].map((stat, i) => (
-              <div
-                key={i}
-                className={`text-center ${i > 0 ? 'md:border-r md:border-[#4A3D20]' : ''}`}
-              >
-                <p className="text-3xl font-bold tracking-tight text-[#C8A96E] md:text-5xl">
-                  {stat.value}
-                </p>
-                <p className="mt-2 text-sm text-[#A89870]">{stat.label}</p>
+              <div key={i}>
+                <p className="text-3xl font-bold text-[#44360E] md:text-4xl">{stat.value}</p>
+                <p className="mt-1 text-sm text-[#6B5D3A]">{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Features ─── */}
-      <section id="features" className="py-24 lg:py-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          {/* Section heading */}
-          <div className="animate-on-scroll mb-20 max-w-xl">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="h-px w-10 bg-[#B8860B]" />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#B8860B]">
-                المميزات
-              </span>
-            </div>
-            <h2 className="text-3xl font-bold leading-tight text-[#44360E] md:text-[2.5rem]">
-              كل ما يحتاجه مكتبك العقاري في منصة واحدة
+      {/* ───── Features Grid ───── */}
+      <section className="border-t border-[#E8DFC4] bg-white py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="animate-on-scroll mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-[#44360E] md:text-4xl">
+              كل ما يحتاجه مكتبك العقاري
             </h2>
+            <p className="mx-auto max-w-2xl text-[#6B5D3A]">
+              منصة متكاملة صُممت خصيصاً للسوق السعودي — من الموقع الإلكتروني إلى إدارة العملاء
+            </p>
           </div>
-
-          {/* Feature 1 — Hero feature */}
-          <div className="animate-on-scroll mb-16 grid items-center gap-10 border-b border-[#E8DFC4] pb-16 lg:grid-cols-5 lg:gap-16">
-            <div className="lg:col-span-3">
-              <span className="select-none text-[4rem] font-bold leading-none text-[#E8DFC4]">
-                01
-              </span>
-              <h3 className="-mt-2 text-2xl font-bold text-[#44360E] md:text-3xl">
-                موقع إلكتروني احترافي
-              </h3>
-              <p className="mt-4 max-w-xl text-lg leading-relaxed text-[#6B5D3A]">
-                موقع جاهز بهويتك الخاصة مع نطاق مخصص، تصاميم فاخرة، ودعم كامل للعربية والإنجليزية.
-                صُمم ليعكس احترافية مكتبك ويجذب العملاء من اليوم الأول.
-              </p>
-            </div>
-            <div className="hidden lg:col-span-2 lg:block">
-              <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-[#F5EDD5] to-[#EDE3C5]">
-                <Globe className="h-16 w-16 text-[#B8860B]/25" />
-              </div>
-            </div>
-          </div>
-
-          {/* Features 2–3 */}
-          <div className="mb-16 grid gap-12 border-b border-[#E8DFC4] pb-16 md:grid-cols-2 md:gap-16">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {[
               {
-                num: '02',
+                icon: Globe,
+                title: 'موقع إلكتروني احترافي',
+                desc: 'موقع جاهز بهويتك الخاصة مع نطاق مخصص، تصاميم فاخرة، ودعم كامل للعربية والإنجليزية',
+              },
+              {
+                icon: Building2,
                 title: 'إدارة العقارات',
                 desc: 'إضافة وإدارة العقارات بسهولة مع صور متعددة، فيديو، جولات 360°، وبيانات تفصيلية',
               },
               {
-                num: '03',
+                icon: BarChart3,
                 title: 'تحليلات متقدمة',
                 desc: 'تتبع الزيارات، العملاء المحتملين، مصادر الزيارات، وتقارير شهرية بصيغة PDF',
               },
-            ].map((f, i) => (
-              <div key={i} className={`animate-on-scroll stagger-${i + 1}`}>
-                <span className="select-none text-[3.5rem] font-bold leading-none text-[#E8DFC4]">
-                  {f.num}
-                </span>
-                <h3 className="-mt-1 text-xl font-bold text-[#44360E]">{f.title}</h3>
-                <p className="mt-3 leading-relaxed text-[#6B5D3A]">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Features 4–6 */}
-          <div className="grid gap-10 md:grid-cols-3 md:gap-12">
-            {[
               {
-                num: '04',
+                icon: Shield,
                 title: 'إدارة العملاء',
                 desc: 'نظام CRM متكامل لتتبع العملاء المحتملين من جميع المصادر مع تعيين تلقائي للوكلاء',
               },
               {
-                num: '05',
+                icon: Palette,
                 title: 'تخصيص كامل',
                 desc: 'اختر من بين قوالب جاهزة أو خصص الألوان والخطوط لتتناسب مع هوية مكتبك',
               },
               {
-                num: '06',
+                icon: Building2,
                 title: 'مدونة متكاملة',
-                desc: 'انشر مقالات ونصائح عقارية لتعزيز ظهورك في محركات البحث وبناء الثقة',
+                desc: 'انشر مقالات ونصائح عقارية لتعزيز ظهورك في محركات البحث وبناء الثقة مع العملاء',
               },
-            ].map((f, i) => (
-              <div key={i} className={`animate-on-scroll stagger-${i + 1}`}>
-                <span className="select-none text-[2.5rem] font-bold leading-none text-[#E8DFC4]">
-                  {f.num}
-                </span>
-                <h3 className="text-lg font-semibold text-[#44360E]">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#6B5D3A]">{f.desc}</p>
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className={`animate-on-scroll stagger-${i + 1} group rounded-xl border border-[#E8DFC4] bg-white p-6 transition-all hover:border-[#B8860B]/40 hover:shadow-lg`}
+              >
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#FBF6E1] transition-colors group-hover:bg-[#B8860B]/20">
+                  <feature.icon className="h-6 w-6 text-[#B8860B]" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-[#44360E]">{feature.title}</h3>
+                <p className="text-sm leading-relaxed text-[#6B5D3A]">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── How It Works ─── */}
-      <section id="how-it-works" className="bg-[#F5EDD5] py-24 lg:py-28">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="animate-on-scroll mb-16 max-w-xl">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="h-px w-10 bg-[#B8860B]" />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#B8860B]">
-                كيف يعمل
-              </span>
-            </div>
-            <h2 className="text-3xl font-bold leading-tight text-[#44360E] md:text-[2.5rem]">
-              ابدأ في ثلاث خطوات
+      {/* ───── How It Works ───── */}
+      <section className="border-t border-[#E8DFC4] bg-[#FFFDF5] py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="animate-on-scroll mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-[#44360E] md:text-4xl">
+              ابدأ في ثلاث خطوات بسيطة
             </h2>
-            <p className="mt-4 text-[#6B5D3A]">
+            <p className="mx-auto max-w-xl text-[#6B5D3A]">
               لا تحتاج خبرة تقنية — سجّل وانطلق في دقائق
             </p>
           </div>
-
           <div className="relative grid gap-12 md:grid-cols-3 md:gap-8">
-            {/* Connector line */}
-            <div className="absolute left-[16.67%] right-[16.67%] top-8 hidden h-px bg-[#B8860B]/20 md:block" />
+            {/* Connector line (desktop) */}
+            <div className="absolute top-12 right-[16.67%] left-[16.67%] hidden h-px border-t-2 border-dashed border-[#B8860B]/30 md:block" />
 
             {[
               {
-                step: '01',
+                step: '1',
                 icon: UserPlus,
                 title: 'سجّل مكتبك',
                 desc: 'أنشئ حسابك وأدخل بيانات مكتبك العقاري ورخصة فال',
               },
               {
-                step: '02',
+                step: '2',
                 icon: Settings,
                 title: 'خصّص موقعك',
                 desc: 'اختر القالب، ارفع الشعار، وعدّل الألوان لتتناسب مع هويتك',
               },
               {
-                step: '03',
+                step: '3',
                 icon: Rocket,
                 title: 'انطلق!',
                 desc: 'أضف عقاراتك وشارك موقعك مع عملائك — كل شيء جاهز',
               },
             ].map((item, i) => (
-              <div key={i} className={`animate-on-scroll stagger-${i + 1} relative`}>
-                <div className="relative z-10 mb-5 flex h-16 w-16 items-center justify-center border border-[#B8860B]/20 bg-[#FFFDF5]">
-                  <item.icon className="h-7 w-7 text-[#B8860B]" />
-                  <span className="absolute -right-2.5 -top-2.5 flex h-6 w-6 items-center justify-center bg-[#B8860B] text-[10px] font-bold text-white">
+              <div
+                key={i}
+                className={`animate-on-scroll stagger-${i + 1} relative text-center`}
+              >
+                <div className="relative z-10 mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#B8860B]/30 bg-[#FBF6E1]">
+                  <item.icon className="h-8 w-8 text-[#B8860B]" />
+                  <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#B8860B] text-xs font-bold text-white">
                     {item.step}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-[#44360E]">{item.title}</h3>
-                <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#6B5D3A]">
-                  {item.desc}
-                </p>
+                <h3 className="mb-2 text-lg font-semibold text-[#44360E]">{item.title}</h3>
+                <p className="mx-auto max-w-xs text-sm text-[#6B5D3A]">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Why Falz ─── */}
-      <section className="border-t border-[#E8DFC4] py-24 lg:py-28">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="animate-on-scroll mb-16 max-w-xl">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="h-px w-10 bg-[#B8860B]" />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#B8860B]">
-                لماذا فالز
-              </span>
-            </div>
-            <h2 className="text-3xl font-bold leading-tight text-[#44360E] md:text-[2.5rem]">
-              صُممت خصيصاً للسوق السعودي
+      {/* ───── Why Falz ───── */}
+      <section className="border-t border-[#E8DFC4] bg-white py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="animate-on-scroll mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-[#44360E] md:text-4xl">
+              لماذا فالز؟
             </h2>
+            <p className="mx-auto max-w-xl text-[#6B5D3A]">
+              صُممت خصيصاً لاحتياجات المكاتب العقارية في المملكة العربية السعودية
+            </p>
           </div>
-
-          <div className="grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
                 icon: Fingerprint,
@@ -333,9 +272,14 @@ export default function LandingPage() {
                 desc: 'واجهة سهلة الاستخدام — لا تحتاج مطوّر أو مصمّم',
               },
             ].map((item, i) => (
-              <div key={i} className={`animate-on-scroll stagger-${i + 1}`}>
-                <item.icon className="mb-4 h-6 w-6 text-[#B8860B]" />
-                <h3 className="mb-2 font-bold text-[#44360E]">{item.title}</h3>
+              <div
+                key={i}
+                className={`animate-on-scroll stagger-${i + 1} rounded-xl border border-[#E8DFC4] bg-[#FFFDF5] p-6 text-center transition-all hover:border-[#B8860B]/40 hover:shadow-md`}
+              >
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#FBF6E1]">
+                  <item.icon className="h-7 w-7 text-[#B8860B]" />
+                </div>
+                <h3 className="mb-2 font-semibold text-[#44360E]">{item.title}</h3>
                 <p className="text-sm leading-relaxed text-[#6B5D3A]">{item.desc}</p>
               </div>
             ))}
@@ -343,24 +287,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Pricing ─── */}
-      <section id="pricing" className="bg-[#F5EDD5] py-24 lg:py-28">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="animate-on-scroll mb-4 max-w-xl">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="h-px w-10 bg-[#B8860B]" />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#B8860B]">
-                الأسعار
-              </span>
-            </div>
-            <h2 className="text-3xl font-bold leading-tight text-[#44360E] md:text-[2.5rem]">
+      {/* ───── Pricing ───── */}
+      <section className="border-t border-[#E8DFC4] bg-[#FFFDF5] py-20">
+        <div className="mx-auto max-w-7xl px-6 text-center">
+          <div className="animate-on-scroll mb-4">
+            <h2 className="text-3xl font-bold text-[#44360E] md:text-4xl">
               خطط تناسب حجم مكتبك
             </h2>
           </div>
-          <p className="animate-on-scroll mb-3 max-w-xl text-[#6B5D3A]">
+          <p className="animate-on-scroll mx-auto mb-4 max-w-xl text-[#6B5D3A]">
             ابدأ مجاناً مع الخطة الأساسية وطوّر حسب نمو مكتبك
           </p>
-          <p className="animate-on-scroll mb-14 text-sm text-[#9A7209]">
+          <p className="animate-on-scroll mx-auto mb-12 text-sm text-[#9A7209]">
             وفّر مع الاشتراك السنوي — شهرين مجاناً
           </p>
 
@@ -402,41 +340,40 @@ export default function LandingPage() {
             ].map((plan, i) => (
               <div
                 key={i}
-                className={`animate-on-scroll stagger-${i + 1} relative bg-[#FFFDF5] p-8 transition-all ${
+                className={`animate-on-scroll stagger-${i + 1} relative rounded-xl border p-8 transition-all ${
                   plan.popular
-                    ? 'shadow-lg ring-2 ring-[#B8860B]'
-                    : 'border border-[#E8DFC4] hover:shadow-md'
+                    ? 'border-[#B8860B] bg-white shadow-lg ring-1 ring-[#B8860B]/20'
+                    : 'border-[#E8DFC4] bg-white shadow-sm hover:shadow-md'
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-px left-0 right-0 h-1 bg-[#B8860B]" />
-                )}
-                {plan.popular && (
-                  <span className="mb-4 inline-block bg-[#B8860B] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#B8860B] px-4 py-1 text-xs font-bold text-white shadow-sm">
                     الأكثر شيوعاً
-                  </span>
+                  </div>
                 )}
-                <h3 className="mb-1 text-xl font-bold text-[#44360E]">{plan.name}</h3>
-                <div className="mb-6 mt-4">
-                  <span className="text-4xl font-bold text-[#44360E]">{plan.price}</span>
+                <h3 className="mb-2 text-xl font-bold text-[#44360E]">{plan.name}</h3>
+                <div className="mb-6">
+                  <span className="text-3xl font-bold text-[#B8860B]">{plan.price}</span>
                   {plan.period && (
                     <span className="mr-1 text-sm text-[#6B5D3A]">{plan.period}</span>
                   )}
                 </div>
-                <ul className="mb-8 space-y-3">
+                <ul className="mb-8 space-y-3 text-sm text-[#6B5D3A]">
                   {plan.features.map((f, j) => (
-                    <li key={j} className="flex items-center gap-2.5 text-sm text-[#6B5D3A]">
-                      <Check className="h-4 w-4 flex-shrink-0 text-[#B8860B]" />
+                    <li key={j} className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#FBF6E1] text-xs text-[#B8860B]">
+                        &#10003;
+                      </span>
                       {f}
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/auth/signup"
-                  className={`block py-3 text-center text-sm font-semibold transition-all ${
+                  className={`block rounded-lg py-3 text-center text-sm font-semibold transition-all ${
                     plan.popular
-                      ? 'bg-[#B8860B] text-white hover:bg-[#9A7209]'
-                      : 'border border-[#E8DFC4] text-[#44360E] hover:border-[#B8860B]/40 hover:bg-[#F5EDD5]'
+                      ? 'bg-[#B8860B] text-white shadow-sm hover:bg-[#9A7209]'
+                      : 'border border-[#E8DFC4] text-[#44360E] hover:border-[#B8860B]/40 hover:bg-[#FBF6E1]'
                   }`}
                 >
                   ابدأ الآن
@@ -447,86 +384,85 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Final CTA ─── */}
-      <section className="relative overflow-hidden bg-[#2E2506] py-24 lg:py-28">
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, #C8A96E 0.5px, transparent 0)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-l from-transparent via-[#B8860B]/30 to-transparent" />
+      {/* ───── Final CTA ───── */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#44360E] to-[#2E2506] py-20">
+        {/* Gold accent line */}
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-l from-transparent via-[#B8860B] to-transparent" />
+        {/* Subtle orb */}
+        <div className="animate-orb absolute -bottom-20 right-1/3 h-[300px] w-[300px] rounded-full bg-[#B8860B]/[0.06] blur-3xl" />
 
-        <div className="relative mx-auto max-w-3xl px-6 text-center lg:px-8">
-          <h2 className="animate-on-scroll text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
+        <div className="relative mx-auto max-w-3xl px-6 text-center">
+          <h2 className="animate-on-scroll mb-6 text-3xl font-bold text-white md:text-4xl">
             جاهز لبناء حضورك الرقمي؟
           </h2>
-          <p className="animate-on-scroll mt-6 text-lg text-[#A89870]">
+          <p className="animate-on-scroll mb-10 text-lg text-white/70">
             انضم لأكثر من 100 مكتب عقاري يستخدم فالز لإدارة عقاراته وجذب العملاء
           </p>
-          <div className="animate-on-scroll mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="animate-on-scroll flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/auth/signup"
-              className="inline-flex items-center gap-2 bg-[#B8860B] px-8 py-3.5 font-semibold text-white shadow-sm transition-all hover:bg-[#9A7209]"
+              className="flex items-center gap-2 rounded-lg bg-[#B8860B] px-8 py-3.5 text-base font-semibold text-white shadow-md transition-all hover:bg-[#9A7209] hover:shadow-lg"
             >
               أنشئ موقعك الآن
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-5 w-5" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 border border-[#C8A96E]/20 px-8 py-3.5 font-semibold text-[#C8A96E] transition-all hover:bg-[#C8A96E]/10"
+              className="flex items-center gap-2 rounded-lg border border-white/20 px-8 py-3.5 text-base font-semibold text-white transition-all hover:border-white/40 hover:bg-white/10"
             >
-              <Mail className="h-4 w-4" />
+              <Mail className="h-5 w-5" />
               تواصل معنا
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ─── Footer ─── */}
-      <footer className="border-t border-[#3D3210] bg-[#231D08] py-12">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid gap-10 md:grid-cols-3">
+      {/* ───── Footer ───── */}
+      <footer className="border-t border-[#2A1F0E] bg-[#3D2E1A] py-12">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-8 md:grid-cols-3">
+            {/* Brand */}
             <div>
-              <div className="mb-4 flex items-center gap-2.5">
+              <div className="mb-4 flex items-center gap-3">
                 <FalzLogo variant="light" size="sm" showWordmark={false} />
                 <span className="font-bold text-[#C8A96E]">FALZ</span>
               </div>
-              <p className="max-w-xs text-sm leading-relaxed text-[#8A7E5E]">
+              <p className="text-sm leading-relaxed text-[#C4B89A]">
                 البنية الرقمية الاحترافية للمكاتب العقارية في المملكة العربية السعودية
               </p>
             </div>
 
+            {/* Quick links */}
             <div>
-              <h4 className="mb-4 text-sm font-semibold text-[#C4B89A]">روابط سريعة</h4>
-              <ul className="space-y-2.5 text-sm">
+              <h4 className="mb-4 text-sm font-semibold text-[#E8DFC4]">روابط سريعة</h4>
+              <ul className="space-y-2 text-sm text-[#C4B89A]">
                 <li>
-                  <Link href="/auth/signup" className="text-[#8A7E5E] transition-colors hover:text-[#C8A96E]">
+                  <Link href="/auth/signup" className="transition-colors hover:text-[#C8A96E]">
                     إنشاء حساب
                   </Link>
                 </li>
                 <li>
-                  <Link href="/auth/signin" className="text-[#8A7E5E] transition-colors hover:text-[#C8A96E]">
+                  <Link href="/auth/signin" className="transition-colors hover:text-[#C8A96E]">
                     تسجيل الدخول
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="text-[#8A7E5E] transition-colors hover:text-[#C8A96E]">
+                  <Link href="/contact" className="transition-colors hover:text-[#C8A96E]">
                     تواصل معنا
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dar-al-aseel" className="text-[#8A7E5E] transition-colors hover:text-[#C8A96E]">
+                  <Link href="/dar-al-aseel" className="transition-colors hover:text-[#C8A96E]">
                     مثال حي
                   </Link>
                 </li>
               </ul>
             </div>
 
+            {/* Contact */}
             <div>
-              <h4 className="mb-4 text-sm font-semibold text-[#C4B89A]">تواصل معنا</h4>
-              <ul className="space-y-2.5 text-sm text-[#8A7E5E]">
+              <h4 className="mb-4 text-sm font-semibold text-[#E8DFC4]">تواصل معنا</h4>
+              <ul className="space-y-2 text-sm text-[#C4B89A]">
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   info@falz.sa
@@ -539,13 +475,13 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-10 border-t border-[#3D3210] pt-6 text-center text-xs text-[#6B5D3A]">
+          <div className="mt-10 border-t border-[#5A4A30] pt-6 text-center text-xs text-[#9A8E6E]">
             © {new Date().getFullYear()} FALZ. جميع الحقوق محفوظة.
           </div>
         </div>
       </footer>
 
-      {/* ─── Scroll Animation Observer ─── */}
+      {/* ───── Scroll Animation Observer ───── */}
       <script
         dangerouslySetInnerHTML={{
           __html: `
