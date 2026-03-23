@@ -96,7 +96,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
       {/* Logo Section */}
-      <div className="flex items-center gap-3 border-b border-[#2D2822] px-4 py-5">
+      <div className="flex items-center gap-3 border-b border-white/10 px-4 py-5">
         <Logo size="sm" variant="light" />
         {!sidebarCollapsed && (
           <div className="flex items-center gap-2">
@@ -109,7 +109,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
       </div>
 
       {/* Admin Badge */}
-      <div className="border-b border-[#2D2822] px-4 py-4">
+      <div className="border-b border-white/10 px-4 py-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-red-400/30 bg-red-500/10 text-red-300">
             <Shield className="h-4 w-4" />
@@ -138,8 +138,8 @@ export function AdminShell({ user, children }: AdminShellProps) {
                   className={cn(
                     'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     active
-                      ? 'bg-[#1A1714]/15 text-[#C8A96E] shadow-sm'
-                      : 'text-white/60 hover:bg-[#1A1714]/10 hover:text-white',
+                      ? 'bg-white/15 text-[#C8A96E] shadow-sm'
+                      : 'text-white/60 hover:bg-white/10 hover:text-white',
                     sidebarCollapsed && 'justify-center px-2'
                   )}
                   title={sidebarCollapsed ? item.label : undefined}
@@ -166,11 +166,11 @@ export function AdminShell({ user, children }: AdminShellProps) {
       </nav>
 
       {/* Back to Dashboard */}
-      <div className="border-t border-[#2D2822] px-3 py-3">
+      <div className="border-t border-white/10 px-3 py-3">
         <Link
           href="/dashboard"
           className={cn(
-            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:bg-[#1A1714]/10 hover:text-white',
+            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/10 hover:text-white',
             sidebarCollapsed && 'justify-center px-2'
           )}
         >
@@ -180,10 +180,10 @@ export function AdminShell({ user, children }: AdminShellProps) {
       </div>
 
       {/* Collapse Toggle (Desktop) */}
-      <div className="hidden border-t border-[#2D2822] px-3 py-3 lg:block">
+      <div className="hidden border-t border-white/10 px-3 py-3 lg:block">
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:bg-[#1A1714]/10 hover:text-white"
+          className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/10 hover:text-white"
         >
           {sidebarCollapsed ? (
             <PanelLeftOpen className="h-4 w-4" />
@@ -199,11 +199,11 @@ export function AdminShell({ user, children }: AdminShellProps) {
   )
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#110F0D]">
+    <div className="flex h-screen overflow-hidden bg-[#FAFAF7]">
       {/* Desktop Sidebar - Navy for admin distinction */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col border-e border-[#1E3A5F]/20 bg-[#1A1714] transition-all duration-300',
+          'hidden lg:flex flex-col border-e border-[#1E3A5F]/20 bg-[#1E3A5F] transition-all duration-300',
           sidebarCollapsed ? 'w-[72px]' : 'w-64'
         )}
       >
@@ -221,7 +221,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
       {/* Mobile Sidebar Drawer */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 h-full w-64 border-e border-[#1E3A5F]/20 bg-[#1A1714] transition-transform duration-300 lg:hidden',
+          'fixed left-0 top-0 z-50 h-full w-64 border-e border-[#1E3A5F]/20 bg-[#1E3A5F] transition-transform duration-300 lg:hidden',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -231,12 +231,12 @@ export function AdminShell({ user, children }: AdminShellProps) {
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="flex h-16 items-center justify-between border-b border-[#2D2822] bg-[#1A1714] px-4 lg:px-6">
+        <header className="flex h-16 items-center justify-between border-b border-[#E2E8F0] bg-white px-4 lg:px-6">
           {/* Left side */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-lg p-2 text-[#8A7E5E] transition-colors hover:bg-[#252119] hover:text-[#1E3A5F] lg:hidden"
+              className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] lg:hidden"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -244,7 +244,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                 <Menu className="h-5 w-5" />
               )}
             </button>
-            <h2 className="text-sm font-medium text-[#8A7E5E]">
+            <h2 className="text-sm font-medium text-[#718096]">
               إدارة المنصة
             </h2>
           </div>
@@ -252,12 +252,12 @@ export function AdminShell({ user, children }: AdminShellProps) {
           {/* Right side */}
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-sm font-medium text-[#E8E0D0]">{user.name}</p>
-              <p className="text-xs text-[#5A5040]">{user.email}</p>
+              <p className="text-sm font-medium text-[#2D3748]">{user.name}</p>
+              <p className="text-xs text-[#A0AEC0]">{user.email}</p>
             </div>
             <button
               onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-              className="rounded-lg p-2 text-[#8A7E5E] transition-colors hover:bg-red-500/10 hover:text-red-500"
+              className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-red-50 hover:text-red-500"
               title="تسجيل الخروج"
             >
               <LogOut className="h-5 w-5" />

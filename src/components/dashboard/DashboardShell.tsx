@@ -206,20 +206,20 @@ export function DashboardShell({
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
       {/* Logo Section */}
-      <div className="flex items-center gap-3 border-b border-[#2D2822] px-4 py-5">
+      <div className="flex items-center gap-3 border-b border-[#E2E8F0] px-4 py-5">
         <Logo size="sm" variant="dark" />
         {!sidebarCollapsed && (
-          <span className="text-lg font-bold text-[#C8A96E] tracking-wide">
+          <span className="text-lg font-bold text-[#1E3A5F] tracking-wide">
             FALZ
           </span>
         )}
       </div>
 
       {/* Office Info */}
-      <div className="border-b border-[#2D2822] px-4 py-4">
+      <div className="border-b border-[#E2E8F0] px-4 py-4">
         <div className="flex items-center gap-3">
           {office.logo ? (
-            <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-lg border border-[#2D2822]">
+            <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-lg border border-[#E2E8F0]">
               <Image
                 src={office.logo}
                 alt={office.nameAr || office.name}
@@ -228,16 +228,16 @@ export function DashboardShell({
               />
             </div>
           ) : (
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-[#2D2822] bg-[#C8A96E]/10 text-[#C8A96E]">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-[#E2E8F0] bg-[#FAF5EB] text-[#C8A96E]">
               <Building2 className="h-4 w-4" />
             </div>
           )}
           {!sidebarCollapsed && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-[#E8E0D0]">
+              <p className="truncate text-sm font-semibold text-[#2D3748]">
                 {locale === 'ar' ? (office.nameAr || office.name) : office.name}
               </p>
-              <p className="truncate text-xs text-[#5A5040]">
+              <p className="truncate text-xs text-[#A0AEC0]">
                 {office.slug}.falz.sa
               </p>
             </div>
@@ -264,8 +264,8 @@ export function DashboardShell({
                       className={cn(
                         'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1',
                         active
-                          ? 'bg-[#C8A96E]/10 text-[#C8A96E] border-e-2 border-[#C8A96E]'
-                          : 'text-[#8A7E5E] hover:bg-[#252119] hover:text-[#E8E0D0]'
+                          ? 'bg-[#FAF5EB] text-[#C8A96E] border-e-2 border-[#C8A96E]'
+                          : 'text-[#718096] hover:bg-[#F7F7F2] hover:text-[#1E3A5F]'
                       )}
                     >
                       <Icon
@@ -273,7 +273,7 @@ export function DashboardShell({
                           'h-5 w-5 flex-shrink-0 transition-colors',
                           active
                             ? 'text-[#C8A96E]'
-                            : 'text-[#5A5040] group-hover:text-[#E8E0D0]'
+                            : 'text-[#A0AEC0] group-hover:text-[#1E3A5F]'
                         )}
                       />
                       <span>{locale === 'ar' ? item.labelAr : item.label}</span>
@@ -299,7 +299,7 @@ export function DashboardShell({
                                   'block rounded-lg px-3 py-2 text-sm transition-all duration-200',
                                   subActive
                                     ? 'text-[#C8A96E] font-medium'
-                                    : 'text-[#8A7E5E] hover:bg-[#252119] hover:text-[#E8E0D0]'
+                                    : 'text-[#718096] hover:bg-[#F7F7F2] hover:text-[#1E3A5F]'
                                 )}
                               >
                                 {locale === 'ar' ? sub.labelAr : sub.label}
@@ -316,8 +316,8 @@ export function DashboardShell({
                     className={cn(
                       'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                       active
-                        ? 'bg-[#C8A96E]/10 text-[#C8A96E] border-e-2 border-[#C8A96E]'
-                        : 'text-[#8A7E5E] hover:bg-[#252119] hover:text-[#E8E0D0]',
+                        ? 'bg-[#FAF5EB] text-[#C8A96E] border-e-2 border-[#C8A96E]'
+                        : 'text-[#718096] hover:bg-[#F7F7F2] hover:text-[#1E3A5F]',
                       sidebarCollapsed && 'justify-center px-2'
                     )}
                     title={sidebarCollapsed ? (locale === 'ar' ? item.labelAr : item.label) : undefined}
@@ -327,7 +327,7 @@ export function DashboardShell({
                         'h-5 w-5 flex-shrink-0 transition-colors',
                         active
                           ? 'text-[#C8A96E]'
-                          : 'text-[#5A5040] group-hover:text-[#E8E0D0]'
+                          : 'text-[#A0AEC0] group-hover:text-[#1E3A5F]'
                       )}
                     />
                     {!sidebarCollapsed && (
@@ -345,12 +345,12 @@ export function DashboardShell({
       </nav>
 
       {/* View Public Site */}
-      <div className="border-t border-[#2D2822] px-3 py-3">
+      <div className="border-t border-[#E2E8F0] px-3 py-3">
         <Link
           href={`/${office.slug}`}
           target="_blank"
           className={cn(
-            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#8A7E5E] transition-colors hover:bg-[#252119] hover:text-[#E8E0D0]',
+            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]',
             sidebarCollapsed && 'justify-center px-2'
           )}
         >
@@ -362,11 +362,11 @@ export function DashboardShell({
       </div>
 
       {/* Collapse Toggle (Desktop) */}
-      <div className="hidden border-t border-[#2D2822] px-3 py-3 lg:block">
+      <div className="hidden border-t border-[#E2E8F0] px-3 py-3 lg:block">
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           aria-label={sidebarCollapsed ? (locale === 'ar' ? 'توسيع القائمة' : 'Expand sidebar') : (locale === 'ar' ? 'طي القائمة' : 'Collapse sidebar')}
-          className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[#8A7E5E] transition-colors hover:bg-[#252119] hover:text-[#E8E0D0] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
+          className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
         >
           {sidebarCollapsed ? (
             <PanelLeftOpen className="h-4 w-4" />
@@ -384,12 +384,12 @@ export function DashboardShell({
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="flex h-screen overflow-hidden bg-[#110F0D]"
+      className="flex h-screen overflow-hidden bg-[#FAFAF7]"
     >
       {/* ── Desktop Sidebar ──────────────────────────── */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col border-e border-[#2D2822] bg-[#1A1714] transition-all duration-300',
+          'hidden lg:flex flex-col border-e border-[#E2E8F0] bg-white transition-all duration-300',
           sidebarCollapsed ? 'w-[72px]' : 'w-64'
         )}
       >
@@ -407,7 +407,7 @@ export function DashboardShell({
       {/* ── Mobile Sidebar Drawer ─────────────────────── */}
       <aside
         className={cn(
-          'fixed top-0 z-50 h-full w-64 border-e border-[#2D2822] bg-[#1A1714] transition-transform duration-300 lg:hidden',
+          'fixed top-0 z-50 h-full w-64 border-e border-[#E2E8F0] bg-white transition-transform duration-300 lg:hidden',
           isRtl ? 'right-0' : 'left-0',
           mobileMenuOpen
             ? 'translate-x-0'
@@ -422,14 +422,14 @@ export function DashboardShell({
       {/* ── Main Content ─────────────────────────────── */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="flex h-16 items-center justify-between border-b border-[#2D2822] bg-[#1A1714] px-4 lg:px-6">
+        <header className="flex h-16 items-center justify-between border-b border-[#E2E8F0] bg-white px-4 lg:px-6">
           {/* Left side */}
           <div className="flex items-center gap-3">
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={locale === 'ar' ? (mobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة') : (mobileMenuOpen ? 'Close menu' : 'Open menu')}
-              className="rounded-lg p-2 text-[#8A7E5E] transition-colors hover:bg-[#252119] hover:text-[#E8E0D0] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1 lg:hidden"
+              className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1 lg:hidden"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -439,13 +439,13 @@ export function DashboardShell({
             </button>
 
             {/* Search */}
-            <div className="hidden items-center gap-2 rounded-lg border border-[#2D2822] bg-[#110F0D] px-3 py-2 sm:flex">
-              <Search className="h-4 w-4 text-[#5A5040]" />
+            <div className="hidden items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 sm:flex">
+              <Search className="h-4 w-4 text-[#A0AEC0]" />
               <input
                 type="text"
                 placeholder={locale === 'ar' ? 'بحث...' : 'Search...'}
                 aria-label={locale === 'ar' ? 'بحث' : 'Search'}
-                className="w-48 bg-transparent text-sm text-[#E8E0D0] placeholder:text-[#5A5040] focus:outline-none lg:w-64"
+                className="w-48 bg-transparent text-sm text-[#2D3748] placeholder:text-[#A0AEC0] focus:outline-none lg:w-64"
               />
             </div>
           </div>
@@ -455,7 +455,7 @@ export function DashboardShell({
             {/* Language Toggle */}
             <button
               onClick={toggleLocale}
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs text-[#8A7E5E] transition-colors hover:bg-[#252119] hover:text-[#E8E0D0]"
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]"
             >
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">
@@ -466,7 +466,7 @@ export function DashboardShell({
             {/* Notifications */}
             <button
               aria-label={locale === 'ar' ? 'الإشعارات' : 'Notifications'}
-              className="relative rounded-lg p-2 text-[#8A7E5E] transition-colors hover:bg-[#252119] hover:text-[#E8E0D0] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
+              className="relative rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
             >
               <Bell className="h-5 w-5" />
               <span className="absolute end-1 top-1 h-2 w-2 rounded-full bg-[#C8A96E]" />
@@ -482,16 +482,16 @@ export function DashboardShell({
                 aria-expanded={userMenuOpen}
                 aria-haspopup="true"
                 aria-label={locale === 'ar' ? 'قائمة المستخدم' : 'User menu'}
-                className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-[#252119] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
+                className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-[#F7F7F2] focus-visible:ring-2 focus-visible:ring-[#C8A96E] focus-visible:ring-offset-1"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#C8A96E]/10 text-[#C8A96E]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EBF0F7] text-[#1E3A5F]">
                   <User className="h-4 w-4" />
                 </div>
                 <div className="hidden text-start sm:block">
-                  <p className="text-sm font-medium text-[#E8E0D0]">
+                  <p className="text-sm font-medium text-[#2D3748]">
                     {user.name}
                   </p>
-                  <p className="text-xs text-[#5A5040]">
+                  <p className="text-xs text-[#A0AEC0]">
                     {role === 'OWNER'
                       ? locale === 'ar'
                         ? 'مالك'
@@ -512,29 +512,29 @@ export function DashboardShell({
                 <div
                   role="menu"
                   className={cn(
-                    'absolute top-full mt-2 w-56 rounded-xl border border-[#2D2822] bg-[#1A1714] py-1 shadow-lg',
+                    'absolute top-full mt-2 w-56 rounded-xl border border-[#E2E8F0] bg-white py-1 shadow-lg',
                     isRtl ? 'left-0' : 'right-0'
                   )}
                 >
-                  <div className="border-b border-[#2D2822] px-4 py-3">
-                    <p className="text-sm font-medium text-[#E8E0D0]">
+                  <div className="border-b border-[#E2E8F0] px-4 py-3">
+                    <p className="text-sm font-medium text-[#2D3748]">
                       {user.name}
                     </p>
-                    <p className="text-xs text-[#5A5040]">{user.email}</p>
+                    <p className="text-xs text-[#A0AEC0]">{user.email}</p>
                   </div>
 
                   <Link
                     href="/dashboard/settings"
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#8A7E5E] transition-colors hover:bg-[#252119] hover:text-[#E8E0D0]"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]"
                   >
                     <Settings className="h-4 w-4" />
                     {locale === 'ar' ? 'الإعدادات' : 'Settings'}
                   </Link>
 
-                  <div className="border-t border-[#2D2822]">
+                  <div className="border-t border-[#E2E8F0]">
                     <button
                       onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-500 transition-colors hover:bg-red-500/10"
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-500 transition-colors hover:bg-red-50"
                     >
                       <LogOut className="h-4 w-4" />
                       {locale === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
