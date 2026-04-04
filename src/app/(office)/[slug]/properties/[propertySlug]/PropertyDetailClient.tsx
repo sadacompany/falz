@@ -499,7 +499,7 @@ function getVisitorId(): string {
   if (typeof window === 'undefined') return ''
   let id = localStorage.getItem('falz_visitor_id')
   if (!id) {
-    id = crypto.randomUUID()
+    id = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`
     localStorage.setItem('falz_visitor_id', id)
   }
   return id
