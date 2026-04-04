@@ -716,13 +716,13 @@ export default function SignUpPage() {
               {/* Email (optional) */}
               <div className="space-y-2">
                 <Label htmlFor="email">{strings.email}</Label>
-                <div className="relative">
-                  <Mail className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60]" />
+                <div className="relative" dir="ltr">
+                  <Mail className="absolute top-1/2 -translate-y-1/2 left-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                   <Input
                     id="email"
                     type="email"
                     placeholder={strings.emailPlaceholder}
-                    className="ps-10"
+                    className="pl-10"
                     autoComplete="email"
                     dir="ltr"
                     {...step1Form.register('email')}
@@ -840,12 +840,12 @@ export default function SignUpPage() {
               <div className="space-y-2">
                 <Label htmlFor="officeEmail">{strings.officeEmail}</Label>
                 <div className="relative" dir="ltr">
-                  <Mail className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60] pointer-events-none" />
+                  <Mail className="absolute top-1/2 -translate-y-1/2 left-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                   <Input
                     id="officeEmail"
                     type="email"
                     placeholder={strings.officeEmailPlaceholder}
-                    className="ps-10"
+                    className="pl-10"
                     dir="ltr"
                     {...step2Form.register('officeEmail')}
                   />
@@ -978,18 +978,15 @@ export default function SignUpPage() {
           </div>
 
           {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#E5DCC6]" />
-            </div>
-          </div>
+          <div className="my-8 border-t border-[#E5DCC6]" />
 
           {/* Sign In Link */}
           <p className="text-center text-sm text-[#7A6C4F]">
-            {strings.haveAccount}{' '}
+            {strings.haveAccount}
+            {' '}
             <Link
               href="/auth/signin"
-              className="font-semibold text-[#956D00] hover:text-[#7A5A00] hover:underline"
+              className="font-semibold text-[#956D00] hover:text-[#7A5A00] hover:underline me-1"
             >
               {strings.signIn}
             </Link>
