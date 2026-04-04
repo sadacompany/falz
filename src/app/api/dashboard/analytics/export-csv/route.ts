@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-utils'
 import { checkFeatureAccess } from '@/lib/billing'
 import prisma from '@/lib/db'
-import { stringify } from 'csv-stringify/sync'
 
 /**
  * GET /api/dashboard/analytics/export-csv
@@ -181,6 +180,7 @@ export async function GET(request: NextRequest) {
       ...topPropertyRows,
     ]
 
+    const { stringify } = await import('csv-stringify/sync')
     const csv = stringify(allRows)
 
     const filename = `falz-analytics-${from.toISOString().split('T')[0]}-to-${to.toISOString().split('T')[0]}.csv`

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePublicOffice } from '@/components/public/PublicOfficeContext'
 import { useDirection } from '@/components/shared/DirectionProvider'
 import { formatDate } from '@/lib/utils'
@@ -53,11 +54,13 @@ export function BlogPostClient({ officeSlug, post, relatedPosts }: BlogPostClien
 
       {/* Featured Image */}
       {post.featuredImage && (
-        <div className="aspect-[2/1] rounded-2xl overflow-hidden mb-8 border border-[#E2E8F0]">
-          <img
+        <div className="relative aspect-[2/1] rounded-2xl overflow-hidden mb-8 border border-[#E2E8F0]">
+          <Image
             src={post.featuredImage}
             alt={post.title}
-            className="h-full w-full object-cover"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-cover"
           />
         </div>
       )}
@@ -137,13 +140,14 @@ export function BlogPostClient({ officeSlug, post, relatedPosts }: BlogPostClien
                 href={`/${officeSlug}/blog/${rp.slug}`}
                 className="group rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-white border border-[#E2E8F0]"
               >
-                <div className="aspect-[16/10] overflow-hidden">
+                <div className="relative aspect-[16/10] overflow-hidden">
                   {rp.featuredImage ? (
-                    <img
+                    <Image
                       src={rp.featuredImage}
                       alt={rp.title}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center bg-[#EBF0F7]">

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePublicOffice } from './PublicOfficeContext'
 import { useDirection } from '@/components/shared/DirectionProvider'
 import { formatPrice } from '@/lib/utils'
@@ -70,11 +71,12 @@ export function PropertyCard({ property, officeSlug, showFavorite = true }: Prop
     >
       {/* Image Container */}
       <div className="relative aspect-[16/10] overflow-hidden">
-        <img
+        <Image
           src={imageUrl}
           alt={imageAlt}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
         />
 
         {/* Gradient overlay */}

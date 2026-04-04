@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-utils'
 import { checkFeatureAccess } from '@/lib/billing'
 import prisma from '@/lib/db'
-import { jsPDF } from 'jspdf'
-import autoTable from 'jspdf-autotable'
 
 // Theme colors
 const COLORS = {
@@ -186,6 +184,9 @@ export async function GET(request: NextRequest) {
     const propertyMap = new Map(propertyDetails.map((p) => [p.id, p]))
 
     // ─── Generate PDF ────────────────────────────────────────
+
+    const { jsPDF } = await import('jspdf')
+    const { default: autoTable } = await import('jspdf-autotable')
 
     const doc = new jsPDF({
       orientation: 'portrait',
