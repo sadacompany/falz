@@ -1,11 +1,7 @@
 import { getCurrentUser } from '@/lib/auth-utils'
 import { redirect } from 'next/navigation'
-import dynamic from 'next/dynamic'
 import { getDashboardStats, getLeadsOverTime, getViewsByPropertyType } from '@/lib/actions/analytics'
-
-const DashboardOverview = dynamic(
-  () => import('@/components/dashboard/DashboardOverview').then((mod) => mod.DashboardOverview)
-)
+import { DashboardOverview } from '@/components/dashboard/DashboardOverview'
 
 export default async function DashboardPage() {
   const user = await getCurrentUser()

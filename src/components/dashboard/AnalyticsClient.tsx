@@ -28,7 +28,7 @@ import {
 import { getAnalyticsData, getVisitorMetrics } from '@/lib/actions/analytics'
 import { cn } from '@/lib/utils'
 
-const COLORS = ['#C8A96E', '#3B82F6', '#10B981', '#F59E0B', '#EF4444']
+const COLORS = ['#956D00', '#3B82F6', '#10B981', '#F59E0B', '#EF4444']
 
 const RANGE_OPTIONS = [
   { label: 'آخر 7 أيام', value: 7 },
@@ -56,9 +56,9 @@ const SOURCE_LABELS: Record<string, string> = {
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm shadow-xl">
-      <p className="text-[#718096]">{label}</p>
-      <p className="font-semibold text-[#C8A96E]">{payload[0].value}</p>
+    <div className="rounded-lg border border-[#E5DCC6] bg-white px-3 py-2 text-sm shadow-xl">
+      <p className="text-[#7A6C4F]">{label}</p>
+      <p className="font-semibold text-[#956D00]">{payload[0].value}</p>
     </div>
   )
 }
@@ -86,7 +86,7 @@ export default function AnalyticsClient() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#C8A96E] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#956D00] border-t-transparent" />
       </div>
     )
   }
@@ -109,12 +109,12 @@ export default function AnalyticsClient() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#2D3748]">التحليلات</h1>
-          <p className="mt-1 text-sm text-[#718096]">تتبع أداء موقعك ومعلومات الزوار</p>
+          <h1 className="text-2xl font-bold text-[#2E2506]">التحليلات</h1>
+          <p className="mt-1 text-sm text-[#7A6C4F]">تتبع أداء موقعك ومعلومات الزوار</p>
         </div>
         <div className="flex gap-2">
           {/* Date Range Picker */}
-          <div className="flex rounded-lg border border-[#E2E8F0] bg-white p-1">
+          <div className="flex rounded-lg border border-[#E5DCC6] bg-white p-1">
             {RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
@@ -122,8 +122,8 @@ export default function AnalyticsClient() {
                 className={cn(
                   'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
                   days === opt.value
-                    ? 'bg-[#C8A96E] text-[#1E3A5F]'
-                    : 'text-[#718096] hover:text-[#1E3A5F]'
+                    ? 'bg-[#956D00] text-[#3B2F08]'
+                    : 'text-[#7A6C4F] hover:text-[#3B2F08]'
                 )}
               >
                 {opt.label}
@@ -148,11 +148,11 @@ export default function AnalyticsClient() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-[#718096]">{metric.label}</p>
-                    <p className="mt-1 text-2xl font-bold text-[#2D3748]">{metric.value}</p>
+                    <p className="text-xs text-[#7A6C4F]">{metric.label}</p>
+                    <p className="mt-1 text-2xl font-bold text-[#2E2506]">{metric.value}</p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#C8A96E]/10">
-                    <Icon className="h-5 w-5 text-[#C8A96E]" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#956D00]/10">
+                    <Icon className="h-5 w-5 text-[#956D00]" />
                   </div>
                 </div>
               </CardContent>
@@ -175,19 +175,19 @@ export default function AnalyticsClient() {
                   <AreaChart data={safeData.visitsByDate}>
                     <defs>
                       <linearGradient id="visitGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#C8A96E" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#C8A96E" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#956D00" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#956D00" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-                    <XAxis dataKey="date" stroke="#718096" fontSize={11} tickFormatter={(v) => { const d = new Date(v); return d.toLocaleDateString('ar-SA-u-nu-latn', { month: 'numeric', day: 'numeric' }) }} interval="preserveStartEnd" />
-                    <YAxis stroke="#718096" fontSize={11} allowDecimals={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5DCC6" vertical={false} />
+                    <XAxis dataKey="date" stroke="#7A6C4F" fontSize={11} tickFormatter={(v) => { const d = new Date(v); return d.toLocaleDateString('ar-SA-u-nu-latn', { month: 'numeric', day: 'numeric' }) }} interval="preserveStartEnd" />
+                    <YAxis stroke="#7A6C4F" fontSize={11} allowDecimals={false} />
                     <Tooltip content={<ChartTooltip />} />
-                    <Area type="monotone" dataKey="count" stroke="#C8A96E" fill="url(#visitGrad)" strokeWidth={2} />
+                    <Area type="monotone" dataKey="count" stroke="#956D00" fill="url(#visitGrad)" strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-[#718096]">لا توجد بيانات</div>
+                <div className="flex h-full items-center justify-center text-sm text-[#7A6C4F]">لا توجد بيانات</div>
               )}
             </div>
           </CardContent>
@@ -203,15 +203,15 @@ export default function AnalyticsClient() {
               {safeData.leadsByDate.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={safeData.leadsByDate}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-                    <XAxis dataKey="date" stroke="#718096" fontSize={11} tickFormatter={(v) => { const d = new Date(v); return d.toLocaleDateString('ar-SA-u-nu-latn', { month: 'numeric', day: 'numeric' }) }} interval="preserveStartEnd" />
-                    <YAxis stroke="#718096" fontSize={11} allowDecimals={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5DCC6" vertical={false} />
+                    <XAxis dataKey="date" stroke="#7A6C4F" fontSize={11} tickFormatter={(v) => { const d = new Date(v); return d.toLocaleDateString('ar-SA-u-nu-latn', { month: 'numeric', day: 'numeric' }) }} interval="preserveStartEnd" />
+                    <YAxis stroke="#7A6C4F" fontSize={11} allowDecimals={false} />
                     <Tooltip content={<ChartTooltip />} />
-                    <Bar dataKey="count" fill="#C8A96E" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                    <Bar dataKey="count" fill="#956D00" radius={[4, 4, 0, 0]} maxBarSize={32} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-[#718096]">لا توجد بيانات</div>
+                <div className="flex h-full items-center justify-center text-sm text-[#7A6C4F]">لا توجد بيانات</div>
               )}
             </div>
           </CardContent>
@@ -250,7 +250,7 @@ export default function AnalyticsClient() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-[#718096]">لا توجد بيانات</div>
+                <div className="flex h-full items-center justify-center text-sm text-[#7A6C4F]">لا توجد بيانات</div>
               )}
             </div>
           </CardContent>
@@ -267,11 +267,11 @@ export default function AnalyticsClient() {
                 {safeData.topProperties.map((prop, idx) => (
                   <div key={prop.propertyId || idx} className="flex items-center justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-[#2D3748]">
+                      <p className="truncate text-sm font-medium text-[#2E2506]">
                         {prop.titleAr || prop.title || 'بدون عنوان'}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-[#C8A96E]">
+                    <div className="flex items-center gap-1 text-sm text-[#956D00]">
                       <Eye className="h-3.5 w-3.5" />
                       {prop.views} مشاهدات
                     </div>
@@ -279,7 +279,7 @@ export default function AnalyticsClient() {
                 ))}
               </div>
             ) : (
-              <div className="flex h-48 items-center justify-center text-sm text-[#718096]">لا توجد بيانات</div>
+              <div className="flex h-48 items-center justify-center text-sm text-[#7A6C4F]">لا توجد بيانات</div>
             )}
           </CardContent>
         </Card>
@@ -294,13 +294,13 @@ export default function AnalyticsClient() {
               <div className="space-y-3">
                 {safeData.cityDistribution.map((city, idx) => (
                   <div key={idx} className="flex items-center justify-between gap-2">
-                    <span className="text-sm text-[#2D3748]">{city.city}</span>
-                    <span className="text-sm text-[#718096]">{city.count}</span>
+                    <span className="text-sm text-[#2E2506]">{city.city}</span>
+                    <span className="text-sm text-[#7A6C4F]">{city.count}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex h-48 items-center justify-center text-sm text-[#718096]">لا توجد بيانات</div>
+              <div className="flex h-48 items-center justify-center text-sm text-[#7A6C4F]">لا توجد بيانات</div>
             )}
           </CardContent>
         </Card>
@@ -310,14 +310,14 @@ export default function AnalyticsClient() {
       {visitorData && (
         <>
           <div>
-            <h2 className="text-xl font-bold text-[#2D3748]">مقاييس الزوار</h2>
-            <p className="mt-1 text-sm text-[#718096]">إحصائيات الزوار المسجلين والتفاعل</p>
+            <h2 className="text-xl font-bold text-[#2E2506]">مقاييس الزوار</h2>
+            <p className="mt-1 text-sm text-[#7A6C4F]">إحصائيات الزوار المسجلين والتفاعل</p>
           </div>
 
           {/* Visitor Stats Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { label: 'الزوار المسجلين', value: visitorData.totalVisitors, icon: Users, color: '#C8A96E' },
+              { label: 'الزوار المسجلين', value: visitorData.totalVisitors, icon: Users, color: '#956D00' },
               { label: 'نشطين (30 يوم)', value: visitorData.activeVisitors, icon: UserCheck, color: '#10B981' },
               { label: 'المفضلات', value: visitorData.totalFavorites, icon: Heart, color: '#EF4444' },
               { label: 'الطلبات', value: visitorData.totalRequests, icon: MessageSquare, color: '#3B82F6' },
@@ -328,8 +328,8 @@ export default function AnalyticsClient() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-[#718096]">{metric.label}</p>
-                        <p className="mt-1 text-2xl font-bold text-[#2D3748]">{metric.value}</p>
+                        <p className="text-xs text-[#7A6C4F]">{metric.label}</p>
+                        <p className="mt-1 text-2xl font-bold text-[#2E2506]">{metric.value}</p>
                       </div>
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: `${metric.color}15` }}>
                         <Icon className="h-5 w-5" style={{ color: metric.color }} />
@@ -375,7 +375,7 @@ export default function AnalyticsClient() {
                       </PieChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="flex h-full items-center justify-center text-sm text-[#718096]">لا توجد بيانات</div>
+                    <div className="flex h-full items-center justify-center text-sm text-[#7A6C4F]">لا توجد بيانات</div>
                   )}
                 </div>
               </CardContent>
@@ -392,7 +392,7 @@ export default function AnalyticsClient() {
                     {visitorData.topFavoritedProperties.map((prop, idx) => (
                       <div key={prop.propertyId || idx} className="flex items-center justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-[#2D3748]">
+                          <p className="truncate text-sm font-medium text-[#2E2506]">
                             {prop.titleAr || prop.title || 'بدون عنوان'}
                           </p>
                         </div>
@@ -404,7 +404,7 @@ export default function AnalyticsClient() {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex h-48 items-center justify-center text-sm text-[#718096]">لا توجد بيانات</div>
+                  <div className="flex h-48 items-center justify-center text-sm text-[#7A6C4F]">لا توجد بيانات</div>
                 )}
               </CardContent>
             </Card>
