@@ -1,6 +1,6 @@
 'use client'
 
-import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { motion } from 'framer-motion'
 import type { PageSectionConfig } from '@/types/sections'
 
 interface Props {
@@ -8,23 +8,19 @@ interface Props {
 }
 
 export function TeamSection({ config }: Props) {
-  const ref = useScrollAnimation<HTMLElement>()
-
   const title = config.content.titleAr || config.content.title || 'فريقنا'
   const items = config.content.items || []
 
   if (!items.length) return null
 
   return (
-    <section
-      ref={ref}
-      className="animate-on-scroll py-20 sm:py-28"
-      style={{ backgroundColor: 'var(--theme-surface)' }}
-    >
+    <section className="py-20 md:py-28" style={{ backgroundColor: 'var(--theme-surface)' }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: 'var(--theme-primary)' }}>
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-3"
+            style={{ color: 'var(--theme-primary)' }}
+          >
             {title}
           </h2>
           <div
@@ -33,17 +29,22 @@ export function TeamSection({ config }: Props) {
           />
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-on-scroll-children">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {items.map((member, i) => {
             const name = member.nameAr || member.name || ''
             const role = member.roleAr || member.role || ''
             const bio = member.descriptionAr || member.description || ''
 
             return (
-              <div key={i} className="group text-center">
-                {/* Photo */}
-                <div className="relative overflow-hidden rounded-2xl mb-4 aspect-[3/4]">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="group text-center"
+              >
+                <div className="relative overflow-hidden rounded-xl aspect-square mb-4">
                   {member.photoUrl ? (
                     <img
                       src={member.photoUrl}
@@ -52,29 +53,32 @@ export function TeamSection({ config }: Props) {
                     />
                   ) : (
                     <div
-                      className="h-full w-full flex items-center justify-center text-4xl font-bold text-white"
-                      style={{ backgroundColor: 'var(--theme-primary)' }}
+                      className="h-full w-full flex items-center justify-center text-5xl font-bold text-white"
+                      style={{ backgroundColor: 'var(--theme-accent)' }}
                     >
                       {name.charAt(0)}
                     </div>
                   )}
-                  {/* Hover shadow */}
-                  <div className="absolute inset-0 shadow-inner opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/20 to-transparent" />
+                  {bio && (
+                    <div
+                      className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)' }}
+                    >
+                      <p className="text-xs text-white leading-relaxed line-clamp-3">{bio}</p>
+                    </div>
+                  )}
                 </div>
 
-                {/* Info */}
-                <h3 className="text-base font-bold" style={{ color: 'var(--theme-primary)' }}>
+                <h3
+                  className="text-sm sm:text-base font-bold"
+                  style={{ color: 'var(--theme-primary)' }}
+                >
                   {name}
                 </h3>
-                <p className="text-sm mb-1" style={{ color: 'var(--theme-accent)' }}>
+                <p className="text-xs sm:text-sm" style={{ color: 'var(--theme-muted)' }}>
                   {role}
                 </p>
-                {bio && (
-                  <p className="text-xs line-clamp-2" style={{ color: 'var(--theme-muted)' }}>
-                    {bio}
-                  </p>
-                )}
-              </div>
+              </motion.div>
             )
           })}
         </div>

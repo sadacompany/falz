@@ -43,6 +43,7 @@
         "npm:date-fns@^4.1.0",
         "npm:eslint-config-next@16.1.6",
         "npm:eslint@9",
+        "npm:framer-motion@^12.35.0",
         "npm:jsonwebtoken@^9.0.3",
         "npm:jspdf-autotable@^5.0.7",
         "npm:jspdf@^4.2.0",

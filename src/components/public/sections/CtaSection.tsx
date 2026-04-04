@@ -1,11 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePublicOffice } from '@/components/public/PublicOfficeContext'
-import { useDirection } from '@/components/shared/DirectionProvider'
-import { ArrowRight, ArrowLeft } from 'lucide-react'
-import { WhatsAppIcon } from '@/components/public/WhatsAppIcon'
-import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { motion } from 'framer-motion'
+import { ArrowLeft, MessageCircle } from 'lucide-react'
 import type { PageSectionConfig } from '@/types/sections'
 
 interface Props {
@@ -15,79 +12,87 @@ interface Props {
 }
 
 export function CtaSection({ config, officeSlug, whatsapp }: Props) {
-  const { dict } = usePublicOffice()
-  const { isRtl } = useDirection()
-  const ref = useScrollAnimation<HTMLElement>()
-  const Arrow = isRtl ? ArrowLeft : ArrowRight
-
-  const title = config.content.titleAr || config.content.title || dict.nav.contact
-  const subtitle = config.content.subtitleAr || config.content.subtitle || dict.property.interestedIn
-  const buttonText = config.content.buttonTextAr || config.content.buttonText || dict.nav.contact
+  const title = config.content.titleAr || config.content.title || 'تواصل معنا'
+  const subtitle = config.content.subtitleAr || config.content.subtitle || 'نحن هنا لمساعدتك في العثور على العقار المثالي'
+  const buttonText = config.content.buttonTextAr || config.content.buttonText || 'تواصل معنا'
   const bgImage = config.content.backgroundImage
 
   return (
-    <section
-      ref={ref}
-      className="animate-on-scroll relative py-20 sm:py-28 overflow-hidden"
-      style={{ backgroundColor: 'var(--theme-accent)' }}
-    >
-      {/* Background image with overlay */}
-      {bgImage && (
-        <div className="absolute inset-0">
-          <img src={bgImage} alt="" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-black/50" />
-        </div>
-      )}
-
-      {/* Decorative elements */}
-      {!bgImage && (
+    <section className="relative overflow-hidden py-20 md:py-28">
+      {bgImage ? (
         <>
-          <div className="absolute inset-0 opacity-[0.08]" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: '24px 24px',
-          }} />
+          <div className="absolute inset-0">
+            <img
+              src={bgImage}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/60" />
+          </div>
+        </>
+      ) : (
+        <>
           <div
-            className="absolute -top-32 -end-32 w-96 h-96 rounded-full opacity-20 blur-3xl bg-white"
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(135deg, var(--theme-primary) 0%, color-mix(in srgb, var(--theme-primary) 70%, black) 100%)',
+            }}
           />
           <div
-            className="absolute -bottom-32 -start-32 w-96 h-96 rounded-full opacity-10 blur-3xl bg-white"
+            className="absolute -top-40 -end-40 h-[500px] w-[500px] rounded-full opacity-[0.08] blur-3xl"
+            style={{ backgroundColor: 'white' }}
+          />
+          <div
+            className="absolute -bottom-40 -start-40 h-[400px] w-[400px] rounded-full opacity-[0.06] blur-3xl"
+            style={{ backgroundColor: 'white' }}
+          />
+          <div
+            className="absolute top-1/2 start-1/3 h-64 w-64 -translate-y-1/2 rounded-full opacity-[0.04] blur-2xl"
+            style={{ backgroundColor: 'white' }}
           />
         </>
       )}
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-        {/* Accent line */}
-        <div className="mx-auto mb-6 h-1 w-12 rounded-full bg-white/40" />
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-white">
-          {title}
-        </h2>
-        <p className="text-base sm:text-lg mb-10 max-w-lg mx-auto text-white/75">
-          {subtitle}
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            href={`/${officeSlug}/contact`}
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-base font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
-            style={{
-              backgroundColor: 'var(--theme-primary)',
-              color: 'white',
-            }}
-          >
-            {buttonText}
-            <Arrow className="h-4 w-4" />
-          </Link>
-          {whatsapp && (
-            <a
-              href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl text-base font-semibold transition-all duration-300 hover:scale-105 bg-[#25D366] text-white hover:bg-[#1EBE5A] shadow-lg"
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+            {title}
+          </h2>
+          <p className="mx-auto mb-10 max-w-lg text-base text-white/70 sm:text-lg">
+            {subtitle}
+          </p>
+
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Link
+              href={`/${officeSlug}/contact`}
+              className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105"
+              style={{ backgroundColor: 'var(--theme-accent)' }}
             >
-              <WhatsAppIcon className="h-5 w-5" />
-              واتساب
-            </a>
-          )}
-        </div>
+              {buttonText}
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+            {whatsapp && (
+              <a
+                href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 rounded-xl border px-8 py-4 text-base font-semibold text-white transition-all duration-300 hover:scale-105"
+                style={{
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                }}
+              >
+                <MessageCircle className="h-5 w-5" />
+                واتساب
+              </a>
+            )}
+          </div>
+        </motion.div>
       </div>
     </section>
   )

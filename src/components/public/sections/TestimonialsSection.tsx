@@ -1,9 +1,8 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { useDirection } from '@/components/shared/DirectionProvider'
-import { ChevronLeft, ChevronRight, Star, Quote } from 'lucide-react'
-import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import type { PageSectionConfig } from '@/types/sections'
 
 interface Props {
@@ -12,33 +11,30 @@ interface Props {
 
 const defaultTestimonials = [
   {
-    nameAr: 'أحمد المحمد', nameEn: 'Ahmed Al-Mohammed',
-    roleAr: 'مشتري عقار', roleEn: 'Property Buyer',
+    nameAr: 'أحمد المحمد',
+    roleAr: 'مشتري عقار',
     textAr: 'تجربة ممتازة في شراء منزل أحلامي. فريق محترف وخدمة متميزة من البداية حتى النهاية.',
-    textEn: 'Excellent experience buying my dream home. Professional team and outstanding service from start to finish.',
     rating: 5,
   },
   {
-    nameAr: 'سارة العلي', nameEn: 'Sara Al-Ali',
-    roleAr: 'مستأجرة', roleEn: 'Tenant',
-    textAr: 'ساعدوني في إيجاد الشقة المثالية بسرعة. أنصح بهم بشدة.',
-    textEn: 'They helped me find the perfect apartment quickly. Highly recommended.',
+    nameAr: 'سارة العلي',
+    roleAr: 'مستأجرة',
+    textAr: 'ساعدوني في إيجاد الشقة المثالية بسرعة. أنصح بهم بشدة لكل من يبحث عن سكن مناسب.',
     rating: 5,
   },
   {
-    nameAr: 'خالد الرشيدي', nameEn: 'Khaled Al-Rashidi',
-    roleAr: 'مستثمر عقاري', roleEn: 'Real Estate Investor',
-    textAr: 'شريك موثوق في الاستثمار العقاري. خبرة واسعة ونصائح قيّمة.',
-    textEn: 'A trusted partner in real estate investment. Extensive experience and valuable advice.',
+    nameAr: 'خالد الرشيدي',
+    roleAr: 'مستثمر عقاري',
+    textAr: 'شريك موثوق في الاستثمار العقاري. خبرة واسعة ونصائح قيّمة ساعدتني في اتخاذ القرار.',
     rating: 4,
   },
 ]
 
 export function TestimonialsSection({ config }: Props) {
-  const { isRtl } = useDirection()
-  const sectionRef = useScrollAnimation<HTMLElement>()
-  const scrollRef = useRef<HTMLDivElement>(null)
   const [activeIdx, setActiveIdx] = useState(0)
+  const [direction, setDirection] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const title = config.content.titleAr || config.content.title || 'آراء عملائنا'
 
@@ -51,39 +47,55 @@ export function TestimonialsSection({ config }: Props) {
         rating: item.rating || 5,
       }))
     : defaultTestimonials.map((t) => ({
-        name: t.nameAr || t.nameEn,
-        role: t.roleAr || t.roleEn,
-        text: t.textAr || t.textEn,
+        name: t.nameAr,
+        role: t.roleAr,
+        text: t.textAr,
         photo: undefined as string | undefined,
         rating: t.rating,
       }))
 
-  const scroll = (dir: 'prev' | 'next') => {
-    const container = scrollRef.current
-    if (!container) return
-    const cardWidth = container.firstElementChild?.clientWidth || 320
-    const gap = 24
-    const scrollAmount = cardWidth + gap
-    const newIdx = dir === 'next'
-      ? Math.min(activeIdx + 1, items.length - 1)
-      : Math.max(activeIdx - 1, 0)
-    setActiveIdx(newIdx)
-    container.scrollTo({
-      left: isRtl ? -(newIdx * scrollAmount) : newIdx * scrollAmount,
-      behavior: 'smooth',
-    })
+  const goTo = useCallback(
+    (idx: number) => {
+      setDirection(idx > activeIdx ? 1 : -1)
+      setActiveIdx(idx)
+    },
+    [activeIdx],
+  )
+
+  const goNext = useCallback(() => {
+    setDirection(1)
+    setActiveIdx((prev) => (prev + 1) % items.length)
+  }, [items.length])
+
+  const goPrev = useCallback(() => {
+    setDirection(-1)
+    setActiveIdx((prev) => (prev - 1 + items.length) % items.length)
+  }, [items.length])
+
+  useEffect(() => {
+    if (isPaused || items.length <= 1) return
+    intervalRef.current = setInterval(goNext, 5000)
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [isPaused, goNext, items.length])
+
+  const variants = {
+    enter: (d: number) => ({ x: d > 0 ? 300 : -300, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (d: number) => ({ x: d > 0 ? -300 : 300, opacity: 0 }),
   }
 
+  const current = items[activeIdx]
+
   return (
-    <section
-      ref={sectionRef}
-      className="animate-on-scroll py-20 sm:py-28"
-      style={{ backgroundColor: 'var(--theme-background)' }}
-    >
+    <section className="py-20 md:py-28" style={{ backgroundColor: 'var(--theme-background)' }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: 'var(--theme-primary)' }}>
+        <div className="text-center mb-14">
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-3"
+            style={{ color: 'var(--theme-primary)' }}
+          >
             {title}
           </h2>
           <div
@@ -92,105 +104,127 @@ export function TestimonialsSection({ config }: Props) {
           />
         </div>
 
-        {/* Carousel */}
-        <div className="relative">
-          {/* Arrow buttons (desktop) */}
+        <div
+          className="relative max-w-2xl mx-auto"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
           {items.length > 1 && (
             <>
               <button
-                onClick={() => scroll('prev')}
-                className="hidden lg:flex absolute -start-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full items-center justify-center shadow-lg transition-transform hover:scale-110"
-                style={{ backgroundColor: 'var(--theme-surface)', color: 'var(--theme-primary)' }}
-                aria-label="Previous"
+                onClick={goPrev}
+                className="absolute -start-4 lg:-start-16 top-1/2 -translate-y-1/2 z-10 h-11 w-11 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
+                style={{
+                  backgroundColor: 'var(--theme-surface)',
+                  color: 'var(--theme-primary)',
+                  borderWidth: '1px',
+                  borderColor: 'var(--theme-border)',
+                }}
+                aria-label="السابق"
               >
-                {isRtl ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+                <ChevronRight className="h-5 w-5" />
               </button>
               <button
-                onClick={() => scroll('next')}
-                className="hidden lg:flex absolute -end-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full items-center justify-center shadow-lg transition-transform hover:scale-110"
-                style={{ backgroundColor: 'var(--theme-surface)', color: 'var(--theme-primary)' }}
-                aria-label="Next"
+                onClick={goNext}
+                className="absolute -end-4 lg:-end-16 top-1/2 -translate-y-1/2 z-10 h-11 w-11 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
+                style={{
+                  backgroundColor: 'var(--theme-surface)',
+                  color: 'var(--theme-primary)',
+                  borderWidth: '1px',
+                  borderColor: 'var(--theme-border)',
+                }}
+                aria-label="التالي"
               >
-                {isRtl ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                <ChevronLeft className="h-5 w-5" />
               </button>
             </>
           )}
 
-          <div
-            ref={scrollRef}
-            className="flex gap-6 overflow-x-auto snap-x scrollbar-none pb-4"
-            style={{ scrollbarWidth: 'none' }}
-          >
-            {items.map((item, i) => (
-              <div
-                key={i}
-                className="snap-center shrink-0 w-[320px] sm:w-[380px] rounded-2xl p-8 relative"
-                style={{ backgroundColor: 'var(--theme-surface)' }}
+          <div className="overflow-hidden min-h-[280px] flex items-center">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={activeIdx}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+                className="w-full rounded-2xl p-8 sm:p-10 shadow-sm"
+                style={{
+                  backgroundColor: 'var(--theme-surface)',
+                  borderWidth: '1px',
+                  borderColor: 'var(--theme-border)',
+                }}
               >
-                {/* Quote mark */}
-                <Quote
-                  className="h-8 w-8 mb-4 opacity-20"
+                <span
+                  className="block text-5xl leading-none mb-5 select-none"
                   style={{ color: 'var(--theme-accent)' }}
-                />
+                >
+                  ❝
+                </span>
 
-                {/* Text */}
-                <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--theme-muted)' }}>
-                  {item.text}
+                <p
+                  className="text-base sm:text-lg leading-relaxed mb-6"
+                  style={{ color: 'var(--theme-text)' }}
+                >
+                  {current.text}
                 </p>
 
-                {/* Stars */}
-                <div className="flex gap-0.5 mb-4">
+                <div className="flex gap-0.5 mb-5">
                   {Array.from({ length: 5 }).map((_, s) => (
                     <Star
                       key={s}
-                      className={`h-4 w-4 ${s < item.rating ? 'fill-current' : ''}`}
-                      style={{ color: s < item.rating ? '#F59E0B' : 'var(--theme-border)' }}
+                      className={`h-4 w-4 ${s < current.rating ? 'fill-current' : ''}`}
+                      style={{ color: s < current.rating ? '#F59E0B' : 'var(--theme-border)' }}
                     />
                   ))}
                 </div>
 
-                {/* Author */}
                 <div className="flex items-center gap-3">
-                  {item.photo ? (
-                    <img src={item.photo} alt={item.name} className="h-10 w-10 rounded-full object-cover" />
+                  {current.photo ? (
+                    <img
+                      src={current.photo}
+                      alt={current.name}
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
                   ) : (
                     <div
-                      className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                      className="h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold text-white"
                       style={{ backgroundColor: 'var(--theme-accent)' }}
                     >
-                      {item.name.charAt(0)}
+                      {current.name.charAt(0)}
                     </div>
                   )}
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--theme-primary)' }}>{item.name}</p>
-                    <p className="text-xs" style={{ color: 'var(--theme-muted)' }}>{item.role}</p>
+                    <p
+                      className="text-sm font-semibold"
+                      style={{ color: 'var(--theme-primary)' }}
+                    >
+                      {current.name}
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--theme-muted)' }}>
+                      {current.role}
+                    </p>
                   </div>
                 </div>
-              </div>
-            ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Dots */}
           {items.length > 1 && (
-            <div className="flex justify-center gap-2 mt-6">
+            <div className="flex justify-center gap-2 mt-8">
               {items.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => {
-                    setActiveIdx(i)
-                    const container = scrollRef.current
-                    if (!container) return
-                    const cardWidth = container.firstElementChild?.clientWidth || 320
-                    container.scrollTo({
-                      left: isRtl ? -(i * (cardWidth + 24)) : i * (cardWidth + 24),
-                      behavior: 'smooth',
-                    })
-                  }}
-                  className={`h-2 rounded-full transition-all ${i === activeIdx ? 'w-6' : 'w-2'}`}
+                  onClick={() => goTo(i)}
+                  className="h-2.5 rounded-full transition-all duration-300"
                   style={{
-                    backgroundColor: i === activeIdx ? 'var(--theme-accent)' : 'var(--theme-border)',
+                    width: i === activeIdx ? '28px' : '10px',
+                    backgroundColor:
+                      i === activeIdx ? 'var(--theme-accent)' : 'var(--theme-border)',
                   }}
-                  aria-label={`Go to testimonial ${i + 1}`}
+                  aria-label={`الانتقال إلى التقييم ${i + 1}`}
                 />
               ))}
             </div>

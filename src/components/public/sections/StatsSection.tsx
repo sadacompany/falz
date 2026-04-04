@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { usePublicOffice } from '@/components/public/PublicOfficeContext'
+import { motion } from 'framer-motion'
 import { Building2, TrendingUp, Home, MapPin } from 'lucide-react'
-import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import type { PageSectionConfig } from '@/types/sections'
 
 interface Props {
@@ -25,7 +24,7 @@ function AnimatedNumber({ target }: { target: number }) {
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated.current) {
           hasAnimated.current = true
-          const duration = 1500
+          const duration = 1800
           const start = performance.now()
 
           function tick(now: number) {
@@ -51,17 +50,13 @@ function AnimatedNumber({ target }: { target: number }) {
 }
 
 export function StatsSection({ config, stats, cities }: Props) {
-  const { dict } = usePublicOffice()
-  const ref = useScrollAnimation<HTMLElement>()
-
   const defaultStats = [
-    { icon: Building2, value: stats.totalProperties, label: dict.dashboard.totalProperties },
-    { icon: TrendingUp, value: stats.totalForSale, label: dict.property.forSale },
-    { icon: Home, value: stats.totalForRent, label: dict.property.forRent },
-    { icon: MapPin, value: cities.length, label: dict.common.city },
+    { icon: Building2, value: stats.totalProperties, label: 'إجمالي العقارات' },
+    { icon: TrendingUp, value: stats.totalForSale, label: 'عقارات للبيع' },
+    { icon: Home, value: stats.totalForRent, label: 'عقارات للإيجار' },
+    { icon: MapPin, value: cities.length, label: 'المدن' },
   ]
 
-  // Support custom stats via content.items
   const displayStats = config.content.items?.length
     ? config.content.items.map((item, i) => ({
         icon: defaultStats[i]?.icon || Building2,
@@ -72,35 +67,43 @@ export function StatsSection({ config, stats, cities }: Props) {
 
   return (
     <section
-      ref={ref}
-      className="animate-on-scroll relative py-20 sm:py-28 overflow-hidden"
+      className="relative overflow-hidden py-20 md:py-28"
       style={{ backgroundColor: 'var(--theme-primary)' }}
     >
-      {/* Decorative dot pattern */}
-      <div className="absolute inset-0 opacity-[0.06]" style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-        backgroundSize: '24px 24px',
-      }} />
+      <div
+        className="absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+          backgroundSize: '24px 24px',
+        }}
+      />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {displayStats.map((item, i) => {
             const Icon = item.icon
             return (
-              <div key={i} className="text-center">
-                <div className="flex justify-center mb-4">
+              <motion.div
+                key={i}
+                className="text-center"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-60px' }}
+                transition={{ duration: 0.5, delay: i * 0.12 }}
+              >
+                <div className="mb-4 flex justify-center">
                   <div
-                    className="h-14 w-14 rounded-2xl flex items-center justify-center"
-                    style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                    className="flex h-14 w-14 items-center justify-center rounded-full"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                   >
                     <Icon className="h-7 w-7 text-white/80" />
                   </div>
                 </div>
-                <p className="text-4xl sm:text-5xl font-bold mb-2 text-white">
+                <p className="mb-2 text-3xl font-bold text-white sm:text-4xl">
                   <AnimatedNumber target={item.value} />
                 </p>
                 <p className="text-sm text-white/60">{item.label}</p>
-              </div>
+              </motion.div>
             )
           })}
         </div>
