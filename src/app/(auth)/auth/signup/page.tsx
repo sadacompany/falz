@@ -716,13 +716,13 @@ export default function SignUpPage() {
               {/* Email (optional) */}
               <div className="space-y-2">
                 <Label htmlFor="email">{strings.email}</Label>
-                <div className="relative" dir="ltr">
-                  <Mail className="absolute top-1/2 -translate-y-1/2 left-3 h-4 w-4 text-[#887B60] pointer-events-none" />
+                <div className="relative">
+                  <Mail className="absolute top-1/2 -translate-y-1/2 right-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                   <Input
                     id="email"
                     type="email"
                     placeholder={strings.emailPlaceholder}
-                    className="pl-10"
+                    className="pr-10 text-left"
                     autoComplete="email"
                     dir="ltr"
                     {...step1Form.register('email')}
@@ -839,13 +839,13 @@ export default function SignUpPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="officeEmail">{strings.officeEmail}</Label>
-                <div className="relative" dir="ltr">
-                  <Mail className="absolute top-1/2 -translate-y-1/2 left-3 h-4 w-4 text-[#887B60] pointer-events-none" />
+                <div className="relative">
+                  <Mail className="absolute top-1/2 -translate-y-1/2 right-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                   <Input
                     id="officeEmail"
                     type="email"
                     placeholder={strings.officeEmailPlaceholder}
-                    className="pl-10"
+                    className="pr-10 text-left"
                     dir="ltr"
                     {...step2Form.register('officeEmail')}
                   />
