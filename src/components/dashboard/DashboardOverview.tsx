@@ -90,11 +90,11 @@ function MetricCard({
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-[#718096]">{title}</p>
-            <p className="text-3xl font-bold text-[#1E3A5F]">
+            <p className="text-sm font-medium text-[#7A6C4F]">{title}</p>
+            <p className="text-3xl font-bold text-[#3B2F08]">
               {value}
               {suffix && (
-                <span className="ms-1 text-lg font-normal text-[#A0AEC0]">
+                <span className="ms-1 text-lg font-normal text-[#887B60]">
                   {suffix}
                 </span>
               )}
@@ -114,12 +114,12 @@ function MetricCard({
                   {change >= 0 ? '+' : ''}
                   {change}%
                 </span>
-                <span className="text-xs text-[#A0AEC0]">مقارنة بالشهر الماضي</span>
+                <span className="text-xs text-[#887B60]">مقارنة بالشهر الماضي</span>
               </div>
             )}
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#FAF5EB]">
-            <Icon className="h-6 w-6 text-[#C8A96E]" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7F1E0]">
+            <Icon className="h-6 w-6 text-[#956D00]" />
           </div>
         </div>
       </CardContent>
@@ -132,9 +132,9 @@ function MetricCard({
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm shadow-lg">
-      <p className="text-[#718096]">{label}</p>
-      <p className="font-semibold text-[#C8A96E]">{payload[0].value}</p>
+    <div className="rounded-lg border border-[#E5DCC6] bg-white px-3 py-2 text-sm shadow-lg">
+      <p className="text-[#7A6C4F]">{label}</p>
+      <p className="font-semibold text-[#956D00]">{payload[0].value}</p>
     </div>
   )
 }
@@ -173,10 +173,10 @@ export function DashboardOverview({
       {/* Welcome */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#2D3748]">
+          <h1 className="text-2xl font-bold text-[#2E2506]">
             مرحبا بعودتك، {userName}
           </h1>
-          <p className="mt-1 text-sm text-[#718096]">
+          <p className="mt-1 text-sm text-[#7A6C4F]">
             إليك ما يحدث مع عقاراتك اليوم.
           </p>
         </div>
@@ -237,12 +237,12 @@ export function DashboardOverview({
                   <LineChart data={leadsOverTime}>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="#E2E8F0"
+                      stroke="#E5DCC6"
                       vertical={false}
                     />
                     <XAxis
                       dataKey="date"
-                      stroke="#A0AEC0"
+                      stroke="#887B60"
                       fontSize={11}
                       tickFormatter={(value) => {
                         const d = new Date(value)
@@ -251,7 +251,7 @@ export function DashboardOverview({
                       interval="preserveStartEnd"
                     />
                     <YAxis
-                      stroke="#A0AEC0"
+                      stroke="#887B60"
                       fontSize={11}
                       allowDecimals={false}
                     />
@@ -259,15 +259,15 @@ export function DashboardOverview({
                     <Line
                       type="monotone"
                       dataKey="count"
-                      stroke="#C8A96E"
+                      stroke="#956D00"
                       strokeWidth={2}
                       dot={false}
-                      activeDot={{ r: 4, fill: '#C8A96E' }}
+                      activeDot={{ r: 4, fill: '#956D00' }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-[#A0AEC0]">
+                <div className="flex h-full items-center justify-center text-sm text-[#887B60]">
                   لا توجد بيانات بعد
                 </div>
               )}
@@ -287,30 +287,30 @@ export function DashboardOverview({
                   <BarChart data={viewsByType}>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="#E2E8F0"
+                      stroke="#E5DCC6"
                       vertical={false}
                     />
                     <XAxis
                       dataKey="type"
-                      stroke="#A0AEC0"
+                      stroke="#887B60"
                       fontSize={11}
                     />
                     <YAxis
-                      stroke="#A0AEC0"
+                      stroke="#887B60"
                       fontSize={11}
                       allowDecimals={false}
                     />
                     <Tooltip content={<ChartTooltip />} />
                     <Bar
                       dataKey="count"
-                      fill="#C8A96E"
+                      fill="#956D00"
                       radius={[4, 4, 0, 0]}
                       maxBarSize={48}
                     />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-[#A0AEC0]">
+                <div className="flex h-full items-center justify-center text-sm text-[#887B60]">
                   لا توجد بيانات بعد
                 </div>
               )}
@@ -327,7 +327,7 @@ export function DashboardOverview({
             <CardTitle className="text-base">آخر العملاء المحتملين</CardTitle>
             <Link
               href="/dashboard/leads"
-              className="text-xs text-[#C8A96E] hover:underline"
+              className="text-xs text-[#956D00] hover:underline"
             >
               عرض الكل
             </Link>
@@ -339,13 +339,13 @@ export function DashboardOverview({
                   <Link
                     key={lead.id}
                     href={`/dashboard/leads/${lead.id}`}
-                    className="flex items-center justify-between rounded-lg border border-[#E2E8F0] bg-white p-3 transition-colors hover:border-[#C8A96E]/40 hover:bg-[#F7F7F2]"
+                    className="flex items-center justify-between rounded-lg border border-[#E5DCC6] bg-white p-3 transition-colors hover:border-[#956D00]/40 hover:bg-[#F7F1E0]"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-[#2D3748]">
+                      <p className="text-sm font-medium text-[#2E2506]">
                         {lead.name}
                       </p>
-                      <p className="mt-0.5 truncate text-xs text-[#A0AEC0]">
+                      <p className="mt-0.5 truncate text-xs text-[#887B60]">
                         {lead.property?.titleAr || lead.property?.title || 'بدون عقار'}
                         {lead.agent && ` - ${lead.agent.name}`}
                       </p>
@@ -354,13 +354,13 @@ export function DashboardOverview({
                       <Badge variant={statusColors[lead.status] || 'secondary'}>
                         {statusLabels[lead.status] || lead.status}
                       </Badge>
-                      <ArrowUpRight className="h-4 w-4 text-[#A0AEC0]" />
+                      <ArrowUpRight className="h-4 w-4 text-[#887B60]" />
                     </div>
                   </Link>
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-center text-sm text-[#A0AEC0]">
+              <div className="py-8 text-center text-sm text-[#887B60]">
                 لا يوجد عملاء بعد
               </div>
             )}
@@ -373,7 +373,7 @@ export function DashboardOverview({
             <CardTitle className="text-base">أفضل العقارات حسب المشاهدات</CardTitle>
             <Link
               href="/dashboard/properties"
-              className="text-xs text-[#C8A96E] hover:underline"
+              className="text-xs text-[#956D00] hover:underline"
             >
               عرض الكل
             </Link>
@@ -384,17 +384,17 @@ export function DashboardOverview({
                 {safeStats.topProperties.map((prop, idx) => (
                   <div
                     key={prop.propertyId || idx}
-                    className="flex items-center gap-3 rounded-lg border border-[#E2E8F0] bg-white p-3"
+                    className="flex items-center gap-3 rounded-lg border border-[#E5DCC6] bg-white p-3"
                   >
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#EBF0F7] text-sm font-bold text-[#1E3A5F]">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#F7F1E0] text-sm font-bold text-[#3B2F08]">
                       #{idx + 1}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-[#2D3748]">
+                      <p className="truncate text-sm font-medium text-[#2E2506]">
                         {prop.titleAr || prop.title || 'بدون عنوان'}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-[#718096]">
+                    <div className="flex items-center gap-1 text-sm text-[#7A6C4F]">
                       <Eye className="h-3.5 w-3.5" />
                       {prop.views} مشاهدة
                     </div>
@@ -402,7 +402,7 @@ export function DashboardOverview({
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-center text-sm text-[#A0AEC0]">
+              <div className="py-8 text-center text-sm text-[#887B60]">
                 لا توجد مشاهدات للعقارات بعد
               </div>
             )}

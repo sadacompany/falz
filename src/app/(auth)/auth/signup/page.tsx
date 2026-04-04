@@ -481,22 +481,22 @@ export default function SignUpPage() {
         <button
           type="button"
           onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
-          className="flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs text-[#718096] transition-colors hover:border-[#C8A96E]/40 hover:text-[#C8A96E] shadow-sm"
+          className="flex items-center gap-2 rounded-lg border border-[#E5DCC6] bg-white px-3 py-1.5 text-xs text-[#7A6C4F] transition-colors hover:border-[#956D00]/40 hover:text-[#956D00] shadow-sm"
         >
           <Globe className="h-3.5 w-3.5" />
           {locale === 'ar' ? 'English' : 'العربية'}
         </button>
       </div>
 
-      <Card className="border-[#E2E8F0] bg-white shadow-lg rounded-2xl">
+      <Card className="border-[#E5DCC6] bg-white shadow-lg rounded-2xl">
         <CardContent className="p-8">
           {/* Logo + Header */}
           <div className="mb-6 flex flex-col items-center">
             <Logo size="md" variant="light" />
-            <h1 className="mt-3 text-xl font-bold text-[#1E3A5F]">
+            <h1 className="mt-3 text-xl font-bold text-[#3B2F08]">
               {strings.title}
             </h1>
-            <p className="mt-1 text-sm text-[#718096]">{strings.subtitle}</p>
+            <p className="mt-1 text-sm text-[#7A6C4F]">{strings.subtitle}</p>
           </div>
 
           {/* Progress Steps */}
@@ -513,17 +513,17 @@ export default function SignUpPage() {
                       {i > 0 && (
                         <div
                           className={`h-0.5 w-8 sm:w-12 transition-colors ${
-                            isCompleted ? 'bg-[#C8A96E]' : 'bg-[#E2E8F0]'
+                            isCompleted ? 'bg-[#956D00]' : 'bg-[#E5DCC6]'
                           }`}
                         />
                       )}
                       <div
                         className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all ${
                           isActive
-                            ? 'border-[#C8A96E] bg-[#C8A96E] text-white'
+                            ? 'border-[#956D00] bg-[#956D00] text-white'
                             : isCompleted
-                              ? 'border-[#C8A96E] bg-[#FAF5EB] text-[#C8A96E]'
-                              : 'border-[#E2E8F0] bg-[#F7F7F2] text-[#A0AEC0]'
+                              ? 'border-[#956D00] bg-[#F7F1E0] text-[#956D00]'
+                              : 'border-[#E5DCC6] bg-[#F7F1E0] text-[#887B60]'
                         }`}
                       >
                         {isCompleted ? (
@@ -535,7 +535,7 @@ export default function SignUpPage() {
                       {i < stepLabels.length - 1 && (
                         <div
                           className={`h-0.5 w-8 sm:w-12 transition-colors ${
-                            isCompleted ? 'bg-[#C8A96E]' : 'bg-[#E2E8F0]'
+                            isCompleted ? 'bg-[#956D00]' : 'bg-[#E5DCC6]'
                           }`}
                         />
                       )}
@@ -543,10 +543,10 @@ export default function SignUpPage() {
                     <span
                       className={`mt-1.5 text-[10px] sm:text-xs font-medium ${
                         isActive
-                          ? 'text-[#C8A96E]'
+                          ? 'text-[#956D00]'
                           : isCompleted
-                            ? 'text-[#B8963E]'
-                            : 'text-[#A0AEC0]'
+                            ? 'text-[#7A5A00]'
+                            : 'text-[#887B60]'
                       }`}
                     >
                       {label}
@@ -571,7 +571,7 @@ export default function SignUpPage() {
               <div className="space-y-2">
                 <Label htmlFor="name">{strings.fullName}</Label>
                 <div className="relative">
-                  <User className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#A0AEC0]" />
+                  <User className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60]" />
                   <Input
                     id="name"
                     placeholder={strings.fullNamePlaceholder}
@@ -597,26 +597,26 @@ export default function SignUpPage() {
                       type="button"
                       onClick={() => !phoneVerified && setCountryOpen(!countryOpen)}
                       disabled={phoneVerified}
-                      className="flex items-center gap-1.5 h-10 px-3 rounded-md border border-[#E2E8F0] bg-white text-sm font-medium text-[#2D3748] hover:border-[#C8A96E]/50 transition-colors whitespace-nowrap disabled:opacity-50"
+                      className="flex items-center gap-1.5 h-10 px-3 rounded-md border border-[#E5DCC6] bg-white text-sm font-medium text-[#2E2506] hover:border-[#956D00]/50 transition-colors whitespace-nowrap disabled:opacity-50"
                     >
                       <span className="text-lg leading-none">{selectedCountry.flag}</span>
                       <span className="tabular-nums">+{selectedCountry.code}</span>
-                      <ChevronDown className="h-3.5 w-3.5 text-[#A0AEC0]" />
+                      <ChevronDown className="h-3.5 w-3.5 text-[#887B60]" />
                     </button>
                     {countryOpen && (
-                      <div className="absolute top-full left-0 mt-1 w-56 rounded-xl border border-[#E2E8F0] bg-white shadow-xl z-50 py-1 overflow-hidden">
+                      <div className="absolute top-full left-0 mt-1 w-56 rounded-xl border border-[#E5DCC6] bg-white shadow-xl z-50 py-1 overflow-hidden">
                         {gulfCountries.map((country) => (
                           <button
                             key={country.code}
                             type="button"
                             onClick={() => { setCountryCode(country.code); setCountryOpen(false) }}
-                            className={`flex items-center gap-3 w-full px-3.5 py-2.5 text-sm transition-colors hover:bg-[#F7FAFC] ${
-                              country.code === countryCode ? 'bg-[#FAF5EB] text-[#C8A96E] font-semibold' : 'text-[#2D3748]'
+                            className={`flex items-center gap-3 w-full px-3.5 py-2.5 text-sm transition-colors hover:bg-[#F7F1E0] ${
+                              country.code === countryCode ? 'bg-[#F7F1E0] text-[#956D00] font-semibold' : 'text-[#2E2506]'
                             }`}
                           >
                             <span className="text-lg leading-none">{country.flag}</span>
                             <span className="flex-1 text-left">{locale === 'ar' ? country.nameAr : country.nameEn}</span>
-                            <span className="tabular-nums text-[#718096]">+{country.code}</span>
+                            <span className="tabular-nums text-[#7A6C4F]">+{country.code}</span>
                           </button>
                         ))}
                       </div>
@@ -690,14 +690,14 @@ export default function SignUpPage() {
                   </Button>
                   <div className="text-center">
                     {countdown > 0 ? (
-                      <span className="text-xs text-[#A0AEC0]">
+                      <span className="text-xs text-[#887B60]">
                         {strings.resendIn} {countdown}{strings.seconds}
                       </span>
                     ) : (
                       <button
                         type="button"
                         onClick={handleSendOtp}
-                        className="text-xs text-[#C8A96E] hover:underline"
+                        className="text-xs text-[#956D00] hover:underline"
                       >
                         {strings.resendOtp}
                       </button>
@@ -717,7 +717,7 @@ export default function SignUpPage() {
               <div className="space-y-2">
                 <Label htmlFor="email">{strings.email}</Label>
                 <div className="relative">
-                  <Mail className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#A0AEC0]" />
+                  <Mail className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60]" />
                   <Input
                     id="email"
                     type="email"
@@ -738,7 +738,7 @@ export default function SignUpPage() {
               <div className="space-y-2">
                 <Label htmlFor="officeNameAr">{strings.officeNameAr}</Label>
                 <div className="relative" dir="rtl">
-                  <Building2 className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#A0AEC0] pointer-events-none" />
+                  <Building2 className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                   <Input
                     id="officeNameAr"
                     placeholder={strings.officeNameArPlaceholder}
@@ -757,7 +757,7 @@ export default function SignUpPage() {
               <div className="space-y-2">
                 <Label htmlFor="officeNameEn">{strings.officeNameEn}</Label>
                 <div className="relative" dir="ltr">
-                  <Building2 className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#A0AEC0] pointer-events-none" />
+                  <Building2 className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                   <Input
                     id="officeNameEn"
                     placeholder={strings.officeNameEnPlaceholder}
@@ -772,7 +772,7 @@ export default function SignUpPage() {
               <div className="space-y-2">
                 <Label htmlFor="slug">{strings.slug}</Label>
                 <div className="relative" dir="ltr">
-                  <Globe className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#A0AEC0] pointer-events-none" />
+                  <Globe className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                   <Input
                     id="slug"
                     placeholder={strings.slugPlaceholder}
@@ -781,9 +781,9 @@ export default function SignUpPage() {
                     {...step2Form.register('slug')}
                   />
                 </div>
-                <p className="text-xs text-[#718096]">
+                <p className="text-xs text-[#7A6C4F]">
                   {strings.slugHelp}
-                  <span className="font-mono text-[#C8A96E]">
+                  <span className="font-mono text-[#956D00]">
                     {step2Form.watch('slug') || '...'}
                   </span>
                 </p>
@@ -797,7 +797,7 @@ export default function SignUpPage() {
               <div className="space-y-2">
                 <Label htmlFor="falLicenseNo">{strings.falLicense}</Label>
                 <div className="relative" dir="ltr">
-                  <FileText className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#A0AEC0] pointer-events-none" />
+                  <FileText className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                   <Input
                     id="falLicenseNo"
                     placeholder={strings.falLicensePlaceholder}
@@ -812,7 +812,7 @@ export default function SignUpPage() {
                 <div className="space-y-2">
                   <Label htmlFor="officePhone">{strings.officePhone}</Label>
                   <div className="relative" dir="ltr">
-                    <Phone className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#A0AEC0] pointer-events-none" />
+                    <Phone className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                     <Input
                       id="officePhone"
                       placeholder={strings.officePhonePlaceholder}
@@ -825,7 +825,7 @@ export default function SignUpPage() {
                 <div className="space-y-2">
                   <Label htmlFor="whatsapp">{strings.whatsapp}</Label>
                   <div className="relative" dir="ltr">
-                    <Phone className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#A0AEC0] pointer-events-none" />
+                    <Phone className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                     <Input
                       id="whatsapp"
                       placeholder={strings.whatsappPlaceholder}
@@ -840,7 +840,7 @@ export default function SignUpPage() {
               <div className="space-y-2">
                 <Label htmlFor="officeEmail">{strings.officeEmail}</Label>
                 <div className="relative" dir="ltr">
-                  <Mail className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#A0AEC0] pointer-events-none" />
+                  <Mail className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-[#887B60] pointer-events-none" />
                   <Input
                     id="officeEmail"
                     type="email"
@@ -858,7 +858,7 @@ export default function SignUpPage() {
           {step === 3 && (
             <div className="space-y-4">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-[#1E3A5F]">
+                <h3 className="text-lg font-semibold text-[#3B2F08]">
                   {strings.uploadLogo}
                 </h3>
               </div>
@@ -870,13 +870,13 @@ export default function SignUpPage() {
                 onClick={() => fileInputRef.current?.click()}
                 className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all ${
                   isDragging
-                    ? 'border-[#C8A96E] bg-[#FAF5EB]'
-                    : 'border-[#E2E8F0] bg-[#FAFAF7] hover:border-[#C8A96E]/40 hover:bg-[#FAF5EB]/50'
+                    ? 'border-[#956D00] bg-[#F7F1E0]'
+                    : 'border-[#E5DCC6] bg-[#F7F1E0] hover:border-[#956D00]/40 hover:bg-[#F7F1E0]/50'
                 }`}
               >
                 {logoPreview ? (
                   <div className="flex flex-col items-center gap-4">
-                    <div className="relative h-32 w-32 overflow-hidden rounded-xl border-2 border-[#C8A96E]/30 shadow-sm">
+                    <div className="relative h-32 w-32 overflow-hidden rounded-xl border-2 border-[#956D00]/30 shadow-sm">
                       <Image
                         src={logoPreview}
                         alt="Logo preview"
@@ -884,7 +884,7 @@ export default function SignUpPage() {
                         className="object-cover"
                       />
                     </div>
-                    <p className="text-sm text-[#718096]">{logoFile?.name}</p>
+                    <p className="text-sm text-[#7A6C4F]">{logoFile?.name}</p>
                     <Button
                       variant="outline"
                       size="sm"
@@ -900,16 +900,16 @@ export default function SignUpPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#EBF0F7]">
-                      <Upload className="h-6 w-6 text-[#718096]" />
+                    <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#F7F1E0]">
+                      <Upload className="h-6 w-6 text-[#7A6C4F]" />
                     </div>
-                    <p className="text-sm font-medium text-[#2D3748]">
+                    <p className="text-sm font-medium text-[#2E2506]">
                       {strings.dragDrop}
                     </p>
-                    <p className="mt-1 text-xs text-[#718096]">
+                    <p className="mt-1 text-xs text-[#7A6C4F]">
                       {strings.orClickUpload}
                     </p>
-                    <p className="mt-2 text-xs text-[#A0AEC0]">
+                    <p className="mt-2 text-xs text-[#887B60]">
                       {strings.maxSize} &middot; {strings.formats}
                     </p>
                   </>
@@ -930,7 +930,7 @@ export default function SignUpPage() {
               <button
                 type="button"
                 onClick={goNext}
-                className="w-full text-center text-sm text-[#718096] hover:text-[#C8A96E] hover:underline"
+                className="w-full text-center text-sm text-[#7A6C4F] hover:text-[#956D00] hover:underline"
               >
                 {strings.skipLogo}
               </button>
@@ -980,16 +980,16 @@ export default function SignUpPage() {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#E2E8F0]" />
+              <div className="w-full border-t border-[#E5DCC6]" />
             </div>
           </div>
 
           {/* Sign In Link */}
-          <p className="text-center text-sm text-[#718096]">
+          <p className="text-center text-sm text-[#7A6C4F]">
             {strings.haveAccount}{' '}
             <Link
               href="/auth/signin"
-              className="font-semibold text-[#C8A96E] hover:text-[#B8963E] hover:underline"
+              className="font-semibold text-[#956D00] hover:text-[#7A5A00] hover:underline"
             >
               {strings.signIn}
             </Link>
@@ -998,7 +998,7 @@ export default function SignUpPage() {
       </Card>
 
       {/* Footer */}
-      <p className="mt-6 text-center text-xs text-[#A0AEC0]">
+      <p className="mt-6 text-center text-xs text-[#887B60]">
         FALZ Platform &copy; {new Date().getFullYear()}
       </p>
     </div>
