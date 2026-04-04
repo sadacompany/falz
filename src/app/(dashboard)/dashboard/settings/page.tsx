@@ -127,23 +127,39 @@ interface FieldConfig {
   key: string
   label: string
   labelAr: string
-  type: 'text' | 'textarea' | 'toggle'
+  type: 'text' | 'textarea' | 'toggle' | 'select'
   contentKey?: string
+  options?: { value: string; labelAr: string }[]
 }
 
 const SECTION_FIELDS: Partial<Record<SectionType, FieldConfig[]>> = {
   hero: [
+    { key: 'layout', label: 'Layout', labelAr: 'التخطيط', type: 'select', contentKey: 'layout', options: [
+      { value: 'centered', labelAr: 'وسط' },
+      { value: 'split', labelAr: 'مقسم' },
+      { value: 'fullscreen', labelAr: 'شاشة كاملة' },
+    ]},
     { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
     { key: 'subtitleAr', label: 'Subtitle', labelAr: 'العنوان الفرعي', type: 'text', contentKey: 'subtitleAr' },
     { key: 'backgroundImage', label: 'Background Image', labelAr: 'صورة الخلفية', type: 'text', contentKey: 'backgroundImage' },
     { key: 'buttonTextAr', label: 'Button Text', labelAr: 'نص الزر', type: 'text', contentKey: 'buttonTextAr' },
   ],
   about: [
+    { key: 'layout', label: 'Layout', labelAr: 'التخطيط', type: 'select', contentKey: 'layout', options: [
+      { value: 'image-right', labelAr: 'صورة يمين' },
+      { value: 'image-left', labelAr: 'صورة يسار' },
+      { value: 'text-only', labelAr: 'نص فقط' },
+    ]},
     { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
     { key: 'bodyAr', label: 'Body', labelAr: 'المحتوى', type: 'textarea', contentKey: 'bodyAr' },
     { key: 'imageUrl', label: 'Image URL', labelAr: 'رابط الصورة', type: 'text', contentKey: 'imageUrl' },
   ],
   services: [
+    { key: 'layout', label: 'Layout', labelAr: 'عدد الأعمدة', type: 'select', contentKey: 'layout', options: [
+      { value: 'grid-3', labelAr: '3 أعمدة' },
+      { value: 'grid-4', labelAr: '4 أعمدة' },
+      { value: 'grid-6', labelAr: '6 أعمدة' },
+    ]},
     { key: 'titleAr', label: 'Title', labelAr: 'العنوان', type: 'text', contentKey: 'titleAr' },
     { key: 'subtitleAr', label: 'Subtitle', labelAr: 'العنوان الفرعي', type: 'text', contentKey: 'subtitleAr' },
   ],
@@ -878,6 +894,30 @@ export default function SettingsPage() {
                                 }
 
                                 const value = (section.content as any)?.[field.contentKey!] || ''
+
+                                if (field.type === 'select' && field.options) {
+                                  return (
+                                    <div key={field.key} className="space-y-1">
+                                      <Label className="text-xs text-[#4A5568]">
+                                        {field.labelAr}
+                                      </Label>
+                                      <select
+                                        value={value || field.options[0]?.value || ''}
+                                        onChange={(e) =>
+                                          updateContent(section.id, field.contentKey!, e.target.value)
+                                        }
+                                        className="w-full rounded-md border border-[#E2E8F0] px-2 py-1.5 text-sm text-[#2D3748] bg-white focus:border-[#C8A96E] focus:outline-none focus:ring-1 focus:ring-[#C8A96E]"
+                                        dir="rtl"
+                                      >
+                                        {field.options.map((opt) => (
+                                          <option key={opt.value} value={opt.value}>
+                                            {opt.labelAr}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  )
+                                }
 
                                 if (field.type === 'textarea') {
                                   return (

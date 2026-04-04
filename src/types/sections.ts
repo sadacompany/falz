@@ -45,7 +45,7 @@ export interface PageSectionConfig {
     imageUrl?: string
     items?: SectionItem[]
     backgroundImage?: string
-    layout?: 'centered' | 'split'
+    layout?: 'centered' | 'split' | 'fullscreen' | 'image-right' | 'image-left' | 'text-only' | 'grid-3' | 'grid-4' | 'grid-6' | 'horizontal' | 'vertical'
     buttonText?: string
     buttonTextAr?: string
     buttonUrl?: string
