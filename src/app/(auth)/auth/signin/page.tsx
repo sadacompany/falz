@@ -152,7 +152,7 @@ function OtpInput({
 
   const borderColor = hasError
     ? 'border-red-300 focus:border-red-400 focus:ring-red-200'
-    : 'border-[#E2E8F0] focus:border-[#C8A96E] focus:ring-[#C8A96E]/20'
+    : 'border-[#E5DCC6] focus:border-[#C4960C] focus:ring-[#C4960C]/20'
 
   return (
     <div className="flex gap-2.5 justify-center" dir="ltr">
@@ -171,10 +171,10 @@ function OtpInput({
           className={`
             w-12 h-14 sm:w-14 sm:h-16
             rounded-xl border-2 bg-white
-            text-center text-2xl sm:text-3xl font-bold text-[#1E3A5F]
+            text-center text-2xl sm:text-3xl font-bold text-[#3B2F08]
             outline-none transition-all duration-200
             focus:ring-4 focus:scale-105
-            placeholder:text-[#D4D4D4]
+            placeholder:text-[#D4C9A8]
             ${borderColor}
           `}
           placeholder="·"
@@ -189,7 +189,7 @@ function OtpInput({
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-[400px] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#C8A96E] border-t-transparent" /></div>}>
+    <Suspense fallback={<div className="flex min-h-[400px] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#C4960C] border-t-transparent" /></div>}>
       <SignInForm />
     </Suspense>
   )
@@ -313,22 +313,22 @@ function SignInForm() {
         <button
           type="button"
           onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-white px-3.5 py-1.5 text-xs font-medium text-[#718096] transition-colors hover:border-[#C8A96E]/40 hover:text-[#C8A96E] shadow-sm"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[#E5DCC6] bg-white px-3.5 py-1.5 text-xs font-medium text-[#7A6C4F] transition-colors hover:border-[#C4960C]/40 hover:text-[#C4960C] shadow-sm"
         >
           <Globe className="h-3.5 w-3.5" />
           {locale === 'ar' ? 'English' : 'العربية'}
         </button>
       </div>
 
-      <Card className="border-[#E2E8F0] bg-white shadow-xl rounded-2xl overflow-hidden">
-        <div className="h-1 bg-gradient-to-r from-[#1E3A5F] via-[#C8A96E] to-[#1E3A5F]" />
+      <Card className="border-[#E5DCC6] bg-white shadow-xl rounded-2xl overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-[#3B2F08] via-[#C4960C] to-[#3B2F08]" />
 
         <CardContent className="px-7 py-9 sm:px-10 sm:py-10">
           {/* Header */}
           <div className="mb-8 flex flex-col items-center text-center">
             <Logo size="lg" variant="light" />
-            <h1 className="mt-5 text-2xl font-bold text-[#1E3A5F]">{strings.title}</h1>
-            <p className="mt-2 text-sm text-[#718096]">{strings.subtitle}</p>
+            <h1 className="mt-5 text-2xl font-bold text-[#3B2F08]">{strings.title}</h1>
+            <p className="mt-2 text-sm text-[#7A6C4F]">{strings.subtitle}</p>
           </div>
 
           {/* Error */}
@@ -342,7 +342,7 @@ function SignInForm() {
           {step === 'phone' && (
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-sm font-medium text-[#2D3748]">
+                <Label htmlFor="phone" className="text-sm font-medium text-[#2E2506]">
                   {strings.phone}
                 </Label>
                 <div className="flex gap-2" dir="ltr">
@@ -351,26 +351,26 @@ function SignInForm() {
                     <button
                       type="button"
                       onClick={() => setCountryOpen(!countryOpen)}
-                      className="flex items-center gap-1.5 h-13 px-3 rounded-xl border-2 border-[#E2E8F0] bg-white text-sm font-medium text-[#2D3748] hover:border-[#C8A96E]/50 transition-colors whitespace-nowrap"
+                      className="flex items-center gap-1.5 h-13 px-3 rounded-xl border-2 border-[#E5DCC6] bg-white text-sm font-medium text-[#2E2506] hover:border-[#C4960C]/50 transition-colors whitespace-nowrap"
                     >
                       <span className="text-lg leading-none">{selectedCountry.flag}</span>
                       <span className="tabular-nums">+{selectedCountry.code}</span>
-                      <ChevronDown className="h-3.5 w-3.5 text-[#A0AEC0]" />
+                      <ChevronDown className="h-3.5 w-3.5 text-[#B3A88A]" />
                     </button>
                     {countryOpen && (
-                      <div className="absolute top-full left-0 mt-1 w-56 rounded-xl border border-[#E2E8F0] bg-white shadow-xl z-50 py-1 overflow-hidden">
+                      <div className="absolute top-full left-0 mt-1 w-56 rounded-xl border border-[#E5DCC6] bg-white shadow-xl z-50 py-1 overflow-hidden">
                         {gulfCountries.map((country) => (
                           <button
                             key={country.code}
                             type="button"
                             onClick={() => { setCountryCode(country.code); setCountryOpen(false) }}
-                            className={`flex items-center gap-3 w-full px-3.5 py-2.5 text-sm transition-colors hover:bg-[#F7FAFC] ${
-                              country.code === countryCode ? 'bg-[#FAF5EB] text-[#C8A96E] font-semibold' : 'text-[#2D3748]'
+                            className={`flex items-center gap-3 w-full px-3.5 py-2.5 text-sm transition-colors hover:bg-[#F7F1E0] ${
+                              country.code === countryCode ? 'bg-[#F7F1E0] text-[#C4960C] font-semibold' : 'text-[#2E2506]'
                             }`}
                           >
                             <span className="text-lg leading-none">{country.flag}</span>
                             <span className="flex-1 text-left">{locale === 'ar' ? country.nameAr : country.nameEn}</span>
-                            <span className="tabular-nums text-[#718096]">+{country.code}</span>
+                            <span className="tabular-nums text-[#7A6C4F]">+{country.code}</span>
                           </button>
                         ))}
                       </div>
@@ -381,7 +381,7 @@ function SignInForm() {
                     id="phone"
                     type="tel"
                     placeholder={selectedCountry.placeholder}
-                    className="flex-1 h-13 text-base rounded-xl border-2 border-[#E2E8F0] focus:border-[#C8A96E] focus:ring-4 focus:ring-[#C8A96E]/20"
+                    className="flex-1 h-13 text-base rounded-xl border-2 border-[#E5DCC6] focus:border-[#C4960C] focus:ring-4 focus:ring-[#C4960C]/20"
                     value={phoneValue}
                     onChange={(e) => setPhoneValue(e.target.value.replace(/[^\d]/g, ''))}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
@@ -404,17 +404,17 @@ function SignInForm() {
           {step === 'otp' && (
             <div className="space-y-6">
               {/* Info banner */}
-              <div className="flex items-center justify-between rounded-xl bg-[#F7FAFC] px-4 py-3 border border-[#E2E8F0]">
-                <div className="flex items-center gap-2 text-sm text-[#718096]">
-                  <ShieldCheck className="h-4 w-4 shrink-0 text-[#C8A96E]" />
+              <div className="flex items-center justify-between rounded-xl bg-[#F7F1E0] px-4 py-3 border border-[#E5DCC6]">
+                <div className="flex items-center gap-2 text-sm text-[#7A6C4F]">
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-[#C4960C]" />
                   <span>{strings.otpSentTo}</span>
                 </div>
-                <span className="text-sm font-bold text-[#1E3A5F] tabular-nums" dir="ltr">{buildFullPhone()}</span>
+                <span className="text-sm font-bold text-[#3B2F08] tabular-nums" dir="ltr">{buildFullPhone()}</span>
               </div>
 
               {/* 6 digit fields */}
               <div className="space-y-3">
-                <Label className="block text-center text-sm font-medium text-[#2D3748]">
+                <Label className="block text-center text-sm font-medium text-[#2E2506]">
                   {strings.otpCode}
                 </Label>
                 <OtpInput
@@ -440,20 +440,20 @@ function SignInForm() {
                 <button
                   type="button"
                   onClick={() => { setStep('phone'); setOtpCode(''); setError(null) }}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-[#718096] hover:text-[#1E3A5F] transition-colors"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-[#7A6C4F] hover:text-[#3B2F08] transition-colors"
                 >
                   <ArrowRight className="h-3 w-3 ltr:rotate-180" />
                   {strings.changeNumber}
                 </button>
                 {countdown > 0 ? (
-                  <span className="text-xs tabular-nums text-[#A0AEC0]">
+                  <span className="text-xs tabular-nums text-[#B3A88A]">
                     {strings.resendIn} {countdown}{strings.seconds}
                   </span>
                 ) : (
                   <button
                     type="button"
                     onClick={handleSendOtp}
-                    className="text-xs font-semibold text-[#C8A96E] hover:underline"
+                    className="text-xs font-semibold text-[#C4960C] hover:underline"
                   >
                     {strings.resendOtp}
                   </button>
@@ -463,14 +463,14 @@ function SignInForm() {
           )}
 
           {/* Divider */}
-          <div className="my-7 border-t border-[#E2E8F0]" />
+          <div className="my-7 border-t border-[#E5DCC6]" />
 
           {/* Register link */}
-          <p className="text-center text-sm text-[#718096]">
+          <p className="text-center text-sm text-[#7A6C4F]">
             {strings.noAccount}{' '}
             <Link
               href="/auth/signup"
-              className="font-semibold text-[#C8A96E] hover:text-[#B8963E] hover:underline"
+              className="font-semibold text-[#C4960C] hover:text-[#A87E0A] hover:underline"
             >
               {strings.register}
             </Link>
@@ -478,7 +478,7 @@ function SignInForm() {
         </CardContent>
       </Card>
 
-      <p className="mt-6 text-center text-xs text-[#A0AEC0]">
+      <p className="mt-6 text-center text-xs text-[#B3A88A]">
         FALZ Platform &copy; {new Date().getFullYear()}
       </p>
     </div>

@@ -100,7 +100,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
         <Logo size="sm" variant="light" />
         {!sidebarCollapsed && (
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-[#C8A96E] tracking-wide">FALZ</span>
+            <span className="text-lg font-bold text-[#C4960C] tracking-wide">FALZ</span>
             <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-300">
               مشرف
             </span>
@@ -138,7 +138,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                   className={cn(
                     'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     active
-                      ? 'bg-white/15 text-[#C8A96E] shadow-sm'
+                      ? 'bg-white/15 text-[#C4960C] shadow-sm'
                       : 'text-white/60 hover:bg-white/10 hover:text-white',
                     sidebarCollapsed && 'justify-center px-2'
                   )}
@@ -148,7 +148,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                     className={cn(
                       'h-5 w-5 flex-shrink-0 transition-colors',
                       active
-                        ? 'text-[#C8A96E]'
+                        ? 'text-[#C4960C]'
                         : 'text-white/50 group-hover:text-white'
                     )}
                   />
@@ -156,7 +156,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                     <span>{item.label}</span>
                   )}
                   {active && !sidebarCollapsed && (
-                    <div className="ms-auto h-1.5 w-1.5 rounded-full bg-[#C8A96E]" />
+                    <div className="ms-auto h-1.5 w-1.5 rounded-full bg-[#C4960C]" />
                   )}
                 </Link>
               </li>
@@ -199,11 +199,11 @@ export function AdminShell({ user, children }: AdminShellProps) {
   )
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#FAFAF7]">
+    <div className="flex h-screen overflow-hidden bg-[#FFFDF5]">
       {/* Desktop Sidebar - Navy for admin distinction */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col border-e border-[#1E3A5F]/20 bg-[#1E3A5F] transition-all duration-300',
+          'hidden lg:flex flex-col border-e border-[#1A2F4A]/20 bg-[#1A2F4A] transition-all duration-300',
           sidebarCollapsed ? 'w-[72px]' : 'w-64'
         )}
       >
@@ -221,7 +221,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
       {/* Mobile Sidebar Drawer */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 h-full w-64 border-e border-[#1E3A5F]/20 bg-[#1E3A5F] transition-transform duration-300 lg:hidden',
+          'fixed left-0 top-0 z-50 h-full w-64 border-e border-[#1A2F4A]/20 bg-[#1A2F4A] transition-transform duration-300 lg:hidden',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -231,12 +231,12 @@ export function AdminShell({ user, children }: AdminShellProps) {
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="flex h-16 items-center justify-between border-b border-[#E2E8F0] bg-white px-4 lg:px-6">
+        <header className="flex h-16 items-center justify-between border-b border-[#E5DCC6] bg-white px-4 lg:px-6">
           {/* Left side */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F] lg:hidden"
+              className="rounded-lg p-2 text-[#7A6C4F] transition-colors hover:bg-[#F7F1E0] hover:text-[#1A2F4A] lg:hidden"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -244,7 +244,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                 <Menu className="h-5 w-5" />
               )}
             </button>
-            <h2 className="text-sm font-medium text-[#718096]">
+            <h2 className="text-sm font-medium text-[#7A6C4F]">
               إدارة المنصة
             </h2>
           </div>
@@ -252,12 +252,12 @@ export function AdminShell({ user, children }: AdminShellProps) {
           {/* Right side */}
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-sm font-medium text-[#2D3748]">{user.name}</p>
-              <p className="text-xs text-[#A0AEC0]">{user.email}</p>
+              <p className="text-sm font-medium text-[#2E2506]">{user.name}</p>
+              <p className="text-xs text-[#B3A88A]">{user.email}</p>
             </div>
             <button
               onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-              className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-red-50 hover:text-red-500"
+              className="rounded-lg p-2 text-[#7A6C4F] transition-colors hover:bg-red-50 hover:text-red-500"
               title="تسجيل الخروج"
             >
               <LogOut className="h-5 w-5" />
