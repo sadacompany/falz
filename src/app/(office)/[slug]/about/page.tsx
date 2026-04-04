@@ -1,7 +1,5 @@
 import { notFound } from 'next/navigation'
-import { cookies, headers } from 'next/headers'
 import prisma from '@/lib/db'
-import { resolveLocale, getDictionary } from '@/i18n'
 import { AboutPageClient } from './AboutPageClient'
 import type { Metadata } from 'next'
 
@@ -44,13 +42,7 @@ export default async function AboutPage({ params }: PageProps) {
     notFound()
   }
 
-  // Resolve locale
-  const cookieStore = await cookies()
-  const headerStore = await headers()
-  const cookieLocale = cookieStore.get('locale')?.value
-  const acceptLang = headerStore.get('accept-language')
-  const browserLocale = acceptLang?.startsWith('ar') ? 'ar' : acceptLang?.startsWith('en') ? 'en' : undefined
-  const locale = resolveLocale(cookieLocale || browserLocale || office.defaultLanguage)
+  const locale = 'ar' as const
 
   // Stats
   const [totalProperties, totalAgents] = await Promise.all([
@@ -79,13 +71,13 @@ export default async function AboutPage({ params }: PageProps) {
   return (
     <AboutPageClient
       officeSlug={slug}
-      officeName={locale === 'ar' && office.nameAr ? office.nameAr : office.name}
-      description={locale === 'ar' && office.descriptionAr ? office.descriptionAr : office.description}
+      officeName={office.nameAr || office.name}
+      description={office.descriptionAr || office.description}
       phone={office.phone}
       email={office.email}
       whatsapp={office.whatsapp}
-      address={locale === 'ar' && office.addressAr ? office.addressAr : office.address}
-      city={locale === 'ar' && office.cityAr ? office.cityAr : office.city}
+      address={office.addressAr || office.address}
+      city={office.cityAr || office.city}
       falLicenseNo={office.falLicenseNo}
       website={office.website}
       socialLinks={office.socialLinks as Record<string, string> | null}
