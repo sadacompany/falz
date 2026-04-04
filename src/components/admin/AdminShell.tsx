@@ -100,7 +100,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
         <Logo size="sm" variant="light" />
         {!sidebarCollapsed && (
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-[#C4960C] tracking-wide">FALZ</span>
+            <span className="text-lg font-bold text-[#956D00] tracking-wide">FALZ</span>
             <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-300">
               مشرف
             </span>
@@ -138,7 +138,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                   className={cn(
                     'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     active
-                      ? 'bg-white/15 text-[#C4960C] shadow-sm'
+                      ? 'bg-white/15 text-[#956D00] shadow-sm'
                       : 'text-white/60 hover:bg-white/10 hover:text-white',
                     sidebarCollapsed && 'justify-center px-2'
                   )}
@@ -148,7 +148,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                     className={cn(
                       'h-5 w-5 flex-shrink-0 transition-colors',
                       active
-                        ? 'text-[#C4960C]'
+                        ? 'text-[#956D00]'
                         : 'text-white/50 group-hover:text-white'
                     )}
                   />
@@ -156,7 +156,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                     <span>{item.label}</span>
                   )}
                   {active && !sidebarCollapsed && (
-                    <div className="ms-auto h-1.5 w-1.5 rounded-full bg-[#C4960C]" />
+                    <div className="ms-auto h-1.5 w-1.5 rounded-full bg-[#956D00]" />
                   )}
                 </Link>
               </li>
@@ -183,6 +183,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
       <div className="hidden border-t border-white/10 px-3 py-3 lg:block">
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          aria-label={sidebarCollapsed ? 'توسيع القائمة' : 'طي القائمة'}
           className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/10 hover:text-white"
         >
           {sidebarCollapsed ? (
@@ -236,6 +237,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
               className="rounded-lg p-2 text-[#7A6C4F] transition-colors hover:bg-[#F7F1E0] hover:text-[#1A2F4A] lg:hidden"
             >
               {mobileMenuOpen ? (
@@ -253,7 +255,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
           <div className="flex items-center gap-3">
             <div className="text-right">
               <p className="text-sm font-medium text-[#2E2506]">{user.name}</p>
-              <p className="text-xs text-[#B3A88A]">{user.email}</p>
+              <p className="text-xs text-[#887B60]">{user.email}</p>
             </div>
             <button
               onClick={() => signOut({ callbackUrl: '/auth/signin' })}

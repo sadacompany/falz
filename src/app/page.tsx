@@ -95,7 +95,7 @@ export default function LandingPage() {
             <FalzLogo variant="dark" size="sm" />
             <span className="text-xl font-bold tracking-tight text-[#3B2F08]">FALZ</span>
           </div>
-          <div className="flex items-center gap-4">
+          <nav aria-label="القائمة الرئيسية" className="flex items-center gap-4">
             <Link
               href="/auth/signin"
               className="text-sm text-[#7A6C4F] transition-colors hover:text-[#3B2F08]"
@@ -105,12 +105,12 @@ export default function LandingPage() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href="/auth/signup"
-                className="inline-block rounded-lg bg-[#C4960C] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#A87E0A]"
+                className="inline-block rounded-lg bg-[#956D00] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#7A5A00]"
               >
                 ابدأ الآن
               </Link>
             </motion.div>
-          </div>
+          </nav>
         </div>
       </header>
 
@@ -124,7 +124,7 @@ export default function LandingPage() {
           }}
         />
         <div className="absolute -top-32 right-1/4 h-[420px] w-[420px] rounded-full bg-[#3B2F08]/[0.04] blur-3xl" />
-        <div className="absolute -bottom-24 left-1/4 h-[340px] w-[340px] rounded-full bg-[#C4960C]/[0.05] blur-3xl" />
+        <div className="absolute -bottom-24 left-1/4 h-[340px] w-[340px] rounded-full bg-[#956D00]/[0.05] blur-3xl" />
 
         <motion.div
           className="relative mx-auto max-w-7xl px-6 text-center"
@@ -134,7 +134,7 @@ export default function LandingPage() {
         >
           <motion.div
             variants={itemVariants}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#C4960C]/30 bg-[#F7F1E0] px-4 py-1.5 text-sm font-medium text-[#A87E0A]"
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#956D00]/30 bg-[#F7F1E0] px-4 py-1.5 text-sm font-medium text-[#7A5A00]"
           >
             <Building2 className="h-4 w-4" />
             البنية الرقمية الاحترافية للمكاتب العقارية
@@ -146,7 +146,7 @@ export default function LandingPage() {
           >
             امنح مكتبك العقاري
             <br />
-            <span className="bg-gradient-to-l from-[#C4960C] to-[#A87E0A] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-l from-[#956D00] to-[#7A5A00] bg-clip-text text-transparent">
               حضوراً رقمياً استثنائياً
             </span>
           </motion.h1>
@@ -166,7 +166,7 @@ export default function LandingPage() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href="/auth/signup"
-                className="flex items-center gap-2 rounded-lg bg-[#C4960C] px-8 py-3.5 text-base font-semibold text-white shadow-md transition-all hover:bg-[#A87E0A] hover:shadow-lg"
+                className="flex items-center gap-2 rounded-lg bg-[#956D00] px-8 py-3.5 text-base font-semibold text-white shadow-md transition-all hover:bg-[#7A5A00] hover:shadow-lg"
               >
                 أنشئ موقعك الآن
                 <ArrowLeft className="h-5 w-5" />
@@ -175,7 +175,7 @@ export default function LandingPage() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href="/dar-al-aseel"
-                className="flex items-center gap-2 rounded-lg border border-[#E5DCC6] bg-white px-8 py-3.5 text-base font-semibold text-[#3B2F08] shadow-sm transition-all hover:border-[#C4960C]/40 hover:bg-[#F7F1E0]"
+                className="flex items-center gap-2 rounded-lg border border-[#E5DCC6] bg-white px-8 py-3.5 text-base font-semibold text-[#3B2F08] shadow-sm transition-all hover:border-[#956D00]/40 hover:bg-[#F7F1E0]"
               >
                 شاهد مثال حي
                 <ArrowRight className="h-5 w-5" />
@@ -280,10 +280,10 @@ export default function LandingPage() {
                 variants={cardVariants}
                 whileHover={{ y: -4 }}
                 transition={{ type: 'spring', stiffness: 300 }}
-                className="group rounded-xl border border-[#E5DCC6] bg-white p-6 transition-colors hover:border-[#C4960C]/40 hover:shadow-lg"
+                className="group rounded-xl border border-[#E5DCC6] bg-white p-6 transition-colors hover:border-[#956D00]/40 hover:shadow-lg"
               >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#F7F1E0] transition-colors group-hover:bg-[#C4960C]/20">
-                  <feature.icon className="h-6 w-6 text-[#C4960C]" />
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#F7F1E0] transition-colors group-hover:bg-[#956D00]/20">
+                  <feature.icon className="h-6 w-6 text-[#956D00]" />
                 </div>
                 <h3 className="mb-2 text-lg font-semibold text-[#3B2F08]">{feature.title}</h3>
                 <p className="text-sm leading-relaxed text-[#7A6C4F]">{feature.desc}</p>
@@ -310,7 +310,7 @@ export default function LandingPage() {
             </p>
           </motion.div>
           <div className="relative">
-            <div className="absolute top-12 right-[16.67%] left-[16.67%] hidden h-px border-t-2 border-dashed border-[#C4960C]/30 md:block" />
+            <div className="absolute top-12 right-[16.67%] left-[16.67%] hidden h-px border-t-2 border-dashed border-[#956D00]/30 md:block" />
             <motion.div
               className="grid gap-12 md:grid-cols-3 md:gap-8"
               variants={staggerGrid}
@@ -343,9 +343,9 @@ export default function LandingPage() {
                   variants={cardVariants}
                   className="relative text-center"
                 >
-                  <div className="relative z-10 mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#C4960C]/30 bg-[#F7F1E0]">
-                    <item.icon className="h-8 w-8 text-[#C4960C]" />
-                    <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#C4960C] text-xs font-bold text-white">
+                  <div className="relative z-10 mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#956D00]/30 bg-[#F7F1E0]">
+                    <item.icon className="h-8 w-8 text-[#956D00]" />
+                    <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#956D00] text-xs font-bold text-white">
                       {item.step}
                     </span>
                   </div>
@@ -408,10 +408,10 @@ export default function LandingPage() {
                 variants={cardVariants}
                 whileHover={{ y: -4 }}
                 transition={{ type: 'spring', stiffness: 300 }}
-                className="rounded-xl border border-[#E5DCC6] bg-[#FFFDF5] p-6 text-center transition-colors hover:border-[#C4960C]/40 hover:shadow-md"
+                className="rounded-xl border border-[#E5DCC6] bg-[#FFFDF5] p-6 text-center transition-colors hover:border-[#956D00]/40 hover:shadow-md"
               >
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#F7F1E0]">
-                  <item.icon className="h-7 w-7 text-[#C4960C]" />
+                  <item.icon className="h-7 w-7 text-[#956D00]" />
                 </div>
                 <h3 className="mb-2 font-semibold text-[#3B2F08]">{item.title}</h3>
                 <p className="text-sm leading-relaxed text-[#7A6C4F]">{item.desc}</p>
@@ -448,7 +448,7 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.5, ease, delay: 0.15 }}
-            className="mx-auto mb-12 text-sm text-[#A87E0A]"
+            className="mx-auto mb-12 text-sm text-[#7A5A00]"
           >
             وفّر مع الاشتراك السنوي — شهرين مجاناً
           </motion.p>
@@ -502,18 +502,18 @@ export default function LandingPage() {
                 transition={{ type: 'spring', stiffness: 300 }}
                 className={`relative rounded-xl border p-8 transition-colors ${
                   plan.popular
-                    ? 'border-[#C4960C] bg-white shadow-lg ring-1 ring-[#C4960C]/20'
+                    ? 'border-[#956D00] bg-white shadow-lg ring-1 ring-[#956D00]/20'
                     : 'border-[#E5DCC6] bg-white shadow-sm hover:shadow-md'
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#C4960C] px-4 py-1 text-xs font-bold text-white shadow-sm">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#956D00] px-4 py-1 text-xs font-bold text-white shadow-sm">
                     الأكثر شيوعاً
                   </div>
                 )}
                 <h3 className="mb-2 text-xl font-bold text-[#3B2F08]">{plan.name}</h3>
                 <div className="mb-6">
-                  <span className="text-3xl font-bold text-[#C4960C]">{plan.price}</span>
+                  <span className="text-3xl font-bold text-[#956D00]">{plan.price}</span>
                   {plan.period && (
                     <span className="mr-1 text-sm text-[#7A6C4F]">{plan.period}</span>
                   )}
@@ -521,7 +521,7 @@ export default function LandingPage() {
                 <ul className="mb-8 space-y-3 text-sm text-[#7A6C4F]">
                   {plan.features.map((f, j) => (
                     <li key={j} className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#F7F1E0] text-xs text-[#C4960C]">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#F7F1E0] text-xs text-[#956D00]">
                         &#10003;
                       </span>
                       {f}
@@ -533,8 +533,8 @@ export default function LandingPage() {
                     href="/auth/signup"
                     className={`block rounded-lg py-3 text-center text-sm font-semibold transition-colors ${
                       plan.popular
-                        ? 'bg-[#C4960C] text-white shadow-sm hover:bg-[#A87E0A]'
-                        : 'border border-[#E5DCC6] text-[#3B2F08] hover:border-[#C4960C]/40 hover:bg-[#F7F1E0]'
+                        ? 'bg-[#956D00] text-white shadow-sm hover:bg-[#7A5A00]'
+                        : 'border border-[#E5DCC6] text-[#3B2F08] hover:border-[#956D00]/40 hover:bg-[#F7F1E0]'
                     }`}
                   >
                     ابدأ الآن
@@ -547,8 +547,8 @@ export default function LandingPage() {
       </section>
 
       <section className="relative overflow-hidden bg-gradient-to-br from-[#3B2F08] to-[#2E2506] py-28">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-l from-transparent via-[#C4960C] to-transparent" />
-        <div className="absolute -bottom-20 right-1/3 h-[300px] w-[300px] rounded-full bg-[#C4960C]/[0.04] blur-3xl" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-l from-transparent via-[#956D00] to-transparent" />
+        <div className="absolute -bottom-20 right-1/3 h-[300px] w-[300px] rounded-full bg-[#956D00]/[0.04] blur-3xl" />
 
         <motion.div
           className="relative mx-auto max-w-3xl px-6 text-center"
@@ -573,7 +573,7 @@ export default function LandingPage() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href="/auth/signup"
-                className="flex items-center gap-2 rounded-lg bg-[#C4960C] px-8 py-3.5 text-base font-semibold text-white shadow-md transition-all hover:bg-[#A87E0A] hover:shadow-lg"
+                className="flex items-center gap-2 rounded-lg bg-[#956D00] px-8 py-3.5 text-base font-semibold text-white shadow-md transition-all hover:bg-[#7A5A00] hover:shadow-lg"
               >
                 أنشئ موقعك الآن
                 <ArrowLeft className="h-5 w-5" />
@@ -605,7 +605,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div>
+            <nav aria-label="روابط سريعة">
               <h4 className="mb-4 text-sm font-semibold text-[#E5DCC6]">روابط سريعة</h4>
               <ul className="space-y-2 text-sm text-[#C4B89A]">
                 <li>
@@ -629,7 +629,7 @@ export default function LandingPage() {
                   </Link>
                 </li>
               </ul>
-            </div>
+            </nav>
 
             <div>
               <h4 className="mb-4 text-sm font-semibold text-[#E5DCC6]">تواصل معنا</h4>

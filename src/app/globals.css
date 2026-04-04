@@ -4,8 +4,8 @@
   --background: #FFFDF5;
   --foreground: #2E2506;
   --theme-primary: #3B2F08;
-  --theme-accent: #C4960C;
-  --theme-accent-hover: #A87E0A;
+  --theme-accent: #956D00;
+  --theme-accent-hover: #7A5A00;
   --theme-background: #FFFDF5;
   --theme-surface: #FFFFFF;
   --theme-surface-hover: #F7F1E0;
@@ -91,7 +91,7 @@ body {
 
 /* ===== Selection ===== */
 ::selection {
-  background-color: rgba(196, 150, 12, 0.2);
+  background-color: rgba(149, 109, 0, 0.2);
   color: #3B2F08;
 }
 
