@@ -50,7 +50,20 @@ export default async function HomePage({ params, searchParams }: PageProps) {
   const resolvedSearchParams = await searchParams
   const isPreview = resolvedSearchParams?.preview === '1'
 
-  const office = await getOfficeData(slug)
+  let office
+  try {
+    office = await getOfficeData(slug)
+  } catch (err) {
+    console.error(`[HomePage] Failed to fetch office "${slug}":`, err)
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center p-8 text-center">
+        <div>
+          <h1 className="text-2xl font-bold text-[#3B2F08]">حدث خطأ</h1>
+          <p className="mt-2 text-[#7A6C4F]">تعذر تحميل بيانات الموقع. يرجى المحاولة لاحقاً.</p>
+        </div>
+      </div>
+    )
+  }
   if (!office) return null
 
   // Resolve locale
@@ -66,31 +79,18 @@ export default async function HomePage({ params, searchParams }: PageProps) {
   const description = locale === 'ar' && office.descriptionAr ? office.descriptionAr : office.description
 
   // Fetch featured properties
-  const featuredProperties = await prisma.property.findMany({
-    where: {
-      officeId: office.id,
-      status: 'PUBLISHED',
-      isFeatured: true,
-    },
-    include: {
-      media: {
-        where: { type: 'IMAGE' },
-        orderBy: { sortOrder: 'asc' },
-        take: 1,
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 4,
-  })
+  let displayProperties: any[] = []
+  let totalProperties = 0
+  let totalForSale = 0
+  let totalForRent = 0
+  let citiesRaw: { city: string | null; cityAr: string | null }[] = []
 
-  // If not enough featured, supplement with recent published
-  let displayProperties = featuredProperties
-  if (displayProperties.length < 4) {
-    const moreProperties = await prisma.property.findMany({
+  try {
+    const featuredProperties = await prisma.property.findMany({
       where: {
         officeId: office.id,
         status: 'PUBLISHED',
-        id: { notIn: displayProperties.map((p) => p.id) },
+        isFeatured: true,
       },
       include: {
         media: {
@@ -100,25 +100,45 @@ export default async function HomePage({ params, searchParams }: PageProps) {
         },
       },
       orderBy: { createdAt: 'desc' },
-      take: 4 - displayProperties.length,
+      take: 4,
     })
-    displayProperties = [...displayProperties, ...moreProperties]
+
+    displayProperties = featuredProperties
+    if (displayProperties.length < 4) {
+      const moreProperties = await prisma.property.findMany({
+        where: {
+          officeId: office.id,
+          status: 'PUBLISHED',
+          id: { notIn: displayProperties.map((p) => p.id) },
+        },
+        include: {
+          media: {
+            where: { type: 'IMAGE' },
+            orderBy: { sortOrder: 'asc' },
+            take: 1,
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 4 - displayProperties.length,
+      })
+      displayProperties = [...displayProperties, ...moreProperties]
+    }
+
+    ;[totalProperties, totalForSale, totalForRent] = await Promise.all([
+      prisma.property.count({ where: { officeId: office.id, status: 'PUBLISHED' } }),
+      prisma.property.count({ where: { officeId: office.id, status: 'PUBLISHED', dealType: 'SALE' } }),
+      prisma.property.count({ where: { officeId: office.id, status: 'PUBLISHED', dealType: 'RENT' } }),
+    ])
+
+    citiesRaw = await prisma.property.findMany({
+      where: { officeId: office.id, status: 'PUBLISHED', city: { not: null } },
+      select: { city: true, cityAr: true },
+      distinct: ['city'],
+      take: 20,
+    })
+  } catch (err) {
+    console.error(`[HomePage] Failed to fetch properties for "${slug}":`, err)
   }
-
-  // Stats
-  const [totalProperties, totalForSale, totalForRent] = await Promise.all([
-    prisma.property.count({ where: { officeId: office.id, status: 'PUBLISHED' } }),
-    prisma.property.count({ where: { officeId: office.id, status: 'PUBLISHED', dealType: 'SALE' } }),
-    prisma.property.count({ where: { officeId: office.id, status: 'PUBLISHED', dealType: 'RENT' } }),
-  ])
-
-  // Get distinct cities for quick filter
-  const citiesRaw = await prisma.property.findMany({
-    where: { officeId: office.id, status: 'PUBLISHED', city: { not: null } },
-    select: { city: true, cityAr: true },
-    distinct: ['city'],
-    take: 20,
-  })
 
   // Serialize properties for client component
   const serializedProperties = displayProperties.map((p) => ({
@@ -139,7 +159,7 @@ export default async function HomePage({ params, searchParams }: PageProps) {
     area: p.area,
     isFeatured: p.isFeatured,
     availability: p.availability,
-    media: p.media.map((m) => ({ url: m.url, alt: m.alt, altAr: m.altAr })),
+    media: (p.media || []).map((m: any) => ({ url: m.url, alt: m.alt, altAr: m.altAr })),
   }))
 
   const cities = citiesRaw.map((c) => ({
