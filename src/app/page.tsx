@@ -1,13 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import {
   motion,
   useInView,
   useMotionValue,
-  useTransform,
-  useMotionTemplate,
   animate,
 } from 'framer-motion'
 import {
@@ -68,23 +66,25 @@ function AnimatedCounter({ value, suffix = '', prefix = '' }: { value: number; s
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true })
   const count = useMotionValue(0)
-  const rounded = useTransform(count, (v) => Math.round(v).toLocaleString('en'))
-  const display = useMotionTemplate`${rounded}`
+  const [display, setDisplay] = useState('0')
 
   useEffect(() => {
     if (isInView) {
-      animate(count, value, { duration: 1.5, ease: [0.16, 1, 0.3, 1] })
+      const controls = animate(count, value, {
+        duration: 1.5,
+        ease: [0.16, 1, 0.3, 1],
+        onUpdate: (v) => setDisplay(Math.round(v).toLocaleString('en')),
+      })
+      return controls.stop
     }
   }, [isInView, count, value])
 
   return (
     <span ref={ref}>
-      {prefix}<motion.span>{display}</motion.span>{suffix}
+      {prefix}{display}{suffix}
     </span>
   )
 }
-
-const MotionLink = motion.create(Link)
 
 export default function LandingPage() {
   return (
@@ -102,14 +102,14 @@ export default function LandingPage() {
             >
               تسجيل الدخول
             </Link>
-            <MotionLink
-              href="/auth/signup"
-              className="rounded-lg bg-[#C4960C] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#A87E0A]"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              ابدأ الآن
-            </MotionLink>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/auth/signup"
+                className="inline-block rounded-lg bg-[#C4960C] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#A87E0A]"
+              >
+                ابدأ الآن
+              </Link>
+            </motion.div>
           </div>
         </div>
       </header>
@@ -163,24 +163,24 @@ export default function LandingPage() {
             variants={itemVariants}
             className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
           >
-            <MotionLink
-              href="/auth/signup"
-              className="flex items-center gap-2 rounded-lg bg-[#C4960C] px-8 py-3.5 text-base font-semibold text-white shadow-md transition-all hover:bg-[#A87E0A] hover:shadow-lg"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              أنشئ موقعك الآن
-              <ArrowLeft className="h-5 w-5" />
-            </MotionLink>
-            <MotionLink
-              href="/dar-al-aseel"
-              className="flex items-center gap-2 rounded-lg border border-[#E5DCC6] bg-white px-8 py-3.5 text-base font-semibold text-[#3B2F08] shadow-sm transition-all hover:border-[#C4960C]/40 hover:bg-[#F7F1E0]"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              شاهد مثال حي
-              <ArrowRight className="h-5 w-5" />
-            </MotionLink>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/auth/signup"
+                className="flex items-center gap-2 rounded-lg bg-[#C4960C] px-8 py-3.5 text-base font-semibold text-white shadow-md transition-all hover:bg-[#A87E0A] hover:shadow-lg"
+              >
+                أنشئ موقعك الآن
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/dar-al-aseel"
+                className="flex items-center gap-2 rounded-lg border border-[#E5DCC6] bg-white px-8 py-3.5 text-base font-semibold text-[#3B2F08] shadow-sm transition-all hover:border-[#C4960C]/40 hover:bg-[#F7F1E0]"
+              >
+                شاهد مثال حي
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            </motion.div>
           </motion.div>
         </motion.div>
       </section>
@@ -528,18 +528,18 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <MotionLink
-                  href="/auth/signup"
-                  className={`block rounded-lg py-3 text-center text-sm font-semibold transition-colors ${
-                    plan.popular
-                      ? 'bg-[#C4960C] text-white shadow-sm hover:bg-[#A87E0A]'
-                      : 'border border-[#E5DCC6] text-[#3B2F08] hover:border-[#C4960C]/40 hover:bg-[#F7F1E0]'
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  ابدأ الآن
-                </MotionLink>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Link
+                    href="/auth/signup"
+                    className={`block rounded-lg py-3 text-center text-sm font-semibold transition-colors ${
+                      plan.popular
+                        ? 'bg-[#C4960C] text-white shadow-sm hover:bg-[#A87E0A]'
+                        : 'border border-[#E5DCC6] text-[#3B2F08] hover:border-[#C4960C]/40 hover:bg-[#F7F1E0]'
+                    }`}
+                  >
+                    ابدأ الآن
+                  </Link>
+                </motion.div>
               </motion.div>
             ))}
           </motion.div>
@@ -570,24 +570,24 @@ export default function LandingPage() {
             variants={itemVariants}
             className="flex flex-col items-center justify-center gap-4 sm:flex-row"
           >
-            <MotionLink
-              href="/auth/signup"
-              className="flex items-center gap-2 rounded-lg bg-[#C4960C] px-8 py-3.5 text-base font-semibold text-white shadow-md transition-all hover:bg-[#A87E0A] hover:shadow-lg"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              أنشئ موقعك الآن
-              <ArrowLeft className="h-5 w-5" />
-            </MotionLink>
-            <MotionLink
-              href="/contact"
-              className="flex items-center gap-2 rounded-lg border border-white/20 px-8 py-3.5 text-base font-semibold text-white transition-all hover:border-white/40 hover:bg-white/10"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Mail className="h-5 w-5" />
-              تواصل معنا
-            </MotionLink>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/auth/signup"
+                className="flex items-center gap-2 rounded-lg bg-[#C4960C] px-8 py-3.5 text-base font-semibold text-white shadow-md transition-all hover:bg-[#A87E0A] hover:shadow-lg"
+              >
+                أنشئ موقعك الآن
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/contact"
+                className="flex items-center gap-2 rounded-lg border border-white/20 px-8 py-3.5 text-base font-semibold text-white transition-all hover:border-white/40 hover:bg-white/10"
+              >
+                <Mail className="h-5 w-5" />
+                تواصل معنا
+              </Link>
+            </motion.div>
           </motion.div>
         </motion.div>
       </section>
