@@ -19,6 +19,8 @@ jobs:
             git pull origin master
             docker build -t falz-app .
             docker stop falz-app && docker rm falz-app
+            # Fix DATABASE_URL to use linked container hostname instead of localhost
+            DB_URL=$(grep DATABASE_URL /opt/falz/.env | head -1 | cut -d= -f2- | tr -d '"' | sed 's/@localhost:/@falz-postgres:/')
             docker run -d \
               --name falz-app \
               --restart always \
@@ -26,5 +28,6 @@ jobs:
               -p 3000:3000 \
               --env-file /opt/falz/.env \
               -e NEXTAUTH_URL=http://falzapp.duckdns.org:3000 \
+              -e DATABASE_URL="$DB_URL" \
               falz-app
             docker image prune -f
