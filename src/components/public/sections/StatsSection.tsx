@@ -68,13 +68,13 @@ export function StatsSection({ config, stats, cities }: Props) {
   return (
     <section
       className="relative overflow-hidden py-20 md:py-28"
-      style={{ backgroundColor: 'var(--theme-primary)' }}
+      style={{ backgroundColor: 'color-mix(in srgb, var(--theme-primary) 6%, var(--theme-background))' }}
     >
       <div
-        className="absolute inset-0 opacity-[0.06]"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-          backgroundSize: '24px 24px',
+          backgroundImage: 'radial-gradient(circle at 1px 1px, var(--theme-primary) 1px, transparent 0)',
+          backgroundSize: '32px 32px',
         }}
       />
 
@@ -86,23 +86,23 @@ export function StatsSection({ config, stats, cities }: Props) {
               <motion.div
                 key={i}
                 className="text-center"
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-60px' }}
-                transition={{ duration: 0.5, delay: i * 0.12 }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
               >
                 <div className="mb-4 flex justify-center">
                   <div
-                    className="flex h-14 w-14 items-center justify-center rounded-full"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                    className="flex h-14 w-14 items-center justify-center rounded-2xl"
+                    style={{ backgroundColor: 'color-mix(in srgb, var(--theme-accent) 12%, transparent)' }}
                   >
-                    <Icon className="h-7 w-7 text-white/80" />
+                    <Icon className="h-6 w-6" style={{ color: 'var(--theme-accent)' }} />
                   </div>
                 </div>
-                <p className="mb-2 text-3xl font-bold text-white sm:text-4xl">
+                <p className="mb-1 text-3xl font-bold sm:text-4xl" style={{ color: 'var(--theme-primary)' }}>
                   <AnimatedNumber target={item.value} />
                 </p>
-                <p className="text-sm text-white/60">{item.label}</p>
+                <p className="text-sm" style={{ color: 'var(--theme-muted)' }}>{item.label}</p>
               </motion.div>
             )
           })}
