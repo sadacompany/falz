@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
-import { Globe, ShieldCheck, ArrowRight, ChevronDown } from 'lucide-react'
+import { ShieldCheck, ArrowRight, ChevronDown } from 'lucide-react'
 
 import { Logo } from '@/components/shared/Logo'
 import { Button } from '@/components/ui/button'
@@ -206,7 +206,7 @@ function SignInForm() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
 
-  const [locale, setLocale] = useState<Locale>('ar')
+  const locale: Locale = 'ar'
   const [step, setStep] = useState<'phone' | 'otp'>('phone')
   const [countryCode, setCountryCode] = useState('966')
   const [phoneValue, setPhoneValue] = useState('')
@@ -316,19 +316,7 @@ function SignInForm() {
   }, [phoneValue, countryCode, otpCode, callbackUrl, router, strings])
 
   return (
-    <div dir={isRtl ? 'rtl' : 'ltr'} className="w-full max-w-md mx-auto">
-      {/* Language Toggle */}
-      <div className="mb-5 flex justify-start">
-        <button
-          type="button"
-          onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#E5DCC6] bg-white px-3.5 py-1.5 text-xs font-medium text-[#7A6C4F] transition-colors hover:border-[#956D00]/40 hover:text-[#956D00] shadow-sm"
-        >
-          <Globe className="h-3.5 w-3.5" />
-          {locale === 'ar' ? 'English' : 'العربية'}
-        </button>
-      </div>
-
+    <div dir="rtl" className="w-full max-w-md mx-auto">
       <Card className="border-[#E5DCC6] bg-white shadow-xl rounded-2xl overflow-hidden">
         <div className="h-1 bg-gradient-to-r from-[#3B2F08] via-[#956D00] to-[#3B2F08]" />
 

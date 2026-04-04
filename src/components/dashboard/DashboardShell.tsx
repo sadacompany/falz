@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -16,7 +16,6 @@ import {
   Settings,
   Search,
   Bell,
-  Globe,
   Menu,
   X,
   ChevronLeft,
@@ -151,7 +150,7 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [locale, setLocale] = useState<'ar' | 'en'>('ar')
+  const locale = 'ar' as const
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -186,11 +185,6 @@ export function DashboardShell({
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [userMenuOpen])
-
-  const toggleLocale = useCallback(() => {
-    setLocale((l) => (l === 'ar' ? 'en' : 'ar'))
-    document.cookie = `falz-locale=${locale === 'ar' ? 'en' : 'ar'}; path=/; max-age=31536000`
-  }, [locale])
 
   const filteredNavItems = navItems.filter(
     (item) => !item.roles || item.roles.includes(role)
@@ -452,17 +446,6 @@ export function DashboardShell({
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            {/* Language Toggle */}
-            <button
-              onClick={toggleLocale}
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs text-[#7A6C4F] transition-colors hover:bg-[#F7F1E0] hover:text-[#3B2F08]"
-            >
-              <Globe className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                {locale === 'ar' ? 'EN' : 'AR'}
-              </span>
-            </button>
-
             {/* Notifications */}
             <button
               aria-label={locale === 'ar' ? 'الإشعارات' : 'Notifications'}

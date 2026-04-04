@@ -187,7 +187,7 @@ const TOTAL_STEPS = 3
 
 export default function SignUpPage() {
   const router = useRouter()
-  const [locale, setLocale] = useState<Locale>('ar')
+  const locale: Locale = 'ar'
   const [step, setStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
   const [logoFile, setLogoFile] = useState<File | null>(null)
@@ -475,19 +475,7 @@ export default function SignUpPage() {
   // ─── Render ───────────────────────────────────────────────────
 
   return (
-    <div dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Language Toggle */}
-      <div className="mb-4 flex justify-end">
-        <button
-          type="button"
-          onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
-          className="flex items-center gap-2 rounded-lg border border-[#E5DCC6] bg-white px-3 py-1.5 text-xs text-[#7A6C4F] transition-colors hover:border-[#956D00]/40 hover:text-[#956D00] shadow-sm"
-        >
-          <Globe className="h-3.5 w-3.5" />
-          {locale === 'ar' ? 'English' : 'العربية'}
-        </button>
-      </div>
-
+    <div dir="rtl">
       <Card className="border-[#E5DCC6] bg-white shadow-lg rounded-2xl">
         <CardContent className="p-8">
           {/* Logo + Header */}

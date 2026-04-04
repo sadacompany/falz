@@ -394,8 +394,8 @@ export default function LandingPage() {
               },
               {
                 icon: Languages,
-                title: 'عربي وإنجليزي',
-                desc: 'دعم كامل للغتين مع تخطيط RTL احترافي',
+                title: 'تصميم عربي أصيل',
+                desc: 'واجهة مصممة بالكامل للغة العربية مع تخطيط RTL احترافي',
               },
               {
                 icon: Zap,
