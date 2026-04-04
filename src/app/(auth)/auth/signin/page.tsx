@@ -159,7 +159,7 @@ function OtpInput({
     : 'border-[#E5DCC6] focus:border-[#956D00] focus:ring-[#956D00]/20'
 
   return (
-    <div className="flex gap-2.5 justify-center" dir="ltr">
+    <div className="flex gap-1.5 sm:gap-2.5 justify-center" dir="ltr">
       {digits.map((digit, i) => (
         <input
           key={i}
@@ -175,9 +175,9 @@ function OtpInput({
           onPaste={handlePaste}
           onFocus={(e) => e.target.select()}
           className={`
-            w-12 h-14 sm:w-14 sm:h-16
-            rounded-xl border-2 bg-white
-            text-center text-2xl sm:text-3xl font-bold text-[#3B2F08]
+            w-10 h-12 sm:w-14 sm:h-16
+            rounded-lg sm:rounded-xl border-2 bg-white
+            text-center text-xl sm:text-3xl font-bold text-[#3B2F08]
             outline-none transition-all duration-200
             focus:ring-4 focus:scale-105
             placeholder:text-[#A09480]
