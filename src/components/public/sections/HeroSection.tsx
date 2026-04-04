@@ -5,7 +5,8 @@ import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { usePublicOffice } from '@/components/public/PublicOfficeContext'
 import { useDirection } from '@/components/shared/DirectionProvider'
-import { Search, ChevronDown, MessageCircle } from 'lucide-react'
+import { Search, ChevronDown } from 'lucide-react'
+import { WhatsAppIcon } from '@/components/public/WhatsAppIcon'
 import type { PageSectionConfig } from '@/types/sections'
 
 interface Props {
@@ -137,14 +138,9 @@ export function HeroSection({ config, officeSlug, officeName, description, whats
                 href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl text-base font-semibold transition-all duration-300 hover:scale-[1.03] border"
-                style={{
-                  borderColor: hasImage ? 'rgba(255,255,255,0.3)' : 'var(--theme-border)',
-                  color: hasImage ? 'white' : 'var(--theme-primary)',
-                  backgroundColor: hasImage ? 'rgba(255,255,255,0.05)' : 'transparent',
-                }}
+                className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl text-base font-semibold transition-all duration-300 hover:scale-[1.03] bg-[#25D366] text-white shadow-md hover:bg-[#1DA851]"
               >
-                <MessageCircle className="h-5 w-5" />
+                <WhatsAppIcon className="h-5 w-5" />
                 تواصل واتساب
               </a>
             )}

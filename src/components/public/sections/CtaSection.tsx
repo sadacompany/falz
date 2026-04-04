@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeft, MessageCircle } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
+import { WhatsAppIcon } from '@/components/public/WhatsAppIcon'
 import type { PageSectionConfig } from '@/types/sections'
 
 interface Props {
@@ -69,13 +70,9 @@ export function CtaSection({ config, officeSlug, whatsapp }: Props) {
                 href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 rounded-xl border px-8 py-4 text-base font-semibold transition-all duration-300 hover:scale-[1.03]"
-                style={{
-                  borderColor: bgImage ? 'rgba(255,255,255,0.3)' : 'var(--theme-border)',
-                  color: bgImage ? 'white' : 'var(--theme-primary)',
-                }}
+                className="inline-flex items-center gap-2.5 rounded-xl px-8 py-4 text-base font-semibold transition-all duration-300 hover:scale-[1.03] bg-[#25D366] text-white shadow-md hover:bg-[#1DA851]"
               >
-                <MessageCircle className="h-5 w-5" />
+                <WhatsAppIcon className="h-5 w-5" />
                 واتساب
               </a>
             )}
