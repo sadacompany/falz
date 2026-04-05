@@ -14,9 +14,67 @@
   --theme-muted: #7A6C4F;
 }
 
+/* ===== Landing page theme system ===== */
+html[data-theme="dark"] {
+  --page-bg: #070b15;
+  --elevated-bg: #0c1222;
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-hover-bg: rgba(255, 255, 255, 0.06);
+  --heading-clr: #ffffff;
+  --body-clr: #9ca3af;
+  --dim-clr: #6b7280;
+  --edge-clr: rgba(255, 255, 255, 0.06);
+  --nav-clr: rgba(7, 11, 21, 0.92);
+  --input-clr: rgba(255, 255, 255, 0.05);
+  --glow-opacity: 0.05;
+  --scrollbar-track: #070b15;
+  --badge-bg: rgba(212, 175, 55, 0.1);
+  --badge-border: rgba(212, 175, 55, 0.2);
+  --section-alt: #0a0f1c;
+  --footer-bg: #050810;
+  --footer-border: rgba(255, 255, 255, 0.06);
+  --footer-heading: #ffffff;
+  --footer-text: #6b7280;
+}
+
+html[data-theme="light"] {
+  --page-bg: #ffffff;
+  --elevated-bg: #ffffff;
+  --card-bg: #ffffff;
+  --card-hover-bg: #f5f6f8;
+  --heading-clr: #0f172a;
+  --body-clr: #475569;
+  --dim-clr: #94a3b8;
+  --edge-clr: rgba(0, 0, 0, 0.07);
+  --nav-clr: rgba(255, 255, 255, 0.92);
+  --input-clr: #eef0f4;
+  --glow-opacity: 0.03;
+  --scrollbar-track: #ffffff;
+  --badge-bg: rgba(212, 175, 55, 0.06);
+  --badge-border: rgba(212, 175, 55, 0.15);
+  --section-alt: #faf8f3;
+  --footer-bg: #0f172a;
+  --footer-border: rgba(255, 255, 255, 0.08);
+  --footer-heading: #ffffff;
+  --footer-text: #94a3b8;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: #D4AF37;
+  --color-accent: #3B82F6;
+  --color-page: var(--page-bg);
+  --color-elevated: var(--elevated-bg);
+  --color-card: var(--card-bg);
+  --color-card-hover: var(--card-hover-bg);
+  --color-heading: var(--heading-clr);
+  --color-body: var(--body-clr);
+  --color-dim: var(--dim-clr);
+  --color-edge: var(--edge-clr);
+  --color-nav: var(--nav-clr);
+  --color-input: var(--input-clr);
+  --color-alt: var(--section-alt);
   --font-sans: var(--font-display), var(--font-arabic), "IBM Plex Sans Arabic", system-ui, -apple-system, sans-serif;
 }
 
@@ -26,6 +84,14 @@ body {
   font-family: var(--font-display), var(--font-arabic), "IBM Plex Sans Arabic", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Landing page body overrides */
+html[data-theme] body {
+  background: var(--page-bg);
+  color: var(--heading-clr);
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ===== Fluid Type Scale ===== */
@@ -67,8 +133,8 @@ body {
 
 /* ===== Scrollbar ===== */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -84,17 +150,12 @@ body {
   background: #9A8E6E;
 }
 
-/* Dark landing page scrollbar */
-html:has(.dark-landing) ::-webkit-scrollbar-track {
-  background: #0a0f1a;
+html[data-theme] ::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
 }
 
-html:has(.dark-landing) ::-webkit-scrollbar-thumb {
-  background: #D4A843;
-}
-
-html:has(.dark-landing) ::-webkit-scrollbar-thumb:hover {
-  background: #C09A35;
+html[data-theme] ::-webkit-scrollbar-thumb {
+  background: #D4AF37;
 }
 
 /* ===== RTL utilities ===== */
@@ -108,8 +169,8 @@ html:has(.dark-landing) ::-webkit-scrollbar-thumb:hover {
   color: #3B2F08;
 }
 
-html:has(.dark-landing) ::selection {
-  background-color: rgba(212, 168, 67, 0.3);
+html[data-theme="dark"] ::selection {
+  background-color: rgba(212, 175, 55, 0.3);
   color: white;
 }
 
@@ -124,25 +185,22 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ===== Glow opacity for light theme ===== */
+[data-theme="light"] .glow {
+  opacity: var(--glow-opacity);
+}
+
 /* ===== Animations ===== */
 
-/* Hero staggered fade-in-up */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in-up {
   animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Stagger delays */
 .stagger-1 { animation-delay: 0.1s; }
 .stagger-2 { animation-delay: 0.25s; }
 .stagger-3 { animation-delay: 0.4s; }
@@ -150,40 +208,22 @@ html {
 .stagger-5 { animation-delay: 0.7s; }
 .stagger-6 { animation-delay: 0.85s; }
 
-/* Floating gradient orbs */
 @keyframes orbFloat {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(30px, -20px) scale(1.05);
-  }
-  66% {
-    transform: translate(-20px, 15px) scale(0.95);
-  }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
 }
 
-.animate-orb {
-  animation: orbFloat 8s ease-in-out infinite;
-}
+.animate-orb { animation: orbFloat 8s ease-in-out infinite; }
+.animate-orb-reverse { animation: orbFloat 10s ease-in-out infinite reverse; }
 
-.animate-orb-reverse {
-  animation: orbFloat 10s ease-in-out infinite reverse;
-}
-
-/* Scroll-triggered animations */
 .animate-on-scroll {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.animate-on-scroll.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Scroll stagger delays */
+.animate-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
 .animate-on-scroll.stagger-1 { transition-delay: 0.1s; }
 .animate-on-scroll.stagger-2 { transition-delay: 0.2s; }
 .animate-on-scroll.stagger-3 { transition-delay: 0.3s; }
@@ -191,37 +231,21 @@ html {
 .animate-on-scroll.stagger-5 { transition-delay: 0.5s; }
 .animate-on-scroll.stagger-6 { transition-delay: 0.6s; }
 
-/* Snap scroll for carousels */
-.snap-x {
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
+.snap-x { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.snap-center { scroll-snap-align: center; }
 
-.snap-center {
-  scroll-snap-align: center;
-}
-
-/* Marquee animation */
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
-.animate-marquee {
-  animation: marquee 30s linear infinite;
-}
+.animate-marquee { animation: marquee 30s linear infinite; }
+.animate-marquee:hover { animation-play-state: paused; }
 
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
-
-/* Staggered children animation on scroll */
 .animate-on-scroll-children > * {
-  opacity: 0;
-  transform: translateY(24px);
+  opacity: 0; transform: translateY(24px);
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 .animate-on-scroll-children.is-visible > *:nth-child(1) { opacity: 1; transform: translateY(0); transition-delay: 0.05s; }
 .animate-on-scroll-children.is-visible > *:nth-child(2) { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
 .animate-on-scroll-children.is-visible > *:nth-child(3) { opacity: 1; transform: translateY(0); transition-delay: 0.15s; }
@@ -231,56 +255,23 @@ html {
 .animate-on-scroll-children.is-visible > *:nth-child(7) { opacity: 1; transform: translateY(0); transition-delay: 0.35s; }
 .animate-on-scroll-children.is-visible > *:nth-child(8) { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
 
-/* Count-up animation helper */
-.count-up {
-  display: inline-block;
-}
+.count-up { display: inline-block; }
 
-/* Shimmer skeleton */
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    #F7F1E0 25%,
-    #EDE5CC 37%,
-    #F7F1E0 63%
-  );
+  background: linear-gradient(90deg, #F7F1E0 25%, #EDE5CC 37%, #F7F1E0 63%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
-/* ===== Accessibility ===== */
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-in-up,
-  .animate-orb,
-  .animate-orb-reverse {
-    animation: none;
-  }
-
-  .animate-on-scroll,
-  .animate-on-scroll-children > * {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .animate-marquee {
-    animation: none;
-  }
-
-  .animate-shimmer {
-    animation: none;
-  }
-
-  * {
-    scroll-behavior: auto;
-  }
+  .animate-fade-in-up, .animate-orb, .animate-orb-reverse { animation: none; }
+  .animate-on-scroll, .animate-on-scroll-children > * { opacity: 1; transform: none; transition: none; }
+  .animate-marquee { animation: none; }
+  .animate-shimmer { animation: none; }
+  * { scroll-behavior: auto; }
 }
