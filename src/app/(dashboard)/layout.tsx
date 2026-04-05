@@ -13,6 +13,9 @@ export default async function DashboardRootLayout({
   }
 
   if (!user.memberships || user.memberships.length === 0) {
+    if (user.isSuperAdmin) {
+      redirect('/admin')
+    }
     redirect('/auth/signup')
   }
 

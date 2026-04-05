@@ -15,6 +15,10 @@ const TEST_PHONES = new Set([
   '+966502222222',
   '+966503333333',
   '+966504444444',
+  '+966552222001',
+  '+966552222002',
+  '+966552222003',
+  '+966552222004',
 ])
 const isTestPhone = (phone: string) => TEST_PHONES.has(phone)
 
