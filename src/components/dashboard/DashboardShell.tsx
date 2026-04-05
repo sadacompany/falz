@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/shared/Logo'
+import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import type { Role } from '@prisma/client'
 
 // ─── Types ──────────────────────────────────────────────────
@@ -446,6 +447,8 @@ export function DashboardShell({
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            <ThemeToggle />
+
             {/* Notifications */}
             <button
               aria-label={locale === 'ar' ? 'الإشعارات' : 'Notifications'}

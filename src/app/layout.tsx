@@ -26,10 +26,11 @@ export const metadata: Metadata = {
     apple: '/apple-icon.svg',
   },
   openGraph: {
-    title: 'FALZ — Real Estate Digital Infrastructure',
-    description: 'Professional digital infrastructure for real estate offices in Saudi Arabia',
+    title: 'FALZ — المنصة الرقمية المتكاملة للمكاتب العقارية',
+    description: 'منصة فالز تمكّن المكاتب العقارية من بناء حضورها الرقمي الاحترافي مع مواقع إلكترونية مخصصة وأدوات إدارة متقدمة',
     type: 'website',
     siteName: 'FALZ',
+    locale: 'ar_SA',
   },
 }
 

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { FalzLogo } from '@/components/shared/FalzLogo'
+import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import { Mail, Phone, MapPin, Send, Check, Loader2, ArrowRight } from 'lucide-react'
 
 export default function ContactPage() {
@@ -44,13 +45,16 @@ export default function ContactPage() {
             <FalzLogo size="sm" className="text-primary" />
             <span className="text-xl font-bold tracking-tight text-heading">FAL<span className="text-primary">Z</span></span>
           </Link>
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm text-body transition-colors hover:text-heading"
-          >
-            الرئيسية
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-sm text-body transition-colors hover:text-heading"
+            >
+              الرئيسية
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </header>
 

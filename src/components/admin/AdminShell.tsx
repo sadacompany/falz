@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/shared/Logo'
+import { ThemeToggle } from '@/components/shared/ThemeToggle'
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -253,6 +254,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <div className="text-right">
               <p className="text-sm font-medium text-heading">{user.name}</p>
               <p className="text-xs text-dim">{user.email}</p>
