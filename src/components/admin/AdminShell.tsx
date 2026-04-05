@@ -100,7 +100,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
         <Logo size="sm" variant="light" />
         {!sidebarCollapsed && (
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-[#956D00] tracking-wide">FALZ</span>
+            <span className="text-lg font-bold text-primary tracking-wide">FALZ</span>
             <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-300">
               مشرف
             </span>
@@ -138,7 +138,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                   className={cn(
                     'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     active
-                      ? 'bg-white/15 text-[#956D00] shadow-sm'
+                      ? 'bg-white/15 text-primary shadow-sm'
                       : 'text-white/60 hover:bg-white/10 hover:text-white',
                     sidebarCollapsed && 'justify-center px-2'
                   )}
@@ -148,7 +148,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                     className={cn(
                       'h-5 w-5 flex-shrink-0 transition-colors',
                       active
-                        ? 'text-[#956D00]'
+                        ? 'text-primary'
                         : 'text-white/50 group-hover:text-white'
                     )}
                   />
@@ -156,7 +156,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                     <span>{item.label}</span>
                   )}
                   {active && !sidebarCollapsed && (
-                    <div className="ms-auto h-1.5 w-1.5 rounded-full bg-[#956D00]" />
+                    <div className="ms-auto h-1.5 w-1.5 rounded-full bg-primary" />
                   )}
                 </Link>
               </li>
@@ -200,7 +200,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
   )
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#FFFDF5]">
+    <div className="flex h-screen overflow-hidden bg-page">
       {/* Desktop Sidebar - Navy for admin distinction */}
       <aside
         className={cn(
@@ -232,13 +232,13 @@ export function AdminShell({ user, children }: AdminShellProps) {
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="flex h-16 items-center justify-between border-b border-[#E5DCC6] bg-white px-4 lg:px-6">
+        <header className="flex h-16 items-center justify-between border-b border-edge bg-elevated px-4 lg:px-6">
           {/* Left side */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
-              className="rounded-lg p-2 text-[#7A6C4F] transition-colors hover:bg-[#F7F1E0] hover:text-[#1A2F4A] lg:hidden"
+              className="rounded-lg p-2 text-body transition-colors hover:bg-card-hover hover:text-heading lg:hidden"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -246,7 +246,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                 <Menu className="h-5 w-5" />
               )}
             </button>
-            <h2 className="text-sm font-medium text-[#7A6C4F]">
+            <h2 className="text-sm font-medium text-body">
               إدارة المنصة
             </h2>
           </div>
@@ -254,12 +254,12 @@ export function AdminShell({ user, children }: AdminShellProps) {
           {/* Right side */}
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-sm font-medium text-[#2E2506]">{user.name}</p>
-              <p className="text-xs text-[#887B60]">{user.email}</p>
+              <p className="text-sm font-medium text-heading">{user.name}</p>
+              <p className="text-xs text-dim">{user.email}</p>
             </div>
             <button
               onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-              className="rounded-lg p-2 text-[#7A6C4F] transition-colors hover:bg-red-50 hover:text-red-500"
+              className="rounded-lg p-2 text-body transition-colors hover:bg-red-50 hover:text-red-500"
               title="تسجيل الخروج"
             >
               <LogOut className="h-5 w-5" />

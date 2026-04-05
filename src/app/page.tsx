@@ -1,25 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect, createContext, useContext } from 'react'
+import { useState } from 'react'
 import { motion, useScroll, AnimatePresence } from 'framer-motion'
-
-/* ═══════════════════════════════════════════
-   Theme
-   ═══════════════════════════════════════════ */
-
-type Theme = 'dark' | 'light'
-const ThemeCtx = createContext<{ theme: Theme; toggle: () => void }>({ theme: 'dark', toggle: () => {} })
-function useTheme() { return useContext(ThemeCtx) }
-
-function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark')
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    return () => { document.documentElement.removeAttribute('data-theme') }
-  }, [theme])
-  return <ThemeCtx value={{ theme, toggle: () => setTheme(t => t === 'dark' ? 'light' : 'dark') }}>{children}</ThemeCtx>
-}
+import { useAppTheme } from '@/components/shared/AppThemeProvider'
 
 /* ═══════════════════════════════════════════
    SVG Icons
@@ -175,16 +159,8 @@ const monthlyData = [45, 58, 42, 72, 85, 68, 92, 78]
    ═══════════════════════════════════════════ */
 
 export default function LandingPage() {
-  return (
-    <ThemeProvider>
-      <LandingContent />
-    </ThemeProvider>
-  )
-}
-
-function LandingContent() {
   const { scrollYProgress } = useScroll()
-  const { theme, toggle } = useTheme()
+  const { theme, toggle } = useAppTheme()
   const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   return (

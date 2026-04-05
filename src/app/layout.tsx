@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { DM_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google'
 import './globals.css'
+import AppThemeProvider from '@/components/shared/AppThemeProvider'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -33,9 +34,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body className={`${dmSans.variable} ${ibmPlexArabic.variable} font-sans antialiased bg-[#FFFDF5] text-[#2E2506]`}>
-        {children}
+    <html lang="ar" dir="rtl" data-theme="dark" suppressHydrationWarning>
+      <body className={`${dmSans.variable} ${ibmPlexArabic.variable} font-sans antialiased`}>
+        <AppThemeProvider>{children}</AppThemeProvider>
       </body>
     </html>
   )

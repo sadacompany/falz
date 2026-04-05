@@ -23,8 +23,8 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#2D3748]">لوحة تحكم المنصة</h1>
-        <p className="mt-1 text-sm text-[#718096]">
+        <h1 className="text-2xl font-bold text-heading">لوحة تحكم المنصة</h1>
+        <p className="mt-1 text-sm text-dim">
           نظرة عامة على المنصة والإحصائيات.
         </p>
       </div>
@@ -38,8 +38,8 @@ export default async function AdminDashboardPage() {
                 <Building2 className="h-5 w-5 text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-[#718096]">إجمالي المكاتب</p>
-                <p className="text-2xl font-bold text-[#2D3748]">{stats.totalOffices}</p>
+                <p className="text-sm text-dim">إجمالي المكاتب</p>
+                <p className="text-2xl font-bold text-heading">{stats.totalOffices}</p>
               </div>
             </div>
           </CardContent>
@@ -52,8 +52,8 @@ export default async function AdminDashboardPage() {
                 <Users className="h-5 w-5 text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-[#718096]">إجمالي المستخدمين</p>
-                <p className="text-2xl font-bold text-[#2D3748]">{stats.totalUsers}</p>
+                <p className="text-sm text-dim">إجمالي المستخدمين</p>
+                <p className="text-2xl font-bold text-heading">{stats.totalUsers}</p>
               </div>
             </div>
           </CardContent>
@@ -66,8 +66,8 @@ export default async function AdminDashboardPage() {
                 <Home className="h-5 w-5 text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm text-[#718096]">إجمالي العقارات</p>
-                <p className="text-2xl font-bold text-[#2D3748]">{stats.totalProperties}</p>
+                <p className="text-sm text-dim">إجمالي العقارات</p>
+                <p className="text-2xl font-bold text-heading">{stats.totalProperties}</p>
               </div>
             </div>
           </CardContent>
@@ -80,8 +80,8 @@ export default async function AdminDashboardPage() {
                 <MessageSquare className="h-5 w-5 text-amber-400" />
               </div>
               <div>
-                <p className="text-sm text-[#718096]">إجمالي العملاء</p>
-                <p className="text-2xl font-bold text-[#2D3748]">{stats.totalLeads}</p>
+                <p className="text-sm text-dim">إجمالي العملاء</p>
+                <p className="text-2xl font-bold text-heading">{stats.totalLeads}</p>
               </div>
             </div>
           </CardContent>
@@ -94,7 +94,7 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <TrendingUp className="h-5 w-5 text-[#C8A96E]" />
+              <TrendingUp className="h-5 w-5 text-primary" />
               توزيع الاشتراكات
             </CardTitle>
           </CardHeader>
@@ -111,23 +111,23 @@ export default async function AdminDashboardPage() {
                   <div key={item.plan} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-[#2D3748]">
+                        <span className="text-sm font-medium text-heading">
                           {planNameMap[item.plan] || item.plan}
                         </span>
                         <Badge variant="secondary">{item.count}</Badge>
                       </div>
-                      <span className="text-sm text-[#718096]">
+                      <span className="text-sm text-dim">
                         {percentage.toFixed(1)}%
                       </span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-[#EBF0F7]">
+                    <div className="h-2 overflow-hidden rounded-full bg-alt">
                       <div
                         className={`h-full rounded-full transition-all ${
                           item.plan === 'Enterprise'
-                            ? 'bg-[#C8A96E]'
+                            ? 'bg-primary'
                             : item.plan === 'Pro'
                               ? 'bg-blue-500'
-                              : 'bg-[#718096]'
+                              : 'bg-dim'
                         }`}
                         style={{ width: `${percentage}%` }}
                       />
@@ -137,7 +137,7 @@ export default async function AdminDashboardPage() {
               })}
 
               {stats.subscriptionDistribution.length === 0 && (
-                <p className="py-8 text-center text-sm text-[#718096]">
+                <p className="py-8 text-center text-sm text-dim">
                   لا توجد اشتراكات بعد
                 </p>
               )}
@@ -149,23 +149,23 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <DollarSign className="h-5 w-5 text-[#C8A96E]" />
+              <DollarSign className="h-5 w-5 text-primary" />
               إحصائيات الإيرادات
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#FAFAF7] p-4">
-                <p className="text-sm text-[#718096]">إجمالي الإيرادات</p>
-                <p className="mt-1 text-xl font-bold text-[#C8A96E]">
+              <div className="rounded-lg border border-edge bg-page p-4">
+                <p className="text-sm text-dim">إجمالي الإيرادات</p>
+                <p className="mt-1 text-xl font-bold text-primary">
                   {(stats.totalRevenue / 100).toLocaleString('ar-SA-u-nu-latn', {
                     minimumFractionDigits: 2,
                   })}{' '}
                   ر.س
                 </p>
               </div>
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#FAFAF7] p-4">
-                <p className="text-sm text-[#718096]">هذا الشهر</p>
+              <div className="rounded-lg border border-edge bg-page p-4">
+                <p className="text-sm text-dim">هذا الشهر</p>
                 <p className="mt-1 text-xl font-bold text-emerald-400">
                   {(stats.monthlyRevenue / 100).toLocaleString('ar-SA-u-nu-latn', {
                     minimumFractionDigits: 2,
@@ -173,14 +173,14 @@ export default async function AdminDashboardPage() {
                   ر.س
                 </p>
               </div>
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#FAFAF7] p-4">
-                <p className="text-sm text-[#718096]">الفواتير المدفوعة</p>
-                <p className="mt-1 text-xl font-bold text-[#2D3748]">
+              <div className="rounded-lg border border-edge bg-page p-4">
+                <p className="text-sm text-dim">الفواتير المدفوعة</p>
+                <p className="mt-1 text-xl font-bold text-heading">
                   {stats.paidInvoices}
                 </p>
               </div>
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#FAFAF7] p-4">
-                <p className="text-sm text-[#718096]">الفواتير المعلقة</p>
+              <div className="rounded-lg border border-edge bg-page p-4">
+                <p className="text-sm text-dim">الفواتير المعلقة</p>
                 <p className="mt-1 text-xl font-bold text-amber-400">
                   {stats.pendingInvoices}
                 </p>
@@ -197,40 +197,40 @@ export default async function AdminDashboardPage() {
         </CardHeader>
         <CardContent>
           {stats.recentSignups.length === 0 ? (
-            <p className="py-8 text-center text-sm text-[#718096]">
+            <p className="py-8 text-center text-sm text-dim">
               لا توجد تسجيلات حديثة
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-[#E2E8F0]">
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-[#718096]">
+                  <tr className="border-b border-edge">
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-dim">
                       المكتب
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-[#718096]">
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-dim">
                       المالك
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-[#718096]">
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-dim">
                       الحالة
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-[#718096]">
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-dim">
                       التاريخ
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E2E8F0]">
+                <tbody className="divide-y divide-edge">
                   {stats.recentSignups.map((signup) => (
-                    <tr key={signup.id} className="transition-colors hover:bg-[#F7F7F2]/30">
+                    <tr key={signup.id} className="transition-colors hover:bg-card-hover/30">
                       <td className="px-4 py-3">
                         <div>
-                          <p className="text-sm font-medium text-[#2D3748]">
+                          <p className="text-sm font-medium text-heading">
                             {signup.name}
                           </p>
-                          <p className="text-xs text-[#718096]">{signup.slug}</p>
+                          <p className="text-xs text-dim">{signup.slug}</p>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-[#718096]">
+                      <td className="px-4 py-3 text-sm text-dim">
                         {signup.ownerEmail || '-'}
                       </td>
                       <td className="px-4 py-3">
@@ -240,7 +240,7 @@ export default async function AdminDashboardPage() {
                           {signup.isApproved ? 'معتمد' : 'معلق'}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-sm text-[#718096]">
+                      <td className="px-4 py-3 text-sm text-dim">
                         {new Date(signup.createdAt).toLocaleDateString('ar-SA-u-nu-latn', {
                           month: 'short',
                           day: 'numeric',

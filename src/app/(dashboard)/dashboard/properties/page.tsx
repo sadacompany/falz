@@ -162,8 +162,8 @@ export default function PropertiesPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#2D3748]">العقارات</h1>
-          <p className="mt-1 text-sm text-[#718096]">
+          <h1 className="text-2xl font-bold text-heading">العقارات</h1>
+          <p className="mt-1 text-sm text-dim">
             {pagination.total} عقار
           </p>
         </div>
@@ -186,7 +186,7 @@ export default function PropertiesPage() {
         <CardContent className="p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
-              <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#718096]" />
+              <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-dim" />
               <Input
                 placeholder="البحث في العقارات..."
                 value={search}
@@ -204,7 +204,7 @@ export default function PropertiesPage() {
                 setStatusFilter(e.target.value)
                 setPage(1)
               }}
-              className="rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748]"
+              className="rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading"
             >
               <option value="">جميع الحالات</option>
               <option value="DRAFT">مسودة</option>
@@ -218,7 +218,7 @@ export default function PropertiesPage() {
                 setDealFilter(e.target.value)
                 setPage(1)
               }}
-              className="rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748]"
+              className="rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading"
             >
               <option value="">جميع الأنواع</option>
               <option value="SALE">بيع</option>
@@ -231,7 +231,7 @@ export default function PropertiesPage() {
                 setTypeFilter(e.target.value)
                 setPage(1)
               }}
-              className="rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748]"
+              className="rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading"
             >
               <option value="">جميع الأصناف</option>
               <option value="APARTMENT">شقة</option>
@@ -242,14 +242,14 @@ export default function PropertiesPage() {
               <option value="BUILDING">مبنى</option>
             </select>
 
-            <div className="flex gap-1 border-s border-[#E2E8F0] ps-3">
+            <div className="flex gap-1 border-s border-edge ps-3">
               <button
                 onClick={() => setViewMode('table')}
                 className={cn(
                   'rounded-md p-2 transition-colors',
                   viewMode === 'table'
-                    ? 'bg-[#C8A96E]/10 text-[#C8A96E]'
-                    : 'text-[#718096] hover:text-[#1E3A5F]'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-dim hover:text-heading'
                 )}
               >
                 <List className="h-4 w-4" />
@@ -259,8 +259,8 @@ export default function PropertiesPage() {
                 className={cn(
                   'rounded-md p-2 transition-colors',
                   viewMode === 'grid'
-                    ? 'bg-[#C8A96E]/10 text-[#C8A96E]'
-                    : 'text-[#718096] hover:text-[#1E3A5F]'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-dim hover:text-heading'
                 )}
               >
                 <Grid3X3 className="h-4 w-4" />
@@ -272,8 +272,8 @@ export default function PropertiesPage() {
 
       {/* Bulk Actions */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-3 rounded-lg border border-[#C8A96E]/30 bg-[#C8A96E]/5 px-4 py-3">
-          <span className="text-sm text-[#C8A96E]">
+        <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
+          <span className="text-sm text-primary">
             {selectedIds.size} محدد
           </span>
           <Button variant="outline" size="sm" onClick={handleBulkPublish}>
@@ -290,16 +290,16 @@ export default function PropertiesPage() {
       {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#C8A96E] border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       ) : properties.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <Building2 className="mx-auto h-12 w-12 text-[#718096]" />
-            <p className="mt-4 text-lg font-medium text-[#2D3748]">
+            <Building2 className="mx-auto h-12 w-12 text-dim" />
+            <p className="mt-4 text-lg font-medium text-heading">
               لا توجد عقارات
             </p>
-            <p className="mt-1 text-sm text-[#718096]">
+            <p className="mt-1 text-sm text-dim">
               أضف أول عقار لك للبدء.
             </p>
             <Link href="/dashboard/properties/new" className="mt-4 inline-block">
@@ -316,34 +316,34 @@ export default function PropertiesPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#E2E8F0]">
+                <tr className="border-b border-edge">
                   <th className="px-4 py-3 text-start">
                     <input
                       type="checkbox"
                       checked={selectedIds.size === properties.length && properties.length > 0}
                       onChange={selectAll}
-                      className="rounded border-[#E2E8F0]"
+                      className="rounded border-edge"
                     />
                   </th>
-                  <th className="px-4 py-3 text-start text-xs font-medium uppercase text-[#718096]">
+                  <th className="px-4 py-3 text-start text-xs font-medium uppercase text-dim">
                     العقار
                   </th>
-                  <th className="px-4 py-3 text-start text-xs font-medium uppercase text-[#718096]">
+                  <th className="px-4 py-3 text-start text-xs font-medium uppercase text-dim">
                     السعر
                   </th>
-                  <th className="px-4 py-3 text-start text-xs font-medium uppercase text-[#718096]">
+                  <th className="px-4 py-3 text-start text-xs font-medium uppercase text-dim">
                     الحالة
                   </th>
-                  <th className="px-4 py-3 text-start text-xs font-medium uppercase text-[#718096]">
+                  <th className="px-4 py-3 text-start text-xs font-medium uppercase text-dim">
                     النوع
                   </th>
-                  <th className="hidden px-4 py-3 text-start text-xs font-medium uppercase text-[#718096] md:table-cell">
+                  <th className="hidden px-4 py-3 text-start text-xs font-medium uppercase text-dim md:table-cell">
                     المشاهدات
                   </th>
-                  <th className="hidden px-4 py-3 text-start text-xs font-medium uppercase text-[#718096] lg:table-cell">
+                  <th className="hidden px-4 py-3 text-start text-xs font-medium uppercase text-dim lg:table-cell">
                     التاريخ
                   </th>
-                  <th className="px-4 py-3 text-end text-xs font-medium uppercase text-[#718096]">
+                  <th className="px-4 py-3 text-end text-xs font-medium uppercase text-dim">
                     الإجراءات
                   </th>
                 </tr>
@@ -357,14 +357,14 @@ export default function PropertiesPage() {
                   return (
                     <tr
                       key={property.id}
-                      className="border-b border-[#E2E8F0] transition-colors hover:bg-white/50"
+                      className="border-b border-edge transition-colors hover:bg-card-hover"
                     >
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
                           checked={selectedIds.has(property.id)}
                           onChange={() => toggleSelect(property.id)}
-                          className="rounded border-[#E2E8F0]"
+                          className="rounded border-edge"
                         />
                       </td>
                       <td className="px-4 py-3">
@@ -379,21 +379,21 @@ export default function PropertiesPage() {
                               />
                             </div>
                           ) : (
-                            <div className="flex h-10 w-14 flex-shrink-0 items-center justify-center rounded-md bg-[#EBF0F7]">
-                              <Building2 className="h-4 w-4 text-[#718096]" />
+                            <div className="flex h-10 w-14 flex-shrink-0 items-center justify-center rounded-md bg-alt">
+                              <Building2 className="h-4 w-4 text-dim" />
                             </div>
                           )}
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-[#2D3748]">
+                            <p className="truncate text-sm font-medium text-heading">
                               {property.title}
                             </p>
-                            <p className="text-xs text-[#718096]">
+                            <p className="text-xs text-dim">
                               {propertyTypeLabel[property.propertyType] || property.propertyType} - {property.city || 'غير محدد'}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-[#2D3748]">
+                      <td className="px-4 py-3 text-sm font-medium text-heading">
                         {formatPrice(BigInt(property.price), property.currency)}
                       </td>
                       <td className="px-4 py-3">
@@ -402,19 +402,19 @@ export default function PropertiesPage() {
                       <td className="px-4 py-3">
                         <Badge variant={deal.variant}>{deal.label}</Badge>
                       </td>
-                      <td className="hidden px-4 py-3 text-sm text-[#718096] md:table-cell">
+                      <td className="hidden px-4 py-3 text-sm text-dim md:table-cell">
                         <div className="flex items-center gap-1">
                           <Eye className="h-3.5 w-3.5" />
                           {property._count.analyticsEvents}
                         </div>
                       </td>
-                      <td className="hidden px-4 py-3 text-sm text-[#718096] lg:table-cell">
+                      <td className="hidden px-4 py-3 text-sm text-dim lg:table-cell">
                         {new Date(property.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
                           <Link href={`/dashboard/properties/${property.id}`}>
-                            <button className="rounded-md p-1.5 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]">
+                            <button className="rounded-md p-1.5 text-dim transition-colors hover:bg-card-hover hover:text-heading">
                               <Edit className="h-4 w-4" />
                             </button>
                           </Link>
@@ -436,7 +436,7 @@ export default function PropertiesPage() {
 
             return (
               <Link key={property.id} href={`/dashboard/properties/${property.id}`}>
-                <Card className="overflow-hidden transition-all duration-200 hover:border-[#C8A96E]/40 hover:shadow-lg hover:shadow-[#C8A96E]/5">
+                <Card className="overflow-hidden transition-all duration-200 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
                   <div className="relative aspect-[4/3]">
                     {thumb ? (
                       <Image
@@ -446,8 +446,8 @@ export default function PropertiesPage() {
                         className="object-cover"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center bg-[#EBF0F7]">
-                        <Building2 className="h-8 w-8 text-[#718096]" />
+                      <div className="flex h-full items-center justify-center bg-alt">
+                        <Building2 className="h-8 w-8 text-dim" />
                       </div>
                     )}
                     <div className="absolute start-2 top-2">
@@ -455,13 +455,13 @@ export default function PropertiesPage() {
                     </div>
                   </div>
                   <CardContent className="p-4">
-                    <p className="truncate text-sm font-semibold text-[#2D3748]">
+                    <p className="truncate text-sm font-semibold text-heading">
                       {property.title}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-[#C8A96E]">
+                    <p className="mt-1 text-sm font-medium text-primary">
                       {formatPrice(BigInt(property.price), property.currency)}
                     </p>
-                    <div className="mt-2 flex items-center justify-between text-xs text-[#718096]">
+                    <div className="mt-2 flex items-center justify-between text-xs text-dim">
                       <span>{propertyTypeLabel[property.propertyType] || property.propertyType}</span>
                       <span className="flex items-center gap-1">
                         <Eye className="h-3 w-3" />
@@ -479,7 +479,7 @@ export default function PropertiesPage() {
       {/* Pagination */}
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-[#718096]">
+          <p className="text-sm text-dim">
             عرض {(pagination.page - 1) * pagination.pageSize + 1} إلى{' '}
             {Math.min(pagination.page * pagination.pageSize, pagination.total)} من{' '}
             {pagination.total}

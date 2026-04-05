@@ -34,17 +34,17 @@ function ErrorContent() {
 
   return (
     <div dir="rtl">
-      <Card className="border-[#E2E8F0] bg-white shadow-lg rounded-2xl">
+      <Card className="border-edge bg-elevated shadow-lg rounded-2xl">
         <CardContent className="p-8">
           <div className="flex flex-col items-center text-center">
             <Logo size="md" variant="light" />
-            <div className="mt-6 inline-flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
+            <div className="mt-6 inline-flex h-14 w-14 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/30">
               <AlertTriangle className="h-7 w-7 text-red-500" />
             </div>
-            <h1 className="mt-4 text-xl font-bold text-[#1E3A5F]">
+            <h1 className="mt-4 text-xl font-bold text-heading">
               خطأ في المصادقة
             </h1>
-            <p className="mt-2 text-sm text-[#718096]">{messages.ar}</p>
+            <p className="mt-2 text-sm text-body">{messages.ar}</p>
             <div className="mt-6 flex gap-3 w-full">
               <Link href="/auth/signin" className="flex-1">
                 <Button className="w-full">تسجيل الدخول</Button>
@@ -64,8 +64,8 @@ export default function AuthErrorPage() {
   return (
     <Suspense
       fallback={
-        <Card className="border-[#E2E8F0] bg-white shadow-lg rounded-2xl">
-          <CardContent className="p-8 text-center text-[#718096]">
+        <Card className="border-edge bg-elevated shadow-lg rounded-2xl">
+          <CardContent className="p-8 text-center text-body">
             جاري التحميل...
           </CardContent>
         </Card>

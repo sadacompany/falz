@@ -79,17 +79,11 @@ html[data-theme="light"] {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--page-bg, var(--background));
+  color: var(--heading-clr, var(--foreground));
   font-family: var(--font-display), var(--font-arabic), "IBM Plex Sans Arabic", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Landing page body overrides */
-html[data-theme] body {
-  background: var(--page-bg);
-  color: var(--heading-clr);
   overflow-x: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -138,24 +132,12 @@ html[data-theme] body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F7F1E0;
+  background: var(--scrollbar-track, #070b15);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D4C9A8;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #9A8E6E;
-}
-
-html[data-theme] ::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-}
-
-html[data-theme] ::-webkit-scrollbar-thumb {
   background: #D4AF37;
+  border-radius: 3px;
 }
 
 /* ===== RTL utilities ===== */
@@ -165,13 +147,8 @@ html[data-theme] ::-webkit-scrollbar-thumb {
 
 /* ===== Selection ===== */
 ::selection {
-  background-color: rgba(149, 109, 0, 0.2);
-  color: #3B2F08;
-}
-
-html[data-theme="dark"] ::selection {
-  background-color: rgba(212, 175, 55, 0.3);
-  color: white;
+  background-color: rgba(212, 175, 55, 0.25);
+  color: var(--heading-clr, white);
 }
 
 /* ===== Focus ===== */
@@ -263,7 +240,7 @@ html {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #F7F1E0 25%, #EDE5CC 37%, #F7F1E0 63%);
+  background: linear-gradient(90deg, var(--card-hover-bg, #F7F1E0) 25%, var(--edge-clr, #EDE5CC) 37%, var(--card-hover-bg, #F7F1E0) 63%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }

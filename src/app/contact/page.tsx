@@ -36,17 +36,17 @@ export default function ContactPage() {
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#FFFDF5] text-[#2E2506]">
+    <div dir="rtl" className="min-h-screen bg-page text-heading">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-[#E5DCC6]/80 bg-[#FFFDF5]/80 backdrop-blur-lg">
+      <header className="sticky top-0 z-50 border-b border-edge/80 bg-page/80 backdrop-blur-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-3">
             <FalzLogo variant="dark" size="sm" />
-            <span className="text-xl font-bold tracking-tight text-[#3B2F08]">FALZ</span>
+            <span className="text-xl font-bold tracking-tight text-heading">FALZ</span>
           </Link>
           <Link
             href="/"
-            className="flex items-center gap-2 text-sm text-[#7A6C4F] transition-colors hover:text-[#3B2F08]"
+            className="flex items-center gap-2 text-sm text-body transition-colors hover:text-heading"
           >
             الرئيسية
             <ArrowRight className="h-4 w-4" />
@@ -56,10 +56,10 @@ export default function ContactPage() {
 
       {/* Hero */}
       <section className="relative py-16 md:py-24">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#F7F1E0]/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-card-hover/50 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-6 text-center">
-          <h1 className="text-3xl font-bold text-[#3B2F08] md:text-5xl">تواصل معنا</h1>
-          <p className="mx-auto mt-4 max-w-xl text-[#7A6C4F]">
+          <h1 className="text-3xl font-bold text-heading md:text-5xl">تواصل معنا</h1>
+          <p className="mx-auto mt-4 max-w-xl text-body">
             نسعد بتواصلك معنا. أرسل رسالتك وسنرد عليك في أقرب وقت ممكن
           </p>
         </div>
@@ -71,33 +71,33 @@ export default function ContactPage() {
           {/* Contact Info */}
           <div className="lg:col-span-2 space-y-8">
             <div>
-              <h2 className="text-xl font-bold text-[#3B2F08] mb-6">معلومات التواصل</h2>
+              <h2 className="text-xl font-bold text-heading mb-6">معلومات التواصل</h2>
               <div className="space-y-5">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#F7F1E0]">
-                    <Mail className="h-5 w-5 text-[#956D00]" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card-hover">
+                    <Mail className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#3B2F08]">البريد الإلكتروني</p>
-                    <p className="text-sm text-[#7A6C4F]">info@falz.sa</p>
+                    <p className="text-sm font-medium text-heading">البريد الإلكتروني</p>
+                    <p className="text-sm text-body">info@falz.sa</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#F7F1E0]">
-                    <Phone className="h-5 w-5 text-[#956D00]" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card-hover">
+                    <Phone className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#3B2F08]">الهاتف</p>
-                    <p className="text-sm text-[#7A6C4F]" dir="ltr">+966 50 000 0000</p>
+                    <p className="text-sm font-medium text-heading">الهاتف</p>
+                    <p className="text-sm text-body" dir="ltr">+966 50 000 0000</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#F7F1E0]">
-                    <MapPin className="h-5 w-5 text-[#956D00]" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card-hover">
+                    <MapPin className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#3B2F08]">الموقع</p>
-                    <p className="text-sm text-[#7A6C4F]">الرياض، المملكة العربية السعودية</p>
+                    <p className="text-sm font-medium text-heading">الموقع</p>
+                    <p className="text-sm text-body">الرياض، المملكة العربية السعودية</p>
                   </div>
                 </div>
               </div>
@@ -106,17 +106,17 @@ export default function ContactPage() {
 
           {/* Contact Form */}
           <div className="lg:col-span-3">
-            <div className="rounded-2xl border border-[#E5DCC6] bg-white p-8 shadow-sm">
+            <div className="rounded-2xl border border-edge bg-elevated p-8 shadow-sm">
               {status === 'success' ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
                     <Check className="h-8 w-8 text-emerald-500" />
                   </div>
-                  <h3 className="text-xl font-bold text-[#3B2F08]">تم إرسال رسالتك بنجاح</h3>
-                  <p className="mt-2 text-[#7A6C4F]">شكراً لتواصلك معنا. سنرد عليك في أقرب وقت ممكن</p>
+                  <h3 className="text-xl font-bold text-heading">تم إرسال رسالتك بنجاح</h3>
+                  <p className="mt-2 text-body">شكراً لتواصلك معنا. سنرد عليك في أقرب وقت ممكن</p>
                   <button
                     onClick={() => setStatus('idle')}
-                    className="mt-6 rounded-lg bg-[#956D00] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#7A5A00]"
+                    className="mt-6 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
                   >
                     إرسال رسالة أخرى
                   </button>
@@ -125,7 +125,7 @@ export default function ContactPage() {
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-[#3B2F08]">
+                      <label className="mb-1.5 block text-sm font-medium text-heading">
                         الاسم <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -133,12 +133,12 @@ export default function ContactPage() {
                         required
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        className="w-full rounded-lg border border-[#E5DCC6] bg-[#FFFDF5] px-4 py-2.5 text-sm text-[#2E2506] placeholder:text-[#887B60] focus:border-[#956D00] focus:outline-none focus:ring-1 focus:ring-[#956D00]"
+                        className="w-full rounded-lg border border-edge bg-input px-4 py-2.5 text-sm text-heading placeholder:text-dim focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         placeholder="اسمك الكامل"
                       />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-[#3B2F08]">
+                      <label className="mb-1.5 block text-sm font-medium text-heading">
                         البريد الإلكتروني <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -146,7 +146,7 @@ export default function ContactPage() {
                         required
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
-                        className="w-full rounded-lg border border-[#E5DCC6] bg-[#FFFDF5] px-4 py-2.5 text-sm text-[#2E2506] placeholder:text-[#887B60] focus:border-[#956D00] focus:outline-none focus:ring-1 focus:ring-[#956D00]"
+                        className="w-full rounded-lg border border-edge bg-input px-4 py-2.5 text-sm text-heading placeholder:text-dim focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         placeholder="example@email.com"
                         dir="ltr"
                       />
@@ -154,33 +154,33 @@ export default function ContactPage() {
                   </div>
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-[#3B2F08]">
+                      <label className="mb-1.5 block text-sm font-medium text-heading">
                         رقم الجوال
                       </label>
                       <input
                         type="tel"
                         value={form.phone}
                         onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                        className="w-full rounded-lg border border-[#E5DCC6] bg-[#FFFDF5] px-4 py-2.5 text-sm text-[#2E2506] placeholder:text-[#887B60] focus:border-[#956D00] focus:outline-none focus:ring-1 focus:ring-[#956D00]"
+                        className="w-full rounded-lg border border-edge bg-input px-4 py-2.5 text-sm text-heading placeholder:text-dim focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         placeholder="+966"
                         dir="ltr"
                       />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-[#3B2F08]">
+                      <label className="mb-1.5 block text-sm font-medium text-heading">
                         اسم الشركة / المكتب
                       </label>
                       <input
                         type="text"
                         value={form.company}
                         onChange={(e) => setForm({ ...form, company: e.target.value })}
-                        className="w-full rounded-lg border border-[#E5DCC6] bg-[#FFFDF5] px-4 py-2.5 text-sm text-[#2E2506] placeholder:text-[#887B60] focus:border-[#956D00] focus:outline-none focus:ring-1 focus:ring-[#956D00]"
+                        className="w-full rounded-lg border border-edge bg-input px-4 py-2.5 text-sm text-heading placeholder:text-dim focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         placeholder="اسم المكتب العقاري"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-[#3B2F08]">
+                    <label className="mb-1.5 block text-sm font-medium text-heading">
                       الرسالة <span className="text-red-500">*</span>
                     </label>
                     <textarea
@@ -188,7 +188,7 @@ export default function ContactPage() {
                       rows={5}
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      className="w-full rounded-lg border border-[#E5DCC6] bg-[#FFFDF5] px-4 py-2.5 text-sm text-[#2E2506] placeholder:text-[#887B60] focus:border-[#956D00] focus:outline-none focus:ring-1 focus:ring-[#956D00] resize-none"
+                      className="w-full rounded-lg border border-edge bg-input px-4 py-2.5 text-sm text-heading placeholder:text-dim focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                       placeholder="كيف يمكننا مساعدتك؟"
                     />
                   </div>
@@ -200,7 +200,7 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={status === 'loading'}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#956D00] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#7A5A00] disabled:opacity-60"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
                   >
                     {status === 'loading' ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -217,8 +217,8 @@ export default function ContactPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[#E5DCC6] bg-white py-8">
-        <div className="mx-auto max-w-7xl px-6 text-center text-xs text-[#887B60]">
+      <footer className="border-t border-edge bg-elevated py-8">
+        <div className="mx-auto max-w-7xl px-6 text-center text-xs text-dim">
           © {new Date().getFullYear()} FALZ. جميع الحقوق محفوظة.
         </div>
       </footer>
