@@ -5,16 +5,9 @@ import { FalzLogo } from './FalzLogo'
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg'
-  variant?: 'light' | 'dark'
   className?: string
 }
 
-export function Logo({ size = 'md', variant = 'light', className }: LogoProps) {
-  return (
-    <FalzLogo
-      size={size}
-      variant={variant === 'dark' ? 'dark' : 'dark'}
-      className={className}
-    />
-  )
+export function Logo({ size = 'md', className }: LogoProps) {
+  return <FalzLogo size={size} className={cn('text-primary', className)} />
 }

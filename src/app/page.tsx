@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { motion, useScroll, AnimatePresence } from 'framer-motion'
 import { useAppTheme } from '@/components/shared/AppThemeProvider'
+import { FalzLogo } from '@/components/shared/FalzLogo'
 
 /* ═══════════════════════════════════════════
    SVG Icons
@@ -169,9 +170,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-nav backdrop-blur-md border-b border-edge">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-black font-black text-sm">F</span>
-            </div>
+            <FalzLogo size="sm" className="text-primary" />
             <span className="text-xl font-black text-heading">
               FAL<span className="text-primary">Z</span>
             </span>
@@ -536,9 +535,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                  <span className="text-black font-black text-sm">F</span>
-                </div>
+                <FalzLogo size="sm" className="text-primary" />
                 <span className="text-xl font-black" style={{ color: 'var(--footer-heading)' }}>FAL<span className="text-primary">Z</span></span>
               </div>
               <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--footer-text)' }}>المنصة الرقمية المتكاملة لإدارة المكاتب العقارية المرخصة في المملكة العربية السعودية.</p>

@@ -37,7 +37,7 @@ function ErrorContent() {
       <Card className="border-edge bg-elevated shadow-lg rounded-2xl">
         <CardContent className="p-8">
           <div className="flex flex-col items-center text-center">
-            <Logo size="md" variant="light" />
+            <Logo size="md" />
             <div className="mt-6 inline-flex h-14 w-14 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/30">
               <AlertTriangle className="h-7 w-7 text-red-500" />
             </div>

@@ -21,10 +21,15 @@ export const metadata: Metadata = {
   description:
     'منصة فالز تمكّن المكاتب العقارية من بناء حضورها الرقمي الاحترافي مع مواقع إلكترونية مخصصة وأدوات إدارة متقدمة',
   keywords: ['عقارات', 'مكاتب عقارية', 'منصة عقارية', 'السعودية', 'FALZ', 'real estate', 'Saudi Arabia'],
+  icons: {
+    icon: '/icon.svg',
+    apple: '/apple-icon.svg',
+  },
   openGraph: {
     title: 'FALZ — Real Estate Digital Infrastructure',
     description: 'Professional digital infrastructure for real estate offices in Saudi Arabia',
     type: 'website',
+    siteName: 'FALZ',
   },
 }
 

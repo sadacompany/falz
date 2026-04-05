@@ -1,0 +1,10 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" rx="40" fill="#070b15"/>
+  <g transform="translate(30, 30)" fill="#D4AF37">
+    <rect x="0" y="0" width="17" height="48"/>
+    <rect x="29" y="0" width="91" height="17"/>
+    <rect x="29" y="29" width="62" height="17"/>
+    <path d="M0 62V120H29V79H17V62Z"/>
+    <rect x="29" y="79" width="62" height="17"/>
+  </g>
+</svg>

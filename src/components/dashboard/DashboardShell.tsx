@@ -201,10 +201,10 @@ export function DashboardShell({
     <div className="flex h-full flex-col">
       {/* Logo Section */}
       <div className="flex items-center gap-3 border-b border-edge px-4 py-5">
-        <Logo size="sm" variant="dark" />
+        <Logo size="sm" />
         {!sidebarCollapsed && (
           <span className="text-lg font-bold text-heading tracking-wide">
-            FALZ
+            FAL<span className="text-primary">Z</span>
           </span>
         )}
       </div>

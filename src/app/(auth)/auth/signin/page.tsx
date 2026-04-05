@@ -323,7 +323,7 @@ function SignInForm() {
         <CardContent className="px-7 py-9 sm:px-10 sm:py-10">
           {/* Header */}
           <div className="mb-8 flex flex-col items-center text-center">
-            <Logo size="lg" variant="light" />
+            <Logo size="lg" />
             <h1 className="mt-5 text-2xl font-bold text-heading">{strings.title}</h1>
             <p className="mt-2 text-sm text-body">{strings.subtitle}</p>
           </div>

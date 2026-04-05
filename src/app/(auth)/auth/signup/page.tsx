@@ -480,7 +480,7 @@ export default function SignUpPage() {
         <CardContent className="p-8">
           {/* Logo + Header */}
           <div className="mb-6 flex flex-col items-center">
-            <Logo size="md" variant="light" />
+            <Logo size="md" />
             <h1 className="mt-3 text-xl font-bold text-heading">
               {strings.title}
             </h1>

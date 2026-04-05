@@ -41,8 +41,8 @@ export default function ContactPage() {
       <header className="sticky top-0 z-50 border-b border-edge/80 bg-page/80 backdrop-blur-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-3">
-            <FalzLogo variant="dark" size="sm" />
-            <span className="text-xl font-bold tracking-tight text-heading">FALZ</span>
+            <FalzLogo size="sm" className="text-primary" />
+            <span className="text-xl font-bold tracking-tight text-heading">FAL<span className="text-primary">Z</span></span>
           </Link>
           <Link
             href="/"

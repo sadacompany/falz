@@ -97,10 +97,10 @@ export function AdminShell({ user, children }: AdminShellProps) {
     <div className="flex h-full flex-col">
       {/* Logo Section */}
       <div className="flex items-center gap-3 border-b border-white/10 px-4 py-5">
-        <Logo size="sm" variant="light" />
+        <Logo size="sm" />
         {!sidebarCollapsed && (
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-primary tracking-wide">FALZ</span>
+            <span className="text-lg font-bold text-primary tracking-wide">FAL<span className="text-white">Z</span></span>
             <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-300">
               مشرف
             </span>
