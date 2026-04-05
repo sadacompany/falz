@@ -84,6 +84,19 @@ body {
   background: #9A8E6E;
 }
 
+/* Dark landing page scrollbar */
+html:has(.dark-landing) ::-webkit-scrollbar-track {
+  background: #0a0f1a;
+}
+
+html:has(.dark-landing) ::-webkit-scrollbar-thumb {
+  background: #D4A843;
+}
+
+html:has(.dark-landing) ::-webkit-scrollbar-thumb:hover {
+  background: #C09A35;
+}
+
 /* ===== RTL utilities ===== */
 [dir="rtl"] .rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 1;
@@ -93,6 +106,11 @@ body {
 ::selection {
   background-color: rgba(149, 109, 0, 0.2);
   color: #3B2F08;
+}
+
+html:has(.dark-landing) ::selection {
+  background-color: rgba(212, 168, 67, 0.3);
+  color: white;
 }
 
 /* ===== Focus ===== */
