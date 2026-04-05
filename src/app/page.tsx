@@ -246,8 +246,8 @@ function LandingContent() {
               <Link href="/auth/signup" className="bg-primary text-black font-bold text-lg px-8 py-3.5 rounded-lg hover:bg-primary/90 transition-colors">
                 ابدأ مجانا
               </Link>
-              <Link href="/contact" className="border border-edge text-heading font-bold text-lg px-8 py-3.5 rounded-lg hover:bg-card-hover transition-colors">
-                تواصل معنا
+              <Link href="/dar-al-aseel" className="border border-edge text-heading font-bold text-lg px-8 py-3.5 rounded-lg hover:bg-card-hover transition-colors">
+                شاهد مثال حي
               </Link>
             </div>
           </motion.div>
