@@ -94,8 +94,13 @@ const navItems: NavItem[] = [
       { label: 'Residential', labelAr: 'سكني', href: '/dashboard/properties?category=RESIDENTIAL' },
       { label: 'Commercial', labelAr: 'تجاري', href: '/dashboard/properties?category=COMMERCIAL' },
       { label: 'Agricultural', labelAr: 'زراعي', href: '/dashboard/properties?category=AGRICULTURAL' },
-      { label: 'Owners', labelAr: 'إدارة الملاك', href: '/dashboard/properties/owners' },
     ],
+  },
+  {
+    label: 'Owners',
+    labelAr: 'إدارة الملاك',
+    href: '/dashboard/properties/owners',
+    icon: User,
   },
   {
     label: 'CRM',
