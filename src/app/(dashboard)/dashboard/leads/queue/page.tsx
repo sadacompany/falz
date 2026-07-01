@@ -50,16 +50,19 @@ export default function QueuePage() {
   const [dbLeads, setDbLeads] = useState<QueueLead[]>([])
   const [loading, setLoading] = useState(true)
   const [claimingId, setClaimingId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchQueueData = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       // Fetch NEW leads. We will filter those without an agent in frontend.
       const data = await getLeads({ status: 'NEW', pageSize: 100 })
       const unassigned = data.leads.filter((l) => !l.agentId) as unknown as QueueLead[]
       setDbLeads(unassigned)
-    } catch (error) {
-      console.error('Failed to load queue data:', error)
+    } catch (err) {
+      console.error('Failed to load queue data:', err)
+      setError('فشل تحميل قائمة طابور العملاء. يرجى محاولة التحديث.')
     } finally {
       setLoading(false)
     }
@@ -80,13 +83,15 @@ export default function QueuePage() {
   // Handle claiming a lead
   const handleAcceptLead = async (leadId: string) => {
     setClaimingId(leadId)
+    setError(null)
     try {
       // Run database server action
       await claimLead(leadId)
       // Refresh queue
       await fetchQueueData()
-    } catch (error) {
-      console.error('Failed to claim lead:', error)
+    } catch (err) {
+      console.error('Failed to claim lead:', err)
+      setError('فشل استلام العميل، ربما تم استلامه من قبل وكيل آخر.')
     } finally {
       setClaimingId(null)
     }
@@ -118,6 +123,13 @@ export default function QueuePage() {
         title="طابور توزيع العملاء"
         description="استعرض العملاء بانتظار الرد، واستلم طلبات العملاء الخاصة بقسمك مباشرة لتظهر في ملفك."
       />
+
+      {/* Error state banner */}
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900/50 p-4 text-red-700 dark:text-red-400 text-sm text-center">
+          {error}
+        </div>
+      )}
 
       {/* Queue Info Alert */}
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-start gap-3">

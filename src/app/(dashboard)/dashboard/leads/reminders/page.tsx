@@ -49,6 +49,8 @@ export default function RemindersPage() {
   const [leads, setLeads] = useState<LeadOption[]>([])
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Form State
   const [showAddForm, setShowAddForm] = useState(false)
@@ -60,6 +62,7 @@ export default function RemindersPage() {
 
   const fetchLeadsData = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const [data, dbReminders] = await Promise.all([
         getLeadsReportsData(),
@@ -78,8 +81,9 @@ export default function RemindersPage() {
           completed: r.completed,
         }))
       )
-    } catch (error) {
-      console.error('Failed to load leads for reminders:', error)
+    } catch (err) {
+      console.error('Failed to load leads for reminders:', err)
+      setError('فشل تحميل قائمة التذكيرات. يرجى محاولة التحديث.')
     } finally {
       setLoading(false)
     }
@@ -102,8 +106,9 @@ export default function RemindersPage() {
 
     try {
       await toggleReminderCompleted(id, newCompleted)
-    } catch (error) {
-      console.error('Failed to toggle reminder:', error)
+    } catch (err) {
+      console.error('Failed to toggle reminder:', err)
+      setError('فشل تعديل حالة التذكير.')
       // Rollback on failure
       setReminders((prev) =>
         prev.map((r) => (r.id === id ? { ...r, completed: !newCompleted } : r))
@@ -114,13 +119,15 @@ export default function RemindersPage() {
   // Delete Reminder
   const handleDeleteReminder = async (id: string) => {
     const previous = [...reminders]
+    setError(null)
     // Optimistic update
     setReminders((prev) => prev.filter((r) => r.id !== id))
 
     try {
       await deleteReminder(id)
-    } catch (error) {
-      console.error('Failed to delete reminder:', error)
+    } catch (err) {
+      console.error('Failed to delete reminder:', err)
+      setError('حدث خطأ أثناء محاولة حذف التذكير.')
       // Rollback on failure
       setReminders(previous)
     }
@@ -137,6 +144,8 @@ export default function RemindersPage() {
 
     const dueDateTime = new Date(`${newDate}T${newTime}`)
 
+    setSaving(true)
+    setError(null)
     try {
       const created = await createReminder({
         leadId: newLeadId || null,
@@ -167,8 +176,11 @@ export default function RemindersPage() {
       setNewTime('')
       setNewPriority('MEDIUM')
       setShowAddForm(false)
-    } catch (error) {
-      console.error('Failed to add reminder:', error)
+    } catch (err) {
+      console.error('Failed to add reminder:', err)
+      setError('فشل إنشاء التذكير الجديد. يرجى التحقق من الاتصال بالخادم.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -209,7 +221,7 @@ export default function RemindersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-right" dir="rtl">
       {/* Shared Header */}
       <LeadsHeader
         title="تذكيرات ومواعيد المتابعة"
@@ -220,6 +232,13 @@ export default function RemindersPage() {
           إضافة تذكير جديد
         </Button>
       </LeadsHeader>
+
+      {/* Error state banner */}
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900/50 p-4 text-red-700 dark:text-red-400 text-sm text-center">
+          {error}
+        </div>
+      )}
 
       {/* Add Reminder Form Collapse */}
       {showAddForm && (
@@ -264,6 +283,7 @@ export default function RemindersPage() {
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
                   required
+                  min={new Date().toISOString().split('T')[0]} // W-14: Prevent past dates
                   className="bg-page border-edge h-10 text-heading"
                 />
               </div>
@@ -295,10 +315,10 @@ export default function RemindersPage() {
               </div>
 
               <div className="md:col-span-3 flex justify-end gap-2 pt-2 border-t border-edge/60">
-                <Button type="button" variant="outline" size="sm" onClick={() => setShowAddForm(false)}>
+                <Button type="button" variant="outline" size="sm" onClick={() => setShowAddForm(false)} disabled={saving}>
                   إلغاء
                 </Button>
-                <Button type="submit" variant="default" size="sm">
+                <Button type="submit" variant="default" size="sm" isLoading={saving}>
                   حفظ التذكير
                 </Button>
               </div>

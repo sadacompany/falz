@@ -69,6 +69,7 @@ export default function KanbanBoardPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('ALL')
+  const [error, setError] = useState<string | null>(null)
 
   // Drag state
   const [draggedLeadId, setDraggedLeadId] = useState<string | null>(null)
@@ -81,12 +82,14 @@ export default function KanbanBoardPage() {
 
   const fetchBoardData = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const data = await getLeadsReportsData()
       // Cast the prisma output to our required interface
       setLeads(data as unknown as LeadWithDetails[])
-    } catch (error) {
-      console.error('Failed to load board data:', error)
+    } catch (err) {
+      console.error('Failed to load board data:', err)
+      setError('حدث خطأ أثناء تحميل بيانات العملاء. يرجى إعادة المحاولة.')
     } finally {
       setLoading(false)
     }
@@ -121,11 +124,13 @@ export default function KanbanBoardPage() {
     setLeads((prevLeads) =>
       prevLeads.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
     )
+    setError(null)
 
     try {
       await updateLeadStatus(leadId, newStatus, closingReason)
-    } catch (error) {
-      console.error('Failed to update stage:', error)
+    } catch (err) {
+      console.error('Failed to update stage:', err)
+      setError('فشل نقل العميل وتحديث حالته. يرجى المحاولة مرة أخرى.')
       // Rollback on error
       fetchBoardData()
     }
@@ -155,22 +160,18 @@ export default function KanbanBoardPage() {
       if (lead.status !== 'NEW') handleMoveLead(id, 'NEW')
     } else if (targetColumn === 'CONTACTED_QUALIFIED') {
       if (lead.status !== 'CONTACTED' && lead.status !== 'QUALIFIED') {
-        // Default moving to CONTACTED
         handleMoveLead(id, 'CONTACTED')
       }
     } else if (targetColumn === 'CLOSED') {
       if (lead.status !== 'CLOSED') {
-        // Trigger modal prompt for closed status
         setPendingLeadId(id)
-        setSelectedReason('')
-        setCustomReason('')
         setShowOutcomeModal(true)
       }
     }
   }
 
   // Handle submission of closing reason
-  const handleConfirmClose = () => {
+  const handleConfirmOutcome = () => {
     if (!pendingLeadId) return
     const reason = selectedReason === 'other' ? customReason : selectedReason
     handleMoveLead(pendingLeadId, 'CLOSED', reason || 'لا يوجد تفاصيل')
@@ -207,7 +208,7 @@ export default function KanbanBoardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-right" dir="rtl">
       {/* Shared Header */}
       <LeadsHeader
         title="لوحة تتبع العملاء"
@@ -451,7 +452,7 @@ export default function KanbanBoardPage() {
               <Button
                 variant="default"
                 size="sm"
-                onClick={handleConfirmClose}
+                onClick={handleConfirmOutcome}
                 disabled={!selectedReason || (selectedReason === 'other' && !customReason.trim())}
               >
                 تأكيد الإغلاق

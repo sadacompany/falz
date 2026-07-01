@@ -79,9 +79,11 @@ export default function LeadsPage() {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<Awaited<ReturnType<typeof getLeads>> | null>(null)
   const [stats, setStats] = useState<Awaited<ReturnType<typeof getLeadStats>> | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchLeads = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const filters: LeadFilters = {
         page,
@@ -96,8 +98,9 @@ export default function LeadsPage() {
       ])
       setData(leadsData)
       setStats(statsData)
-    } catch (error) {
-      console.error('Failed to fetch leads:', error)
+    } catch (err) {
+      console.error('Failed to fetch leads:', err)
+      setError('حدث خطأ أثناء تحميل بيانات العملاء. يرجى إعادة المحاولة.')
     } finally {
       setLoading(false)
     }
@@ -121,8 +124,9 @@ export default function LeadsPage() {
       l.agent?.name || '',
       new Date(l.createdAt).toLocaleDateString('ar-SA-u-nu-latn'),
     ])
-    const csv = [headers, ...rows].map((r) => r.join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv' })
+    // W-8: Add Unicode UTF-8 BOM prefix (\uFEFF) to make Arabic display correctly in Excel
+    const csv = '\uFEFF' + [headers, ...rows].map((r) => r.join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -135,7 +139,7 @@ export default function LeadsPage() {
   const pagination = data?.pagination || { page: 1, pageSize: 15, total: 0, totalPages: 0 }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-right" dir="rtl">
       {/* Shared Header Navigation */}
       <LeadsHeader
         title="إدارة العملاء"
@@ -146,6 +150,13 @@ export default function LeadsPage() {
           تصدير CSV
         </Button>
       </LeadsHeader>
+
+      {/* Error state banner */}
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900/50 p-4 text-red-700 dark:text-red-400 text-sm text-center">
+          {error}
+        </div>
+      )}
 
       {/* Stats Cards */}
       {stats && (

@@ -59,6 +59,7 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [leadsData, setLeadsData] = useState<any[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   // Chart data states
   const [stageData, setStageData] = useState<any[]>([])
@@ -78,12 +79,14 @@ export default function ReportsPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const data = await getLeadsReportsData()
       setLeadsData(data)
       processReportsData(data)
-    } catch (error) {
-      console.error('Failed to load reports data:', error)
+    } catch (err) {
+      console.error('Failed to load reports data:', err)
+      setError('حدث خطأ أثناء تحميل بيانات التقارير. يرجى إعادة المحاولة.')
     } finally {
       setLoading(false)
     }
@@ -223,12 +226,19 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-right" dir="rtl">
       {/* Shared Header */}
       <LeadsHeader
         title="التقارير ولوحات التحليلات"
         description="استعرض أداء المبيعات، ومعدل إغلاق الملفات وتوزيع العملاء حسب الفئة والوكيل."
       />
+
+      {/* Error state banner */}
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900/50 p-4 text-red-700 dark:text-red-400 text-sm text-center">
+          {error}
+        </div>
+      )}
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
