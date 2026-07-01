@@ -15,6 +15,12 @@ function daysAgo(n: number): Date {
   return d;
 }
 
+function addDays(n: number): Date {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d;
+}
+
 function randomBetween(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -362,14 +368,54 @@ async function main() {
     },
   });
 
-  // ─── Office 1 Properties ────────────────────────────────────────────────
+  // ─── Office 1 Owners ──────────────────────────────────────────────────
+  console.log("  Creating Office 1 owners...");
+
+  await prisma.propertyMedia.deleteMany({ where: { property: { officeId: office1.id } } });
+  await prisma.leadActivity.deleteMany({ where: { lead: { officeId: office1.id } } });
+  await prisma.lead.deleteMany({ where: { officeId: office1.id } });
+  await prisma.signboard.deleteMany({ where: { officeId: office1.id } });
+  await prisma.property.deleteMany({ where: { officeId: office1.id } });
+  await prisma.propertyOwner.deleteMany({ where: { officeId: office1.id } });
+  await prisma.missedCall.deleteMany({ where: { officeId: office1.id } });
+
+  const o1Owner1 = await prisma.propertyOwner.create({
+    data: {
+      officeId: office1.id,
+      name: "إبراهيم الناصر",
+      phone: "0501234567",
+      dob: new Date("1980-05-15"),
+      nationalId: "1011122233",
+      type: "OWNER",
+      notes: "مالك عقارات في الملقا والنرجس",
+    }
+  });
+
+  const o1Owner2 = await prisma.propertyOwner.create({
+    data: {
+      officeId: office1.id,
+      name: "محمد المطلق",
+      phone: "0534455667",
+      dob: new Date("1985-11-20"),
+      nationalId: "1022233344",
+      type: "AGENT",
+      notes: "وكيل شرعي لعقارات طريق الملك فهد والرمال",
+    }
+  });
+
+  const o1Owner3 = await prisma.propertyOwner.create({
+    data: {
+      officeId: office1.id,
+      name: "محمد التويجري",
+      phone: "0598877665",
+      dob: new Date("1975-02-10"),
+      nationalId: "1033344455",
+      type: "HEIRS_REPRESENTATIVE",
+      notes: "ممثل ورثة عمارة الياسمين",
+    }
+  });
 
   console.log("  Creating Office 1 properties...");
-
-  // Delete existing properties for this office to allow re-seeding
-  await prisma.propertyMedia.deleteMany({ where: { property: { officeId: office1.id } } });
-  await prisma.lead.deleteMany({ where: { officeId: office1.id } });
-  await prisma.property.deleteMany({ where: { officeId: office1.id } });
 
   const o1PropertiesData = [
     {
@@ -381,6 +427,8 @@ async function main() {
       price: BigInt(4500000),
       dealType: "SALE" as const,
       propertyType: "VILLA" as const,
+      category: "RESIDENTIAL" as const,
+      ownerId: o1Owner1.id,
       area: 550,
       bedrooms: 5,
       bathrooms: 6,
@@ -410,6 +458,8 @@ async function main() {
       price: BigInt(1200000),
       dealType: "SALE" as const,
       propertyType: "APARTMENT" as const,
+      category: "RESIDENTIAL" as const,
+      ownerId: o1Owner1.id,
       area: 180,
       bedrooms: 3,
       bathrooms: 3,
@@ -438,6 +488,8 @@ async function main() {
       price: BigInt(12000000),
       dealType: "SALE" as const,
       propertyType: "LAND" as const,
+      category: "COMMERCIAL" as const,
+      ownerId: o1Owner2.id,
       area: 2500,
       bedrooms: null,
       bathrooms: null,
@@ -465,6 +517,8 @@ async function main() {
       price: BigInt(85000),
       dealType: "RENT" as const,
       propertyType: "APARTMENT" as const,
+      category: "RESIDENTIAL" as const,
+      ownerId: o1Owner3.id,
       area: 180,
       bedrooms: 3,
       bathrooms: 2,
@@ -493,6 +547,8 @@ async function main() {
       price: BigInt(2800000),
       dealType: "SALE" as const,
       propertyType: "VILLA" as const,
+      category: "RESIDENTIAL" as const,
+      ownerId: o1Owner1.id,
       area: 380,
       bedrooms: 4,
       bathrooms: 3,
@@ -514,6 +570,7 @@ async function main() {
     },
   ];
 
+
   const o1Properties = [];
   for (const p of o1PropertiesData) {
     const { images, ...data } = p;
@@ -533,7 +590,51 @@ async function main() {
     console.log(`    ${property.slug}`);
   }
 
+  // ─── Office 1 Signboards & Missed Calls ───────────────────────────────
+  console.log("  Creating Office 1 signboards & missed calls...");
+
+  await prisma.signboard.create({
+    data: {
+      officeId: office1.id,
+      propertyId: o1Properties[0].id,
+      title: "لوحة-الملقا-1",
+      phone: "0501234567",
+      status: "INSTALLED",
+      notes: "لوحة بيع مركبة في واجهة الفيلا",
+    }
+  });
+
+  await prisma.signboard.create({
+    data: {
+      officeId: office1.id,
+      propertyId: o1Properties[2].id,
+      title: "لوحة-الصحافة-2",
+      phone: "0534455667",
+      status: "AVAILABLE",
+      notes: "لوحة تأجير جاهزة للاستخدام",
+    }
+  });
+
+  await prisma.missedCall.create({
+    data: {
+      officeId: office1.id,
+      phone: "0559876543",
+      userId: o1Owner.id,
+      status: "PENDING",
+    }
+  });
+
+  await prisma.missedCall.create({
+    data: {
+      officeId: office1.id,
+      phone: "0533221144",
+      userId: o1Agent1.id,
+      status: "RESOLVED",
+    }
+  });
+
   // ─── Office 1 Blog ──────────────────────────────────────────────────────
+
 
   console.log("  Creating Office 1 blog...");
 
@@ -607,52 +708,199 @@ async function main() {
 
   console.log("  Creating Office 1 leads...");
 
-  await prisma.leadActivity.deleteMany({ where: { lead: { officeId: office1.id } } });
-  await prisma.lead.deleteMany({ where: { officeId: office1.id } });
-
-  const o1Lead1 = await prisma.lead.create({
+  // Seed detailed leads matching Kanban and Queue
+  const lead1 = await prisma.lead.create({
     data: {
       officeId: office1.id,
-      name: "Mohammed Al-Harbi",
-      phone: "+966551234567",
-      email: "mohammed.h@gmail.com",
-      message: "Interested in your available properties in Riyadh.",
+      name: "نورة السبيعي",
+      phone: "0559876543",
+      email: "noura.s@gmail.com",
+      message: "شقة العليا - فريق التسويق",
+      source: "PROPERTY_INQUIRY",
+      status: "NEW",
+      category: "RESIDENTIAL",
+      team: "sales",
+      isReceived: false,
+      reqDealType: "RENT",
+      reqPropertyType: "APARTMENT",
+      reqDistrict: "العليا",
+      reqCity: "الرياض",
+      reqBudget: 65000,
+      reqRooms: 3,
+      reqArea: 150,
+      createdAt: daysAgo(1),
+    }
+  });
+
+  await prisma.leadActivity.create({
+    data: {
+      leadId: lead1.id,
+      type: "note",
+      content: "تفضل التواصل واتساب بعد العصر",
+      createdAt: daysAgo(1),
+    }
+  });
+
+  const lead2 = await prisma.lead.create({
+    data: {
+      officeId: office1.id,
+      name: "خالد الحربي",
+      phone: "0512233445",
+      email: "khaled.h@yahoo.com",
+      message: "مزرعة القصيم - فريق المزادات",
       source: "CONTACT_FORM",
       status: "NEW",
-      agentId: o1Agent1.id,
-      createdAt: daysAgo(1),
-    },
+      category: "AGRICULTURAL",
+      team: "auctions",
+      isReceived: false,
+      reqDealType: "SALE",
+      reqPropertyType: "LAND",
+      reqDistrict: "القصيم",
+      reqCity: "القصيم",
+      reqBudget: 1500000,
+      createdAt: daysAgo(2),
+    }
   });
 
-  await prisma.lead.create({
+  const lead3 = await prisma.lead.create({
     data: {
       officeId: office1.id,
-      propertyId: o1Properties[0].id,
-      name: "Noura Al-Dosari",
-      phone: "+966559876543",
-      email: "noura.d@hotmail.com",
-      message: "I would like to schedule a viewing for the luxury villa in Al-Malqa.",
+      name: "تركي الزهراني",
+      phone: "0533221144",
+      email: "turki.z@outlook.com",
+      message: "شقة الياسمين - فريق الإيجارات",
+      source: "WHATSAPP_CLICK",
+      status: "NEW",
+      category: "RESIDENTIAL",
+      team: "rentals",
+      isReceived: false,
+      reqDealType: "RENT",
+      reqPropertyType: "APARTMENT",
+      reqDistrict: "الياسمين",
+      reqCity: "الرياض",
+      reqBudget: 80000,
+      createdAt: daysAgo(3),
+    }
+  });
+
+  const lead4 = await prisma.lead.create({
+    data: {
+      officeId: office1.id,
+      name: "فهد الرشيد",
+      phone: "0501112233",
+      email: "fahad.r@gmail.com",
+      message: "فيلا النرجس - جاري التفاوض",
       source: "PROPERTY_INQUIRY",
       status: "CONTACTED",
+      category: "RESIDENTIAL",
       agentId: o1Owner.id,
-      createdAt: daysAgo(3),
-    },
+      isReceived: true,
+      reqDealType: "SALE",
+      reqPropertyType: "VILLA",
+      reqDistrict: "النرجس",
+      reqCity: "الرياض",
+      reqBudget: 3200000,
+      reminderDate: addDays(2),
+      createdAt: daysAgo(5),
+    }
   });
 
-  await prisma.lead.create({
+  await prisma.leadActivity.create({
+    data: {
+      leadId: lead4.id,
+      type: "note",
+      content: "تم الاتفاق على موعد معاينة يوم الجمعة",
+      createdAt: daysAgo(4),
+    }
+  });
+
+  const lead5 = await prisma.lead.create({
     data: {
       officeId: office1.id,
-      propertyId: o1Properties[1].id,
-      name: "Faisal Al-Qahtani",
-      phone: "+966554443333",
-      email: "faisal.q@outlook.com",
-      message: "Interested in the apartment in Al-Olaya. What is the lease term?",
-      source: "WHATSAPP_CLICK",
-      status: "QUALIFIED",
+      name: "سالم الغامدي",
+      phone: "0534455667",
+      email: "salem.g@outlook.com",
+      message: "محل السليمانية - جاري التفاوض",
+      source: "MANUAL",
+      status: "CONTACTED",
+      category: "COMMERCIAL",
       agentId: o1Agent1.id,
-      createdAt: daysAgo(5),
-    },
+      isReceived: true,
+      reqDealType: "RENT",
+      reqPropertyType: "OFFICE",
+      reqDistrict: "السليمانية",
+      reqCity: "الرياض",
+      reqBudget: 120000,
+      reminderDate: daysAgo(1), // Overdue reminder
+      createdAt: daysAgo(10),
+    }
   });
+
+  const lead6 = await prisma.lead.create({
+    data: {
+      officeId: office1.id,
+      name: "منيرة العتيبي",
+      phone: "0598877665",
+      email: "munira.o@gmail.com",
+      message: "مكتب الكورنيش - جاري التفاوض",
+      source: "WHATSAPP_CLICK",
+      status: "CONTACTED",
+      category: "COMMERCIAL",
+      agentId: o1Agent2.id,
+      isReceived: true,
+      reqDealType: "RENT",
+      reqPropertyType: "OFFICE",
+      reqDistrict: "الكورنيش",
+      reqCity: "الدمام",
+      reqBudget: 90000,
+      reminderDate: daysAgo(2), // Overdue reminder
+      createdAt: daysAgo(12),
+    }
+  });
+
+  const lead7 = await prisma.lead.create({
+    data: {
+      officeId: office1.id,
+      name: "عبدالله المطيري",
+      phone: "0541122334",
+      email: "abdullah.m@gmail.com",
+      message: "دوبلكس الملقا - منتهي ناجح",
+      source: "PROPERTY_INQUIRY",
+      status: "CLOSED",
+      category: "RESIDENTIAL",
+      agentId: o1Owner.id,
+      isReceived: true,
+      dealOutcome: "تمت الصفقة",
+      createdAt: daysAgo(20),
+    }
+  });
+
+  await prisma.leadActivity.create({
+    data: {
+      leadId: lead7.id,
+      type: "status_change",
+      content: "تم توقيع العقد واستلام الدفعة الأولى",
+      createdAt: daysAgo(2),
+    }
+  });
+
+  const lead8 = await prisma.lead.create({
+    data: {
+      officeId: office1.id,
+      name: "سلطان الدوسري",
+      phone: "0565544332",
+      email: "sultan.d@yahoo.com",
+      message: "مزرعة العليا - منتهي خاسر",
+      source: "PHONE_CLICK",
+      status: "CLOSED",
+      category: "AGRICULTURAL",
+      agentId: o1Agent1.id,
+      isReceived: true,
+      dealOutcome: "اشترى من مكان آخر",
+      createdAt: daysAgo(25),
+    }
+  });
+
 
   // ─── Office 1 Analytics ─────────────────────────────────────────────────
 

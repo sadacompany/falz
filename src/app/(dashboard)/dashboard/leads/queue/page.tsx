@@ -1,0 +1,346 @@
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
+import {
+  UserCheck,
+  Building,
+  Calendar,
+  Phone,
+  Mail,
+  Clock,
+  CheckCircle,
+  HelpCircle,
+  Loader2,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+import { getLeads, claimLead } from '@/lib/actions/leads'
+import { LeadsHeader } from '@/components/leads/LeadsHeader'
+
+// ─── Types ──────────────────────────────────────────────────
+
+interface QueueLead {
+  id: string
+  name: string
+  phone: string | null
+  email: string | null
+  message: string | null
+  createdAt: Date
+  source: string
+  property?: {
+    id: string
+    title: string
+    titleAr: string | null
+    slug: string
+    dealType: 'SALE' | 'RENT'
+    propertyType: string
+  } | null
+}
+
+const QUEUE_TABS = [
+  { key: 'sales', label: 'قسم المبيعات', desc: 'طلبات الشراء والتعاقدات الجديدة' },
+  { key: 'rentals', label: 'قسم الإيجارات', desc: 'طلبات التأجير والاستئجار السكني والتجاري' },
+  { key: 'auctions', label: 'قسم المزادات', desc: 'المزايدين المهتمين بالعقارات المطروحة للمزاد' },
+  { key: 'evaluation', label: 'قسم التقييم والاعتماد', desc: 'طلبات تقييم وتثمين العقارات المعتمدة' },
+]
+
+export default function QueuePage() {
+  const [activeTab, setActiveTab] = useState('sales')
+  const [dbLeads, setDbLeads] = useState<QueueLead[]>([])
+  const [loading, setLoading] = useState(true)
+  const [claimingId, setClaimingId] = useState<string | null>(null)
+  
+  // Interactive mock leads for auctions and evaluation, plus fallback for empty DB
+  const [mockLeads, setMockLeads] = useState<{ [key: string]: any[] }>({
+    sales: [],
+    rentals: [],
+    auctions: [
+      {
+        id: 'mock-auc-1',
+        name: 'عبدالرحمن آل سعود',
+        phone: '0554321098',
+        email: 'a.alsaud@example.com',
+        message: 'مهتم بالمزايدة على أرض حي النرجس التجارية رقم 44.',
+        createdAt: new Date(Date.now() - 1000 * 60 * 25), // 25 mins ago
+        source: 'MANUAL',
+        propertyTitle: 'أرض النرجس الاستثمارية - مزاد النخبة',
+        propertyType: 'LAND',
+        waitingTime: '25 دقيقة',
+      },
+      {
+        id: 'mock-auc-2',
+        name: 'شركة العليان العقارية',
+        phone: '0501112223',
+        email: 'info@olayan.co',
+        message: 'استفسار عن شروط الدخول في المزاد العلني لبرج العليا السكني.',
+        createdAt: new Date(Date.now() - 1000 * 60 * 120), // 2 hours ago
+        source: 'PROPERTY_INQUIRY',
+        propertyTitle: 'برج العليا السكني المكتمل',
+        propertyType: 'BUILDING',
+        waitingTime: 'ساعتين',
+      }
+    ],
+    evaluation: [
+      {
+        id: 'mock-eval-1',
+        name: 'خالد بن ناصر',
+        phone: '0567890123',
+        email: 'khaled.n@example.com',
+        message: 'طلب تقييم معتمد من الهيئة السعودية للمقيمين العقاريين لفيلا في حي الملقا لغرض التمويل العقاري.',
+        createdAt: new Date(Date.now() - 1000 * 60 * 45), // 45 mins ago
+        source: 'CONTACT_FORM',
+        propertyTitle: 'طلب تقييم فيلا سكنية',
+        propertyType: 'VILLA',
+        waitingTime: '45 دقيقة',
+      },
+      {
+        id: 'mock-eval-2',
+        name: 'مصرف الراجحي - إدارة التمويل',
+        phone: '0545556667',
+        email: 'appraisals@alrajhibank.com.sa',
+        message: 'طلب تثمين عمارة تجارية حي الصحافة، المساحة 800 متر مربع.',
+        createdAt: new Date(Date.now() - 1000 * 60 * 300), // 5 hours ago
+        source: 'MANUAL',
+        propertyTitle: 'عمارة الصحافة التجارية',
+        propertyType: 'BUILDING',
+        waitingTime: '5 ساعات',
+      }
+    ]
+  })
+
+  const fetchQueueData = useCallback(async () => {
+    setLoading(true)
+    try {
+      // Fetch NEW leads. We will filter those without an agent in frontend.
+      const data = await getLeads({ status: 'NEW', pageSize: 100 })
+      const unassigned = data.leads.filter((l) => !l.agentId) as unknown as QueueLead[]
+      setDbLeads(unassigned)
+    } catch (error) {
+      console.error('Failed to load queue data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchQueueData()
+  }, [fetchQueueData])
+
+  // Split DB leads into sales and rentals
+  const salesQueue = dbLeads.filter(
+    (l) => !l.property || l.property.dealType === 'SALE'
+  )
+  const rentalsQueue = dbLeads.filter(
+    (l) => l.property?.dealType === 'RENT'
+  )
+
+  // Handle claiming a lead
+  const handleAcceptLead = async (leadId: string, isMock = false) => {
+    setClaimingId(leadId)
+    try {
+      if (isMock) {
+        // Simulate claiming in state
+        await new Promise((resolve) => setTimeout(resolve, 800))
+        setMockLeads((prev) => {
+          const updated = { ...prev }
+          updated[activeTab] = updated[activeTab].filter((l) => l.id !== leadId)
+          return updated
+        })
+      } else {
+        // Run database server action
+        await claimLead(leadId)
+        // Refresh queue
+        await fetchQueueData()
+      }
+    } catch (error) {
+      console.error('Failed to claim lead:', error)
+    } finally {
+      setClaimingId(null)
+    }
+  }
+
+  // Get active queue leads list
+  const getActiveQueue = () => {
+    if (activeTab === 'sales') return salesQueue
+    if (activeTab === 'rentals') return rentalsQueue
+    return mockLeads[activeTab] || []
+  };
+
+  const activeLeads = getActiveQueue()
+
+  // Format waiting time relative
+  const getWaitingTime = (date: Date) => {
+    const diffMs = Date.now() - new Date(date).getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    if (diffMins < 60) return `${diffMins} دقيقة`
+    const diffHours = Math.floor(diffMins / 60)
+    if (diffHours < 24) return `${diffHours} ساعة`
+    return `${Math.floor(diffHours / 24)} يوم`
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Shared Header */}
+      <LeadsHeader
+        title="طابور توزيع العملاء"
+        description="استعرض العملاء بانتظار الرد، واستلم طلبات العملاء الخاصة بقسمك مباشرة لتظهر في ملفك."
+      />
+
+      {/* Queue Info Alert */}
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-start gap-3">
+        <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+        <div>
+          <h4 className="text-sm font-bold text-primary">نظام الاستلام الذاتي (Self-Assignment)</h4>
+          <p className="text-xs text-dim mt-1 leading-relaxed">
+            العملاء المدرجون في هذه القوائم هم عملاء مهتمون ويسعون للتواصل الفوري. بالضغط على زر "استلمت"، سيتم تعيين العميل إليك وسيتم إشعار العميل باسمك وبيانات الاتصال الخاصة بك للمتابعة.
+          </p>
+        </div>
+      </div>
+
+      {/* Tabs Navigation */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 bg-elevated border border-edge p-2 rounded-xl">
+        {QUEUE_TABS.map((tab) => {
+          const isSelected = activeTab === tab.key
+          let count = 0
+          if (tab.key === 'sales') count = salesQueue.length
+          else if (tab.key === 'rentals') count = rentalsQueue.length
+          else count = mockLeads[tab.key]?.length || 0
+
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={cn(
+                "flex flex-col items-center justify-center p-3 rounded-lg border text-center transition-all duration-200",
+                isSelected
+                  ? "bg-primary/5 border-primary text-primary"
+                  : "bg-page border-edge hover:bg-card-hover text-body hover:text-heading"
+              )}
+            >
+              <span className="text-xs font-bold whitespace-nowrap">{tab.label}</span>
+              <div className="mt-2 flex items-center gap-1.5">
+                <Badge variant={count > 0 ? (isSelected ? 'default' : 'warning') : 'secondary'} className="text-[10px] px-1.5 py-0">
+                  {count} عملاء
+                </Badge>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Queue Description */}
+      <div className="text-xs text-dim px-2">
+        ℹ️ {QUEUE_TABS.find((t) => t.key === activeTab)?.desc}
+      </div>
+
+      {/* Waiting Leads List */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : activeLeads.length === 0 ? (
+        <Card className="border-edge bg-elevated">
+          <CardContent className="py-16 text-center">
+            <CheckCircle className="mx-auto h-12 w-12 text-emerald-500" />
+            <p className="mt-4 text-lg font-medium text-heading">القائمة فارغة حالياً</p>
+            <p className="mt-1 text-sm text-dim">جميع العملاء في هذا القسم لديهم وكيل مسؤول ويتم متابعتهم.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {activeLeads.map((lead) => {
+            const isMock = lead.id.startsWith('mock')
+            const waitTime = isMock ? lead.waitingTime : getWaitingTime(lead.createdAt)
+            
+            return (
+              <Card
+                key={lead.id}
+                className={cn(
+                  "border-edge bg-elevated transition-all duration-200 hover:shadow-md hover:border-dim/30",
+                  claimingId === lead.id && "opacity-60 pointer-events-none"
+                )}
+              >
+                <CardContent className="p-5 flex flex-col justify-between h-full space-y-4">
+                  {/* Header: Name and Wait Time */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="text-base font-bold text-heading">{lead.name}</h4>
+                      <div className="mt-1 flex items-center gap-1.5 text-xs text-amber-500 font-semibold">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>بانتظار الرد منذ {waitTime}</span>
+                      </div>
+                    </div>
+                    
+                    <Badge variant="outline" className="text-[10px] bg-card border-edge text-dim py-0 px-2">
+                      مستند: {lead.id.startsWith('mock') ? 'نموذج محاكاة' : 'استفسار حقيقي'}
+                    </Badge>
+                  </div>
+
+                  {/* Body: Inquiry details */}
+                  <div className="text-xs text-body leading-relaxed bg-page border border-edge/60 p-3 rounded-lg">
+                    {lead.message ? (
+                      <p className="line-clamp-2">{lead.message}</p>
+                    ) : (
+                      <p className="italic text-dim">لا توجد رسالة مرفقة من العميل، استفسار مباشر.</p>
+                    )}
+
+                    {lead.property && (
+                      <div className="mt-2.5 pt-2 border-t border-edge flex items-center gap-1.5 text-dim font-medium">
+                        <Building className="h-3.5 w-3.5 text-dim" />
+                        <span className="truncate max-w-[280px]">
+                          العقار: {lead.property.titleAr || lead.property.title}
+                        </span>
+                        <Badge variant="outline" className="text-[9px] py-0 px-1 hover:bg-transparent">
+                          {lead.property.dealType === 'SALE' ? 'شراء' : 'إيجار'}
+                        </Badge>
+                      </div>
+                    )}
+
+                    {isMock && lead.propertyTitle && (
+                      <div className="mt-2.5 pt-2 border-t border-edge flex items-center gap-1.5 text-dim font-medium">
+                        <Building className="h-3.5 w-3.5 text-dim" />
+                        <span className="truncate max-w-[280px]">{lead.propertyTitle}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Contact Info & Claim Button */}
+                  <div className="flex items-center justify-between pt-2 border-t border-edge/40">
+                    <div className="flex items-center gap-2.5 text-xs text-dim">
+                      {lead.phone && (
+                        <span className="flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {lead.phone}
+                        </span>
+                      )}
+                      {lead.email && (
+                        <span className="flex items-center gap-1 hidden sm:inline-flex">
+                          <Mail className="h-3 w-3" />
+                          {lead.email}
+                        </span>
+                      )}
+                    </div>
+
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-8 text-xs font-semibold px-4"
+                      isLoading={claimingId === lead.id}
+                      onClick={() => handleAcceptLead(lead.id, isMock)}
+                    >
+                      <UserCheck className="h-4 w-4" />
+                      استلمت العميل
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}

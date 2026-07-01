@@ -28,11 +28,18 @@ import {
   ExternalLink,
   CreditCard,
   UserCheck,
+  PhoneMissed,
+  Signpost,
+  Plus,
+  Check,
+  PhoneCall,
+  Calendar,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/shared/Logo'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import type { Role } from '@prisma/client'
+import { getMissedCalls, createMissedCall, resolveMissedCall } from '@/lib/actions/missed-calls'
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -83,33 +90,33 @@ const navItems: NavItem[] = [
     labelAr: 'العقارات',
     href: '/dashboard/properties',
     icon: Building2,
+    subItems: [
+      { label: 'Residential', labelAr: 'سكني', href: '/dashboard/properties?category=RESIDENTIAL' },
+      { label: 'Commercial', labelAr: 'تجاري', href: '/dashboard/properties?category=COMMERCIAL' },
+      { label: 'Agricultural', labelAr: 'زراعي', href: '/dashboard/properties?category=AGRICULTURAL' },
+      { label: 'Owners', labelAr: 'إدارة الملاك', href: '/dashboard/properties/owners' },
+    ],
   },
   {
-    label: 'Leads',
-    labelAr: 'العملاء',
+    label: 'CRM',
+    labelAr: 'العملاء (CRM)',
     href: '/dashboard/leads',
     icon: Users,
+    subItems: [
+      { label: 'Board', labelAr: 'لوحة المتابعة', href: '/dashboard/leads/board' },
+      { label: 'Leads List', labelAr: 'قائمة العملاء', href: '/dashboard/leads' },
+      { label: 'Queue', labelAr: 'قائمة الانتظار', href: '/dashboard/leads/queue' },
+      { label: 'Reminders', labelAr: 'التذكيرات', href: '/dashboard/leads/reminders' },
+      { label: 'Analytics', labelAr: 'التقارير والتحليلات', href: '/dashboard/leads/reports' },
+      { label: 'Visitors', labelAr: 'الزوار', href: '/dashboard/visitors' },
+      { label: 'Requests', labelAr: 'الطلبـات', href: '/dashboard/requests' },
+    ],
   },
   {
-    label: 'Requests',
-    labelAr: 'الطلبات',
-    href: '/dashboard/requests',
-    icon: MessageSquare,
-    roles: ['OWNER', 'MANAGER'],
-  },
-  {
-    label: 'Visitors',
-    labelAr: 'الزوار',
-    href: '/dashboard/visitors',
-    icon: UserCheck,
-    roles: ['OWNER', 'MANAGER'],
-  },
-  {
-    label: 'Analytics',
-    labelAr: 'التحليلات',
-    href: '/dashboard/analytics',
-    icon: BarChart3,
-    roles: ['OWNER', 'MANAGER'],
+    label: 'Signboards',
+    labelAr: 'اللوحات الإعلانية',
+    href: '/dashboard/signboards',
+    icon: Signpost,
   },
   {
     label: 'Team',
@@ -155,16 +162,65 @@ export function DashboardShell({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [expandedNav, setExpandedNav] = useState<string | null>(
-    // Auto-expand if we're on a settings page
-    null
-  )
+  const [expandedNav, setExpandedNav] = useState<string | null>(null)
   const isRtl = locale === 'ar'
+
+  // Missed Calls states
+  const [missedCalls, setMissedCalls] = useState<any[]>([])
+  const [missedCallsOpen, setMissedCallsOpen] = useState(false)
+  const [newCallFormOpen, setNewCallFormOpen] = useState(false)
+  const [newPhone, setNewPhone] = useState('')
+  const [newName, setNewName] = useState('')
+  const [newNotes, setNewNotes] = useState('')
+  const [resolvingCallId, setResolvingCallId] = useState<string | null>(null)
+  const [resolveNotes, setResolveNotes] = useState('')
+
+  const fetchCalls = async () => {
+    try {
+      const list = await getMissedCalls()
+      setMissedCalls(list)
+    } catch (e) {
+      console.error('Failed to load missed calls:', e)
+    }
+  }
+
+  useEffect(() => {
+    fetchCalls()
+    const interval = setInterval(fetchCalls, 20000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleLogCall = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newPhone.trim()) return
+    try {
+      await createMissedCall({
+        phone: newPhone.trim(),
+      })
+      setNewPhone('')
+      setNewCallFormOpen(false)
+      fetchCalls()
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const handleResolveCall = async (id: string) => {
+    try {
+      await resolveMissedCall(id)
+      setResolvingCallId(null)
+      fetchCalls()
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const unresolvedCalls = missedCalls.filter((c) => c.status === 'PENDING')
+  const resolvedCalls = missedCalls.filter((c) => c.status === 'RESOLVED')
 
   // Close mobile menu on route change, auto-expand active sub-nav
   useEffect(() => {
     setMobileMenuOpen(false)
-    // Auto-expand nav items with sub-items when active
     for (const item of navItems) {
       if (item.subItems && pathname.startsWith(item.href)) {
         setExpandedNav(item.href)
@@ -194,6 +250,30 @@ export function DashboardShell({
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard'
     return pathname.startsWith(href)
+  }
+
+  const isSubActive = (subHref: string) => {
+    try {
+      const subUrl = new URL(subHref, 'http://x')
+      if (pathname !== subUrl.pathname) return false
+      
+      const subTab = subUrl.searchParams.get('tab')
+      const currentTab = searchParams.get('tab')
+      
+      const subCategory = subUrl.searchParams.get('category')
+      const currentCategory = searchParams.get('category')
+
+      const subView = subUrl.searchParams.get('view')
+      const currentView = searchParams.get('view')
+
+      if (subTab !== currentTab) return false
+      if (subCategory !== currentCategory) return false
+      if (subView !== currentView) return false
+
+      return true
+    } catch (e) {
+      return false
+    }
   }
 
   // ─── Sidebar Content ────────────────────────────────────
@@ -282,10 +362,7 @@ export function DashboardShell({
                     {isExpanded && (
                       <ul className="mt-1 space-y-0.5 ps-8">
                         {item.subItems!.map((sub) => {
-                          const currentTab = searchParams.get('tab')
-                          const subUrl = new URL(sub.href, 'http://x')
-                          const subTab = subUrl.searchParams.get('tab')
-                          const subActive = pathname === subUrl.pathname && (currentTab || null) === (subTab || null)
+                          const subActive = isSubActive(sub.href)
                           return (
                             <li key={sub.href}>
                               <Link
@@ -293,7 +370,7 @@ export function DashboardShell({
                                 className={cn(
                                   'block rounded-lg px-3 py-2 text-sm transition-all duration-200',
                                   subActive
-                                    ? 'text-primary font-medium'
+                                    ? 'text-primary font-medium bg-card-hover border-e-2 border-primary'
                                     : 'text-body hover:bg-card-hover hover:text-heading'
                                 )}
                               >
@@ -447,6 +524,20 @@ export function DashboardShell({
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {/* Missed Calls Icon Button */}
+            <button
+              onClick={() => setMissedCallsOpen(true)}
+              aria-label="المكالمات الفائتة"
+              className="relative rounded-lg p-2 text-body transition-colors hover:bg-card-hover hover:text-heading focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+            >
+              <PhoneMissed className="h-5 w-5 text-red-500" />
+              {unresolvedCalls.length > 0 && (
+                <span className="absolute -end-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-elevated animate-pulse">
+                  {unresolvedCalls.length}
+                </span>
+              )}
+            </button>
+
             <ThemeToggle />
 
             {/* Notifications */}
@@ -498,7 +589,7 @@ export function DashboardShell({
                 <div
                   role="menu"
                   className={cn(
-                    'absolute top-full mt-2 w-56 rounded-xl border border-edge bg-elevated py-1 shadow-lg',
+                    'absolute top-full mt-2 w-56 rounded-xl border border-edge bg-elevated py-1 shadow-lg z-50',
                     isRtl ? 'left-0' : 'right-0'
                   )}
                 >
@@ -535,6 +626,166 @@ export function DashboardShell({
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
       </div>
+
+      {/* ── Missed Calls Modal ───────────────────────── */}
+      {missedCallsOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            onClick={() => {
+              setMissedCallsOpen(false)
+              setNewCallFormOpen(false)
+              setResolvingCallId(null)
+            }}
+          />
+          <div
+            className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-edge bg-elevated p-6 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
+            dir="rtl"
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-edge pb-4 mb-4">
+              <div className="flex items-center gap-2">
+                <PhoneMissed className="h-6 w-6 text-red-500" />
+                <h3 className="text-xl font-bold text-heading">المكالمات الفائتة</h3>
+              </div>
+              <button
+                onClick={() => {
+                  setMissedCallsOpen(false)
+                  setNewCallFormOpen(false)
+                  setResolvingCallId(null)
+                }}
+                className="rounded-lg p-1.5 text-dim hover:bg-card-hover hover:text-heading transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex justify-between items-center mb-4">
+              <button
+                onClick={() => setNewCallFormOpen(!newCallFormOpen)}
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-primary-hover transition-colors"
+              >
+                {newCallFormOpen ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                {newCallFormOpen ? 'إلغاء' : 'تسجيل مكالمة جديدة'}
+              </button>
+              <span className="text-xs text-dim">
+                {unresolvedCalls.length} معلقة | {resolvedCalls.length} منتهية
+              </span>
+            </div>
+
+            {/* Log New Call Form */}
+            {newCallFormOpen && (
+              <form onSubmit={handleLogCall} className="border border-edge rounded-xl p-4 bg-page mb-4 space-y-3">
+                <h4 className="text-sm font-bold text-heading">تسجيل تفاصيل المكالمة</h4>
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-body mb-1">رقم الهاتف</label>
+                    <input
+                      type="tel"
+                      required
+                      value={newPhone}
+                      onChange={(e) => setNewPhone(e.target.value)}
+                      placeholder="مثال: 0500000000"
+                      className="w-full rounded-lg border border-edge bg-input px-3 py-2 text-sm text-heading placeholder:text-dim focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full rounded-lg bg-[#C8A96E] hover:bg-[#B7985D] text-[#1E3A5F] py-2 text-sm font-bold shadow transition-colors"
+                >
+                  حفظ المكالمة
+                </button>
+              </form>
+            )}
+
+            {/* Call Logs Container */}
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              {missedCalls.length === 0 ? (
+                <div className="text-center py-8 text-dim">لا توجد مكالمات مسجلة حالياً.</div>
+              ) : (
+                missedCalls.map((call) => (
+                  <div
+                    key={call.id}
+                    className={cn(
+                      'border rounded-xl p-4 bg-card hover:bg-card-hover transition-all flex flex-col md:flex-row justify-between gap-3',
+                      call.status === 'RESOLVED' ? 'border-edge opacity-70' : 'border-red-200 bg-red-50/5'
+                    )}
+                  >
+                    <div className="space-y-1.5 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-heading">{call.phone}</span>
+                        {call.status === 'PENDING' ? (
+                          <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700">معلقة</span>
+                        ) : (
+                          <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">تم الحل</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-body">مكالمة فائتة للوكيل: {call.user?.nameAr || call.user?.name || 'غير محدد'}</p>
+                      <div className="flex items-center gap-4 text-xs text-dim">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(call.createdAt).toLocaleDateString('ar-SA-u-nu-latn')} {new Date(call.createdAt).toLocaleTimeString('ar-SA-u-nu-latn', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Resolve Actions */}
+                    <div className="flex items-center justify-end">
+                      {call.status === 'PENDING' && (
+                        <>
+                          {resolvingCallId === call.id ? (
+                            <div className="flex flex-col gap-2 w-full md:w-48">
+                              <div className="flex gap-1.5">
+                                <button
+                                  onClick={() => handleResolveCall(call.id)}
+                                  className="flex-1 rounded bg-emerald-600 text-white py-1 text-xs font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1"
+                                >
+                                  <Check className="h-3.5 w-3.5" /> تأكيد الحل
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setResolvingCallId(null)
+                                  }}
+                                  className="rounded bg-page border border-edge text-body px-2 py-1 text-xs hover:bg-card-hover transition-colors"
+                                >
+                                  إلغاء
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setResolvingCallId(call.id)}
+                              className="rounded border border-emerald-600 px-3 py-1.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-1.5"
+                            >
+                              <PhoneCall className="h-3.5 w-3.5" /> حل المكالمة
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-edge pt-4 mt-4 flex justify-end">
+              <button
+                onClick={() => {
+                  setMissedCallsOpen(false)
+                  setNewCallFormOpen(false)
+                  setResolvingCallId(null)
+                }}
+                className="rounded-lg border border-edge bg-page px-4 py-2 text-sm font-semibold text-body hover:bg-card-hover transition-colors"
+              >
+                إغلاق
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

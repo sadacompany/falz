@@ -141,6 +141,9 @@ model Office {
   notifications   Notification[]
   agentProfiles   AgentProfile[]
   visitors        Visitor[]
+  propertyOwners  PropertyOwner[]
+  signboards      Signboard[]
+  missedCalls     MissedCall[]
 
   @@index([slug])
   @@index([customDomain])
@@ -192,6 +195,9 @@ model User {
   leadsAssigned   Lead[]       @relation("AssignedAgent")
   leadsCreated    Lead[]       @relation("LeadCreator")
   leadActivities  LeadActivity[]
+  missedCalls     MissedCall[]
+  // DB-1: Inverse relation for properties where this user is the agent
+  propertiesAsAgent Property[] @relation("PropertyAgent")
 
   @@index([phone])
 }
@@ -282,6 +288,7 @@ model Property {
   currency        String         @default("SAR")
   dealType        DealType       @default(SALE)
   propertyType    PropertyType   @default(APARTMENT)
+  category        PropertyCategory @default(RESIDENTIAL)
   area            Float?         // sqm
   bedrooms        Int?
   bathrooms       Int?
@@ -311,8 +318,12 @@ model Property {
   // Visibility
   isPrivate       Boolean        @default(false)
   previewToken    String?        @unique
-  // Agent
+  // DB-1: Add proper @relation with FK and SetNull cascade to prevent orphan records
   agentId         String?
+  agent           User?          @relation("PropertyAgent", fields: [agentId], references: [id], onDelete: SetNull)
+  // Owner Link
+  ownerId         String?
+  owner           PropertyOwner? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
   // Timestamps
   publishedAt     DateTime?
   createdAt       DateTime       @default(now())
@@ -323,6 +334,7 @@ model Property {
   analyticsEvents  AnalyticsEvent[]
   favorites        Favorite[]
   propertyRequests PropertyRequest[]
+  signboards       Signboard[]
 
   @@unique([officeId, slug])
   @@index([officeId])
@@ -330,6 +342,8 @@ model Property {
   @@index([officeId, dealType])
   @@index([officeId, propertyType])
   @@index([officeId, isFeatured])
+  @@index([officeId, createdAt])
+  @@index([agentId])
   @@index([previewToken])
 }
 
@@ -485,6 +499,22 @@ model Lead {
   message     String?    @db.Text
   source      LeadSource @default(CONTACT_FORM)
   status      LeadStatus @default(NEW)
+  category    PropertyCategory?
+  dealOutcome String?
+  team        String?
+  lastContactedAt DateTime?
+  reminderDate DateTime?
+  isReceived   Boolean    @default(false)
+  city         String?
+  // Explicit request details
+  reqDealType  DealType?
+  reqPropertyType PropertyType?
+  reqDistrict  String?
+  reqCity      String?
+  reqBudget    Float?
+  reqRooms     Int?
+  reqArea      Float?
+  reqNotes     String?    @db.Text
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -492,6 +522,7 @@ model Lead {
 
   @@index([officeId])
   @@index([officeId, status])
+  @@index([officeId, createdAt])
   @@index([agentId])
   @@index([propertyId])
 }
@@ -676,4 +707,84 @@ model AuditLog {
   @@index([officeId])
   @@index([officeId, action])
   @@index([officeId, createdAt])
+}
+
+// ─── NEW CRM & OWNER MODELS ───────────────────────────
+
+enum PropertyCategory {
+  RESIDENTIAL
+  COMMERCIAL
+  AGRICULTURAL
+}
+
+enum OwnerType {
+  OWNER
+  AGENT
+  HEIRS_REPRESENTATIVE
+}
+
+model PropertyOwner {
+  id         String        @id @default(cuid())
+  officeId   String
+  office     Office        @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  name       String
+  phone      String
+  dob        DateTime?
+  nationalId String?
+  type       OwnerType     @default(OWNER)
+  notes      String?       @db.Text
+  properties Property[]
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@unique([officeId, phone])
+  @@index([officeId])
+}
+
+model Signboard {
+  id         String    @id @default(cuid())
+  officeId   String
+  office     Office        @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  title      String
+  phone      String
+  // DB-3: Use enum instead of raw String for type safety
+  status     SignboardStatus @default(AVAILABLE)
+  notes      String?   @db.Text
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([officeId])
+  @@index([officeId, status])
+}
+
+model MissedCall {
+  id        String   @id @default(cuid())
+  officeId  String
+  office    Office   @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  phone     String
+  // DB-2: userId is nullable with SetNull — deleting a user does NOT destroy call history
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // DB-3: Use enum instead of raw String for type safety
+  status    MissedCallStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([officeId])
+  @@index([officeId, status])
+}
+
+// DB-3: New enums for Signboard and MissedCall status
+enum SignboardStatus {
+  AVAILABLE
+  INSTALLED
+  MAINTENANCE
+  REMOVED
+}
+
+enum MissedCallStatus {
+  PENDING
+  RESOLVED
 }

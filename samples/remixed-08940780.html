@@ -1,0 +1,2600 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM — الغنام العقارية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --ink-900:#0E1A2E;
+  --ink-800:#15233B;
+  --ink-700:#1C2E4A;
+  --ink-600:#2A3F60;
+  --sand-50:#FBF9F3;
+  --sand-100:#F7F4EB;
+  --sand-200:#EFE9D8;
+  --sand-300:#E2D9C2;
+  --emerald-50:#E8F3EE;
+  --emerald-200:#A9D2BF;
+  --emerald-600:#0B6B53;
+  --emerald-700:#08543F;
+  --emerald-900:#04342A;
+  --amber-50:#FBF1DC;
+  --amber-200:#EFC97D;
+  --amber-600:#B5780F;
+  --amber-900:#5C3A06;
+  --rose-50:#FAE9E6;
+  --rose-200:#E7AFA5;
+  --rose-600:#A8412F;
+  --rose-900:#5C2118;
+  --bronze-50:#F3ECDD;
+  --bronze-200:#D9C68F;
+  --bronze-600:#8A6B22;
+  --bronze-900:#473608;
+  --line:#E5DFCD;
+  --line-strong:#D2C8AC;
+  --text-1:#15233B;
+  --text-2:#5B6373;
+  --text-3:#92938C;
+  --font-display:'Markazi Text', 'Georgia', serif;
+  --font-body:'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--font-body);
+  background:var(--sand-100);
+  color:var(--text-1);
+  direction:rtl;
+  font-size:14px;
+  line-height:1.5;
+}
+button,input,select,textarea{font-family:inherit;}
+::selection{background:var(--emerald-200);}
+
+/* ===== App shell ===== */
+.app{display:flex;min-height:100vh;}
+
+/* ---- Sidebar ---- */
+.sidebar{
+  width:248px;flex-shrink:0;background:var(--ink-800);
+  color:var(--sand-100);display:flex;flex-direction:column;
+  padding:1.5rem 1.1rem;position:sticky;top:0;height:100vh;
+}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:2rem;padding:0 .3rem;}
+.brand-mark{
+  width:38px;height:38px;border-radius:8px;background:var(--emerald-600);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--sand-50);
+  flex-shrink:0;
+}
+.brand-name{font-family:var(--font-display);font-weight:700;font-size:19px;color:var(--sand-50);line-height:1.2;}
+.brand-sub{font-size:10.5px;color:var(--ink-600);letter-spacing:.04em;font-family:var(--font-mono);}
+
+.nav-group{margin-bottom:1.5rem;}
+.nav-label{font-size:10.5px;color:#5C6C87;text-transform:uppercase;letter-spacing:.08em;padding:0 .6rem;margin-bottom:.5rem;font-weight:500;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:.6rem .7rem;border-radius:9px;
+  color:#C3CADA;font-size:13.5px;cursor:pointer;margin-bottom:2px;font-weight:500;
+  border:none;background:none;width:100%;text-align:right;
+}
+.nav-item:hover{background:var(--ink-700);color:#fff;}
+.nav-item.active{background:var(--emerald-600);color:#fff;}
+.nav-item .nav-text{ display:inline; }
+.nav-badge{margin-right:auto;background:var(--rose-600);color:#fff;font-size:10.5px;font-weight:700;min-width:18px;height:18px;border-radius:20px;display:flex;align-items:center;justify-content:center;padding:0 5px;}
+
+.sidebar-foot{margin-top:auto;padding-top:1rem;border-top:1px solid var(--ink-700);}
+.agent-chip{display:flex;align-items:center;gap:10px;padding:.5rem;border-radius:9px;border:none;background:none;width:100%;text-align:right;cursor:pointer;font-family:inherit;}
+.agent-chip:hover{background:var(--ink-700);}
+.agent-avatar{width:32px;height:32px;border-radius:50%;background:var(--bronze-600);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.agent-name{font-size:12.5px;color:#fff;font-weight:600;}
+.agent-role{font-size:10.5px;color:#5C6C87;}
+
+/* ---- Main ---- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+.topbar{
+  background:var(--sand-50);border-bottom:1px solid var(--line);
+  padding:1.1rem 2rem;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:40;
+}
+.page-title{font-family:var(--font-display);font-weight:700;font-size:26px;color:var(--ink-800);}
+.page-meta{font-size:12px;color:var(--text-3);font-family:var(--font-mono);margin-top:1px;}
+
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.save-pill{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-3);}
+.save-dot{width:6px;height:6px;border-radius:50%;background:var(--text-3);}
+.save-pill.saving .save-dot{background:var(--amber-600);}
+.save-pill.saving{color:var(--amber-600);}
+.save-pill.saved .save-dot{background:var(--emerald-600);}
+.save-pill.saved{color:var(--emerald-600);}
+
+.btn{
+  display:inline-flex;align-items:center;gap:7px;border-radius:9px;font-size:13px;font-weight:600;
+  padding:.55rem 1rem;cursor:pointer;border:1px solid var(--line-strong);background:var(--sand-50);color:var(--text-1);
+  white-space:nowrap;
+}
+.btn:hover{background:var(--sand-200);}
+.btn-primary{background:var(--emerald-600);border-color:var(--emerald-600);color:#fff;}
+.btn-primary:hover{background:var(--emerald-700);}
+.btn-ghost{border-color:transparent;background:transparent;}
+.btn-ghost:hover{background:var(--sand-200);}
+.btn-danger{background:var(--rose-600);border-color:var(--rose-600);color:#fff;}
+.btn-danger:hover{background:var(--rose-900);}
+.btn-sm{padding:.4rem .75rem;font-size:12px;}
+.btn[disabled]{opacity:.5;cursor:not-allowed;}
+.pill-count{background:var(--rose-600);color:#fff;font-size:10.5px;font-weight:700;min-width:17px;height:17px;padding:0 5px;border-radius:20px;display:inline-flex;align-items:center;justify-content:center;}
+
+.view{padding:1.75rem 2rem 3rem;flex:1;}
+.view-section{display:none;}
+.view-section.active{display:block;}
+
+/* ---- Stat cards ---- */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:1.75rem;}
+.stat-card{
+  background:var(--sand-50);border:1px solid var(--line);border-radius:13px;
+  padding:1.1rem 1.25rem;cursor:pointer;position:relative;overflow:hidden;
+}
+.stat-card:hover{border-color:var(--line-strong);}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:4px;height:100%;background:var(--accent,var(--text-3));}
+.stat-card.new{--accent:var(--blue,#185FA5);}
+.stat-card.negotiating{--accent:var(--amber-600);}
+.stat-card.done{--accent:var(--emerald-600);}
+.stat-card.total{--accent:var(--bronze-600);}
+.stat-top{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text-2);font-weight:600;margin-bottom:10px;}
+.stat-number{font-family:var(--font-mono);font-size:28px;font-weight:500;color:var(--ink-800);}
+.stat-sub{font-size:11px;color:var(--text-3);margin-top:3px;}
+
+/* ---- Toolbar ---- */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.1rem;flex-wrap:wrap;}
+.view-toggle{display:flex;background:var(--sand-200);border-radius:9px;padding:3px;gap:2px;}
+.view-toggle button{border:none;background:none;padding:.45rem .9rem;font-size:12.5px;font-weight:600;border-radius:7px;cursor:pointer;color:var(--text-2);}
+.view-toggle button.active{background:var(--sand-50);color:var(--ink-800);box-shadow:0 0 0 1px var(--line);}
+.chip-filter{background:var(--sand-50);border:1px solid var(--line);border-radius:9px;padding:.5rem .8rem;font-size:12.5px;cursor:pointer;color:var(--text-2);font-weight:500;}
+.chip-filter.active{background:var(--emerald-50);border-color:var(--emerald-200);color:var(--emerald-900);font-weight:600;}
+.search-box{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--sand-50);border:1px solid var(--line);border-radius:9px;padding:.5rem .8rem;}
+.search-box input{border:none;background:none;outline:none;flex:1;font-size:12.5px;text-align:right;color:var(--text-1);}
+.search-box svg{flex-shrink:0;opacity:.45;}
+
+/* ---- Kanban ---- */
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start;}
+.kcol{background:var(--sand-200);border-radius:14px;padding:.85rem;min-height:120px;}
+.kcol-head{display:flex;align-items:center;justify-content:space-between;padding:.3rem .4rem .8rem;}
+.kcol-title{font-size:13px;font-weight:700;color:var(--ink-800);display:flex;align-items:center;gap:7px;}
+.kcol-dot{width:8px;height:8px;border-radius:50%;}
+.kcol-count{font-family:var(--font-mono);font-size:11.5px;background:var(--sand-50);border:1px solid var(--line);padding:1px 8px;border-radius:20px;color:var(--text-2);}
+.kcard{
+  background:var(--sand-50);border:1px solid var(--line);border-radius:11px;
+  padding:.85rem .9rem;margin-bottom:9px;cursor:grab;position:relative;
+}
+.kcard:active{cursor:grabbing;}
+.kcard.dragging{opacity:.4;}
+.kcol.drag-over{outline:2px dashed var(--line-strong);outline-offset:-4px;}
+.kcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.kcard-name{font-weight:700;font-size:13.5px;color:var(--ink-800);}
+.kcard-type{font-size:14px;}
+.kcard-listing{font-size:12px;color:var(--text-2);margin-bottom:8px;}
+.kcard-foot{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-3);}
+.kcard-employee{display:flex;align-items:center;gap:5px;}
+.kcard-emp-dot{width:16px;height:16px;border-radius:50%;background:var(--bronze-200);color:var(--bronze-900);font-size:8.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.kcard-pending{color:var(--amber-600);font-weight:600;}
+.kcard-reminder{display:flex;align-items:center;gap:4px;color:var(--rose-600);font-weight:600;}
+.kcard-reminder.ok{color:var(--text-3);}
+
+/* ---- Table ---- */
+.table-wrap{background:var(--sand-50);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead th{text-align:right;font-size:11.5px;color:var(--text-3);font-weight:600;padding:.8rem 1rem;border-bottom:1px solid var(--line);background:var(--sand-100);}
+tbody td{padding:.85rem 1rem;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle;}
+tbody tr:hover td{background:var(--sand-100);}
+tbody tr:last-child td{border-bottom:none;}
+.client-link{font-weight:700;color:var(--ink-800);cursor:pointer;}
+.client-link:hover{color:var(--emerald-600);}
+.client-sub{font-size:11.5px;color:var(--text-3);margin-top:1px;font-family:var(--font-mono);}
+.pending-tag{color:var(--amber-600);font-weight:600;font-size:12px;}
+
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.badge-residential{background:var(--emerald-50);color:var(--emerald-900);}
+.badge-commercial{background:var(--amber-50);color:var(--amber-900);}
+.badge-agricultural{background:#EAF3DE;color:#27500A;}
+
+.stage-pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px;cursor:pointer;border:none;}
+.stage-pill:after{content:'▾';font-size:8px;opacity:.6;}
+.stage-new{background:#E6F1FB;color:#185FA5;}
+.stage-negotiating{background:var(--amber-50);color:var(--amber-900);}
+.stage-done{background:var(--emerald-50);color:var(--emerald-900);}
+
+.reason-pill{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;border:1px dashed var(--line-strong);background:var(--sand-100);border-radius:7px;padding:3px 9px;color:var(--text-3);cursor:pointer;margin-top:5px;}
+.reason-pill.set{border-style:solid;border-color:var(--emerald-200);background:var(--emerald-50);color:var(--emerald-900);font-weight:600;}
+
+.dropdown-menu{position:absolute;top:100%;right:0;margin-top:6px;background:var(--sand-50);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(14,26,46,0.14);padding:6px;min-width:170px;z-index:50;display:none;}
+.dropdown-menu.open{display:block;}
+.dropdown-item{display:block;width:100%;text-align:right;padding:.55rem .65rem;font-size:12.5px;border-radius:7px;cursor:pointer;background:none;border:none;color:var(--text-1);}
+.dropdown-item:hover{background:var(--sand-200);}
+.dd-anchor{position:relative;display:inline-block;}
+.note-box{padding:8px;border-top:1px solid var(--line);margin-top:4px;}
+.note-box textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 8px;font-size:12px;font-family:inherit;resize:vertical;min-height:50px;text-align:right;}
+.note-box button{margin-top:6px;width:100%;background:var(--emerald-600);color:#fff;border:none;border-radius:7px;padding:6px;font-size:12px;font-weight:600;cursor:pointer;}
+
+.icon-btn{width:30px;height:30px;border-radius:8px;background:var(--sand-100);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-2);font-size:13px;}
+.icon-btn:hover{background:var(--sand-200);}
+.icon-btn.danger:hover{background:var(--rose-50);color:var(--rose-600);border-color:var(--rose-200);}
+.actions-cell{display:flex;gap:5px;}
+
+.empty-state{text-align:center;padding:3.5rem 0;color:var(--text-3);}
+.empty-state-icon{font-size:30px;margin-bottom:8px;}
+
+/* ---- Modal ---- */
+.modal-overlay{position:fixed;inset:0;background:rgba(14,26,46,0.5);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--sand-50);border-radius:16px;padding:1.6rem;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;}
+.modal-box.wide{max-width:760px;}
+.modal-title{font-family:var(--font-display);font-weight:700;font-size:21px;color:var(--ink-800);margin-bottom:1.1rem;}
+.form-group{margin-bottom:.85rem;}
+.form-label{display:block;font-size:11.5px;color:var(--text-2);margin-bottom:5px;font-weight:600;}
+.form-input,.form-select,.form-textarea{width:100%;border:1px solid var(--line-strong);border-radius:9px;padding:.6rem .7rem;font-size:13px;font-family:inherit;text-align:right;background:var(--sand-50);color:var(--text-1);}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--emerald-600);}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.modal-actions{display:flex;gap:10px;margin-top:1.2rem;}
+.modal-btn{flex:1;padding:.65rem;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;}
+.modal-btn.save{background:var(--emerald-600);color:#fff;}
+.modal-btn.save:hover{background:var(--emerald-700);}
+.modal-btn.cancel{background:var(--sand-200);color:var(--text-2);}
+.modal-btn.cancel:hover{background:var(--sand-300);}
+.modal-btn.danger{background:var(--rose-600);color:#fff;}
+.form-error{font-size:11.5px;color:var(--rose-600);margin-top:6px;display:none;}
+
+.confirm-box{background:var(--sand-50);border-radius:16px;padding:1.6rem;width:100%;max-width:380px;text-align:center;}
+.team-btn{background:var(--sand-50);border:1px solid var(--line-strong);border-radius:20px;padding:.4rem .9rem;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-2);font-family:inherit;}
+.team-btn:hover{background:var(--sand-200);}
+.team-btn.active{background:var(--ink-800);color:#fff;border-color:var(--ink-800);}
+.assign-mode-btn{background:var(--sand-200);border:1px solid var(--line);border-radius:8px;padding:.4rem .85rem;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-2);font-family:inherit;}
+.assign-mode-btn:hover{background:var(--sand-300);}
+.assign-mode-btn.active{background:var(--ink-800);color:#fff;border-color:var(--ink-800);}
+.listing-mode-btn{background:var(--sand-200);border:1px solid var(--line);border-radius:8px;padding:.4rem .85rem;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-2);font-family:inherit;}
+.listing-mode-btn:hover{background:var(--sand-300);}
+.listing-mode-btn.active{background:var(--ink-800);color:#fff;border-color:var(--ink-800);}
+.stage-change-btn{background:var(--sand-200);border:1px solid var(--line);border-radius:8px;padding:.35rem .75rem;font-size:11.5px;font-weight:600;cursor:pointer;color:var(--text-2);font-family:inherit;}
+.stage-change-btn:hover{background:var(--sand-300);}
+.stage-change-btn.active-stage{background:var(--ink-800);color:#fff;border-color:var(--ink-800);}
+.reason-option-btn{background:var(--sand-50);border:1px solid var(--line-strong);border-radius:8px;padding:.35rem .75rem;font-size:11.5px;font-weight:600;cursor:pointer;color:var(--text-2);font-family:inherit;}
+.reason-option-btn:hover{background:var(--sand-200);}
+.reason-option-btn.active-reason{background:var(--rose-600);color:#fff;border-color:var(--rose-600);}
+
+/* Queue */
+.queue-team-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.1rem;}
+.queue-team-tab{background:var(--sand-50);border:1px solid var(--line-strong);border-radius:10px;padding:.5rem 1rem;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-2);font-family:inherit;}
+.queue-team-tab:hover{background:var(--sand-200);}
+.queue-team-tab.active{background:var(--ink-800);color:#fff;border-color:var(--ink-800);}
+.queue-employee-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.1rem;background:var(--sand-50);border:1px solid var(--line);border-radius:12px;padding:.75rem 1rem;justify-content:space-between;}
+.queue-card{background:var(--sand-50);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.2rem;display:flex;align-items:center;gap:14px;}
+.queue-card-avatar{width:42px;height:42px;border-radius:50%;background:var(--bronze-200);color:var(--bronze-900);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:16px;flex-shrink:0;}
+.queue-card-body{flex:1;}
+.queue-card-name{font-weight:700;font-size:14px;color:var(--ink-800);}
+.queue-card-meta{font-size:12px;color:var(--text-2);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;}
+.queue-card-time{font-size:11px;color:var(--text-3);font-family:var(--font-mono);margin-top:4px;}
+.queue-card-actions{display:flex;gap:8px;flex-shrink:0;}
+.confirm-icon{font-size:28px;margin-bottom:8px;}
+.confirm-title{font-family:var(--font-display);font-weight:700;font-size:18px;margin-bottom:5px;}
+.confirm-sub{font-size:12.5px;color:var(--text-2);margin-bottom:1.2rem;line-height:1.6;}
+
+/* ---- Client profile ---- */
+.profile-header{
+  background:var(--ink-800);border-radius:16px;padding:1.6rem 1.8rem;color:#fff;
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem;
+  position:relative;overflow:hidden;
+}
+.profile-header::after{content:'';position:absolute;left:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.04);}
+.profile-id{display:flex;align-items:center;gap:14px;}
+.profile-avatar{width:54px;height:54px;border-radius:50%;background:var(--emerald-600);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:21px;flex-shrink:0;}
+.profile-name{font-family:var(--font-display);font-weight:700;font-size:24px;}
+.profile-meta{font-size:12px;color:#9FAFC7;font-family:var(--font-mono);margin-top:3px;}
+.profile-back{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#C3CADA;cursor:pointer;margin-bottom:1rem;font-weight:600;}
+.profile-back:hover{color:#fff;}
+
+.profile-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;align-items:start;}
+.profile-card{background:var(--sand-50);border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin-bottom:14px;}
+.profile-card-title{font-family:var(--font-display);font-weight:700;font-size:16.5px;color:var(--ink-800);margin-bottom:.9rem;display:flex;align-items:center;justify-content:space-between;}
+.info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.55rem 0;border-bottom:1px solid var(--sand-200);font-size:12.5px;gap:10px;}
+.info-row:last-child{border-bottom:none;}
+.info-label{color:var(--text-2);flex-shrink:0;padding-top:4px;}
+.info-value{font-weight:600;color:var(--text-1);font-family:var(--font-mono);text-align:left;}
+
+.timeline{position:relative;padding-right:18px;}
+.timeline::before{content:'';position:absolute;right:5px;top:6px;bottom:6px;width:1.5px;background:var(--line-strong);}
+.tl-item{position:relative;padding-bottom:1.1rem;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-dot{position:absolute;right:-18px;top:2px;width:11px;height:11px;border-radius:50%;background:var(--emerald-600);border:2px solid var(--sand-50);}
+.tl-dot.call{background:#185FA5;}
+.tl-dot.note{background:var(--bronze-600);}
+.tl-dot.stage{background:var(--amber-600);}
+.tl-text{font-size:12.5px;color:var(--text-1);font-weight:500;}
+.tl-time{font-size:11px;color:var(--text-3);margin-top:2px;font-family:var(--font-mono);}
+
+.add-note-row{display:flex;gap:8px;margin-top:1rem;}
+.add-note-row input{flex:1;}
+
+/* ---- Reminders ---- */
+.reminder-list{display:flex;flex-direction:column;gap:8px;}
+.reminder-item{background:var(--sand-50);border:1px solid var(--line);border-radius:12px;padding:.9rem 1.1rem;display:flex;align-items:center;gap:14px;}
+.reminder-item.overdue{border-color:var(--rose-200);background:var(--rose-50);}
+.reminder-date{
+  width:52px;height:52px;border-radius:10px;background:var(--sand-200);flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.reminder-item.overdue .reminder-date{background:var(--rose-200);}
+.reminder-day{font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--ink-800);}
+.reminder-month{font-size:9.5px;color:var(--text-3);text-transform:uppercase;}
+.reminder-body{flex:1;}
+.reminder-client{font-weight:700;font-size:13.5px;color:var(--ink-800);}
+.reminder-note{font-size:12px;color:var(--text-2);margin-top:2px;}
+.reminder-tag{font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--rose-50);color:var(--rose-600);}
+
+/* ---- Reports ---- */
+.report-period-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.report-period-tab{background:var(--sand-50);border:1px solid var(--line-strong);border-radius:10px;padding:.5rem 1rem;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-2);font-family:inherit;}
+.report-period-tab:hover{background:var(--sand-200);}
+.report-period-tab.active{background:var(--ink-800);color:#fff;border-color:var(--ink-800);}
+.report-period-label{font-size:11.5px;color:var(--text-3);margin-bottom:14px;font-family:var(--font-mono);}
+.perf-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+.perf-stat{background:var(--sand-50);border:1px solid var(--line);border-radius:13px;padding:1rem 1.2rem;}
+.perf-stat-label{font-size:12px;color:var(--text-2);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.perf-stat-num{font-family:var(--font-mono);font-size:26px;font-weight:500;color:var(--ink-800);}
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.report-card{background:var(--sand-50);border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;}
+.report-card-title{font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--ink-800);margin-bottom:1rem;}
+.chart-box{position:relative;height:240px;}
+.agent-rank{display:flex;align-items:center;gap:10px;padding:.6rem 0;border-bottom:1px solid var(--sand-200);}
+.agent-rank:last-child{border-bottom:none;}
+.rank-num{font-family:var(--font-mono);font-size:12px;color:var(--text-3);width:18px;}
+.rank-name{flex:1;font-size:12.5px;font-weight:600;}
+.rank-bar-track{flex:1.4;height:7px;background:var(--sand-200);border-radius:20px;overflow:hidden;}
+.rank-bar-fill{height:100%;background:var(--emerald-600);border-radius:20px;}
+.rank-val{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--ink-800);width:24px;text-align:left;}
+
+.footnote{font-size:11px;color:var(--text-3);text-align:left;margin-top:1rem;}
+
+@media print{
+  .sidebar,.topbar,.toolbar,.btn{display:none !important;}
+  .view{padding:0;}
+}
+
+@media (max-width: 768px){
+  /* App shell */
+  .app{ flex-direction: column; }
+
+  /* Sidebar → bottom nav bar */
+  .sidebar{
+    width:100%; height:auto; flex-direction:row;
+    padding:.5rem .6rem; position:fixed; bottom:0; top:auto;
+    z-index:90; overflow-x:auto; gap:0; align-items:center;
+    border-top:1px solid var(--ink-700);
+  }
+  .brand{ display:none; }
+  .nav-group{ display:contents; margin:0; }
+  .nav-label{ display:none; }
+  .nav-item{
+    flex-direction:column; gap:3px; padding:.4rem .5rem;
+    font-size:10px; border-radius:8px; min-width:50px;
+    align-items:center; justify-content:center; margin:0;
+  }
+  .nav-item .nicon{ font-size:18px; width:auto; }
+  .nav-item .nav-text{ font-size:9px; display:block; text-align:center; }
+  .nav-badge{ margin:0; }
+
+  .sidebar-foot{ margin:0; padding:0; border:none; flex-shrink:0; }
+  .agent-chip{ flex-direction:column; gap:2px; padding:.4rem .5rem; min-width:50px; border-radius:8px; width:auto; }
+  .agent-role{ display:none; }
+  .agent-name{ font-size:9px; max-width:48px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .agent-avatar{ width:24px; height:24px; font-size:10px; }
+
+  /* Main gets bottom padding for nav */
+  .main{ padding-bottom:64px; }
+
+  /* Topbar */
+  .topbar{ padding:.75rem 1rem; flex-wrap:wrap; gap:8px; position:sticky; top:0; }
+  .page-title{ font-size:18px; }
+  .page-meta{ display:none; }
+  .topbar-right{ gap:6px; flex-wrap:wrap; }
+  .topbar-right .btn:not(#openMissedCallsBtn):not(#openAddTop){ display:none; }
+  #openAddTop{ padding:.5rem .85rem; font-size:12.5px; }
+  #openMissedCallsBtn{ padding:.5rem .85rem; font-size:12.5px; }
+
+  /* View padding */
+  .view{ padding:1rem; }
+
+  /* Stats */
+  .stat-grid{ grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:1rem; }
+  .stat-number{ font-size:22px; }
+
+  /* Toolbar */
+  .toolbar{ gap:6px; }
+  .chip-filter{ font-size:11.5px; padding:.4rem .65rem; }
+  .search-box{ min-width:100%; order:10; }
+
+  /* Kanban */
+  .kanban{ grid-template-columns:1fr; gap:12px; }
+  .kcol{ border-radius:12px; }
+
+  /* Table — card view on mobile */
+  table thead{ display:none; }
+  table, tbody, tr, td{ display:block; width:100%; }
+  tbody tr{
+    background:var(--sand-50); border:1px solid var(--line);
+    border-radius:12px; margin-bottom:10px; padding:.85rem;
+    position:relative;
+  }
+  tbody tr:hover td{ background:transparent; }
+  tbody td{ padding:.2rem 0; border:none; font-size:13px; }
+  tbody td:first-child{ position:absolute; top:.75rem; left:.75rem; }
+  tbody td:nth-child(2){ color:var(--text-3); font-size:11px; margin-top:4px; }
+  tbody td:last-child{ font-size:14px; font-weight:700; order:-1; margin-bottom:6px; }
+
+  /* Profile */
+  .profile-grid{ grid-template-columns:1fr; }
+  .profile-header{ flex-direction:column; align-items:flex-end; gap:12px; }
+  .profile-header > div:last-child{ flex-wrap:wrap; justify-content:flex-end; }
+
+  /* Reports */
+  .report-grid{ grid-template-columns:1fr; }
+  .perf-stat-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
+  .perf-stat-num{ font-size:20px; }
+  .chart-box{ height:200px; }
+
+  /* Modals */
+  .modal-box{ padding:1.2rem; max-height:85vh; }
+  .modal-box.wide{ max-width:100%; }
+  .form-row-2, .form-row-3{ grid-template-columns:1fr; }
+
+  /* Reminders */
+  .reminder-item{ flex-wrap:wrap; }
+
+  /* Profile cards */
+  .profile-card{ padding:1rem; }
+  .add-note-row{ flex-direction:column; }
+  .add-note-row .btn{ width:100%; justify-content:center; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">غ</div>
+      <div>
+        <div class="brand-name">الغنام العقارية</div>
+        <div class="brand-sub">CRM · clients/</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">العملاء</div>
+      <button class="nav-item active" data-nav="board"><span class="nicon">◫</span><span class="nav-text"> لوحة المتابعة</span></button>
+      <button class="nav-item" data-nav="table"><span class="nicon">≡</span><span class="nav-text"> العملاء</span></button>
+      <button class="nav-item" data-nav="queue"><span class="nicon">⏳</span><span class="nav-text"> قائمة الانتظار</span> <span class="nav-badge" id="navQueueBadge" style="display:none;">0</span></button>
+      <button class="nav-item" data-nav="reminders"><span class="nicon">◷</span><span class="nav-text"> التذكيرات</span> <span class="nav-badge" id="navReminderBadge">0</span></button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">التقارير</div>
+      <button class="nav-item" data-nav="reports"><span class="nicon">▤</span><span class="nav-text"> التقارير</span></button>
+    </div>
+
+    <div class="sidebar-foot">
+      <button type="button" class="agent-chip" id="identitySwitchBtn" title="اضغط لتبديل هويتك — بدون حساب أو كلمة مرور">
+        <div class="agent-avatar current-employee-avatar">?</div>
+        <div>
+          <div class="agent-name current-employee-name">اختر اسمك</div>
+          <div class="agent-role">اضغط للتبديل</div>
+        </div>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="pageTitle">لوحة المتابعة</div>
+        <div class="page-meta" id="pageMeta">clients/board</div>
+      </div>
+      <div class="topbar-right">
+        <span class="save-pill" id="saveIndicator"><span class="save-dot"></span><span id="saveIndicatorText">محفوظ</span></span>
+        <button class="btn" id="openMissedCallsBtn">☎️ مكالمات فائتة <span class="pill-count" id="missedCallsCount">0</span></button>
+        <button class="btn" id="exportExcelBtn">⇩ تصدير Excel</button>
+        <button class="btn" id="exportPdfBtn">⇩ تصدير PDF</button>
+        <button class="btn btn-primary" id="openAddTop">+ إضافة عميل</button>
+      </div>
+    </div>
+
+    <div class="view">
+
+      <div class="stat-grid">
+        <div class="stat-card total" data-stage-filter="all">
+          <div class="stat-top">إجمالي العملاء <span>👥</span></div>
+          <div class="stat-number" id="statTotal">0</div>
+          <div class="stat-sub">كل التصنيفات</div>
+        </div>
+        <div class="stat-card new" data-stage-filter="new">
+          <div class="stat-top">جديد <span>🧑</span></div>
+          <div class="stat-number" id="statNew">0</div>
+          <div class="stat-sub">لم يُتابع بعد</div>
+        </div>
+        <div class="stat-card negotiating" data-stage-filter="negotiating">
+          <div class="stat-top">جاري التفاوض <span>💬</span></div>
+          <div class="stat-number" id="statNegotiating">0</div>
+          <div class="stat-sub">قيد المتابعة</div>
+        </div>
+        <div class="stat-card done" data-stage-filter="done">
+          <div class="stat-top">منتهي <span>✅</span></div>
+          <div class="stat-number" id="statDone">0</div>
+          <div class="stat-sub">نجاح أو خسارة</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="view-toggle">
+          <button class="active" data-section="board">لوحة</button>
+          <button data-section="table">جدول</button>
+        </div>
+        <button class="chip-filter" data-type="all">النوع: الكل</button>
+        <button class="chip-filter" data-type="residential">🏠 سكني</button>
+        <button class="chip-filter" data-type="commercial">🏢 تجاري</button>
+        <button class="chip-filter" data-type="agricultural">🌾 زراعي</button>
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" placeholder="بحث بالاسم أو الجوال...">
+        </div>
+      </div>
+
+      <!-- Kanban board view -->
+      <section class="view-section active" id="section-board">
+        <div class="kanban" id="kanbanBoard"></div>
+      </section>
+
+      <!-- Table view -->
+      <section class="view-section" id="section-table">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>إجراءات</th>
+                <th>آخر تواصل</th>
+                <th>الموظف</th>
+                <th>الإعلان</th>
+                <th>المرحلة</th>
+                <th>النوع</th>
+                <th>العميل</th>
+              </tr>
+            </thead>
+            <tbody id="clientsBody"></tbody>
+          </table>
+          <div class="empty-state" id="emptyStateTable" style="display:none;">
+            <div class="empty-state-icon">📭</div>
+            لا يوجد عملاء مطابقين لهذا الفلتر
+          </div>
+        </div>
+      </section>
+
+      <!-- Reminders view -->
+      <section class="view-section" id="section-reminders">
+        <div class="reminder-list" id="reminderList"></div>
+        <div class="empty-state" id="emptyStateReminders" style="display:none;">
+          <div class="empty-state-icon">🔕</div>
+          لا توجد تذكيرات حالياً
+        </div>
+      </section>
+
+      <!-- Team Queue view -->
+      <section class="view-section" id="section-queue">
+        <!-- Team selector -->
+        <div class="queue-team-tabs" id="queueTeamTabs">
+          <button class="queue-team-tab active" data-team="sales">🏷️ فريق التسويق</button>
+          <button class="queue-team-tab" data-team="rentals">🏠 فريق الإيجارات</button>
+          <button class="queue-team-tab" data-team="auctions">🔨 فريق المزادات</button>
+          <button class="queue-team-tab" data-team="evaluation">📋 فريق التقييم</button>
+        </div>
+
+        <!-- Current identity bar -->
+        <div class="queue-employee-bar">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="agent-avatar current-employee-avatar" style="background:var(--bronze-600);">?</div>
+            <div>
+              <div style="font-size:10.5px;color:var(--text-2);">تستلم العملاء بإسم</div>
+              <div class="current-employee-name" style="font-weight:700;font-size:13.5px;color:var(--ink-800);">اختر اسمك</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm" id="queueSwitchIdentityBtn">تبديل</button>
+        </div>
+
+        <div id="queueList" style="display:flex;flex-direction:column;gap:10px;"></div>
+        <div class="empty-state" id="queueEmpty" style="display:none;">
+          <div class="empty-state-icon">✅</div>
+          لا يوجد عملاء في الانتظار لهذا الفريق
+        </div>
+      </section>
+
+      <!-- Reports view -->
+      <section class="view-section" id="section-reports">
+        <div class="report-period-tabs" id="reportPeriodTabs">
+          <button class="report-period-tab" data-period="day">📅 يومي</button>
+          <button class="report-period-tab" data-period="week">🗓️ أسبوعي</button>
+          <button class="report-period-tab" data-period="month">📆 شهري</button>
+          <button class="report-period-tab" data-period="quarter">📊 ربع سنوي</button>
+          <button class="report-period-tab active" data-period="all">∞ كل الفترات</button>
+        </div>
+        <div class="report-period-label" id="reportPeriodLabel"></div>
+
+        <div class="perf-stat-grid" id="perfStatGrid"></div>
+
+        <div class="report-grid">
+          <div class="report-card">
+            <div class="report-card-title">العملاء حسب المرحلة</div>
+            <div class="chart-box"><canvas id="stageChart"></canvas></div>
+          </div>
+          <div class="report-card">
+            <div class="report-card-title">العملاء حسب النوع</div>
+            <div class="chart-box"><canvas id="typeChart"></canvas></div>
+          </div>
+        </div>
+        <div class="report-grid">
+          <div class="report-card">
+            <div class="report-card-title">أداء الموظفين (الصفقات الناجحة)</div>
+            <div id="agentRanking"></div>
+          </div>
+          <div class="report-card">
+            <div class="report-card-title">أسباب إنهاء الصفقات</div>
+            <div class="chart-box"><canvas id="reasonChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Client profile view -->
+      <section class="view-section" id="section-profile">
+        <div class="profile-back" id="profileBackBtn">→ رجوع لقائمة العملاء</div>
+        <div class="profile-header">
+          <div class="profile-id">
+            <div class="profile-avatar" id="profileAvatar">--</div>
+            <div>
+              <div class="profile-name" id="profileName">—</div>
+              <div class="profile-meta" id="profilePhone">—</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,0.25);" id="profileMissedBtn">📵 مكالمة فائتة</button>
+            <button class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,0.25);" id="profileEditBtn">✏️ تعديل</button>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <div>
+            <div class="profile-card">
+              <div class="profile-card-title">سجل المتابعة والملاحظات</div>
+              <div class="timeline" id="profileTimeline"></div>
+              <div class="add-note-row">
+                <input class="form-input" id="newNoteInput" placeholder="أضف ملاحظة أو سجل مكالمة...">
+                <button class="btn btn-primary btn-sm" id="addNoteBtn">إضافة</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="profile-card">
+              <div class="profile-card-title">بيانات العميل</div>
+              <div class="info-row">
+                <span class="info-label">النوع</span>
+                <span class="info-value">
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;" id="profileTypeBtns">
+                    <button class="stage-change-btn" data-type="residential">🏠 سكني</button>
+                    <button class="stage-change-btn" data-type="commercial">🏢 تجاري</button>
+                    <button class="stage-change-btn" data-type="agricultural">🌾 زراعي</button>
+                  </div>
+                </span>
+              </div>
+              <div class="info-row"><span class="info-label">المرحلة</span>
+                <span class="info-value" style="text-align:right;">
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;" id="profileStageBtns">
+                    <button class="stage-change-btn" data-stage="new">🧑 جديد</button>
+                    <button class="stage-change-btn" data-stage="negotiating">💬 جاري التفاوض</button>
+                    <button class="stage-change-btn" data-stage="done">✅ منتهي</button>
+                  </div>
+                  <div id="profileReasonBox" style="display:none;margin-top:10px;background:var(--rose-50);border:1px solid var(--rose-200);border-radius:10px;padding:.75rem;text-align:right;">
+                    <div style="font-size:11.5px;font-weight:700;color:var(--rose-600);margin-bottom:8px;">سبب الإنهاء</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;" id="profileReasonBtns">
+                      <button class="reason-option-btn" data-reason="تمت الصفقة">✅ تمت الصفقة</button>
+                      <button class="reason-option-btn" data-reason="السعر مرتفع">💰 السعر مرتفع</button>
+                      <button class="reason-option-btn" data-reason="لم يجد المطلوب">🔍 لم يجد المطلوب</button>
+                      <button class="reason-option-btn" data-reason="اشترى من مكان آخر">🏠 اشترى من مكان آخر</button>
+                      <button class="reason-option-btn" data-reason="لم يرد">📵 لم يرد</button>
+                      <button class="reason-option-btn" data-reason="غير جاد">🚫 غير جاد</button>
+                    </div>
+                    <input class="form-input" id="profileReasonOther" placeholder="أخرى — اكتب السبب..." style="margin-top:8px;font-size:12px;display:none;">
+                    <span id="profileReasonSelected" style="font-size:12.5px;color:var(--emerald-600);font-weight:700;margin-top:6px;display:none;"></span>
+                  </div>
+                </span>
+              </div>
+              <div class="info-row"><span class="info-label">مصدر العميل</span><span class="info-value" id="profileSource">—</span></div>
+              <div class="info-row"><span class="info-label">الموظف المسؤول</span>
+                <span class="info-value">
+                  <select class="form-select" id="profileEmployeeSelect" style="font-size:11.5px;padding:.35rem .5rem;min-width:170px;"></select>
+                </span>
+              </div>
+              <div class="info-row"><span class="info-label">توجيه لفريق</span>
+                <span class="info-value">
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;" id="profileTeamBtns">
+                    <button class="stage-change-btn" data-team="">بدون</button>
+                    <button class="stage-change-btn" data-team="sales">تسويق</button>
+                    <button class="stage-change-btn" data-team="rentals">إيجارات</button>
+                    <button class="stage-change-btn" data-team="auctions">مزادات</button>
+                    <button class="stage-change-btn" data-team="evaluation">تقييم</button>
+                  </div>
+                </span>
+              </div>
+              <div class="info-row"><span class="info-label">المدينة</span><span class="info-value" id="profileCity">—</span></div>
+              <div class="info-row"><span class="info-label">الإعلان / العقار</span><span class="info-value" id="profileListing">—</span></div>
+              <div class="info-row"><span class="info-label">آخر تواصل</span><span class="info-value" id="profileLastContact">—</span></div>
+              <div class="info-row"><span class="info-label">أُضيف بواسطة</span><span class="info-value" id="profileAddedBy">—</span></div>
+            </div>
+            <div class="profile-card">
+              <div class="profile-card-title">التذكير القادم</div>
+              <div id="profileReminderBox" style="font-size:12.5px;color:var(--text-2);"></div>
+              <div class="add-note-row">
+                <input class="form-input" type="date" id="reminderDateInput">
+                <button class="btn btn-primary btn-sm" id="setReminderBtn">تعيين</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footnote">⚙️ ملاحظة للمبرمج: البيانات والهوية الحالية محفوظة بشكل دائم عبر window.storage. لا يوجد في الواجهة أي خيار لحذف عميل — هذا مقصود. إضافة عميل برقم جوال موجود مسبقًا تفتح ملفه القديم تلقائيًا بدل تكراره.</div>
+    </div>
+  </main>
+
+</div>
+
+<!-- Add/Edit Client Modal (plain div, NOT a <form>, to avoid sandboxed-iframe form-submission issues) -->
+<div class="modal-overlay" id="clientModalOverlay">
+  <div class="modal-box wide">
+    <div class="modal-title" id="clientModalTitle">+ إضافة عميل جديد</div>
+    <div id="clientForm">
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">اسم العميل *</label>
+          <input class="form-input" id="f_name" placeholder="الاسم الكامل">
+        </div>
+        <div class="form-group">
+          <label class="form-label">رقم الجوال *</label>
+          <input class="form-input" id="f_phone" placeholder="05xxxxxxxx">
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">نوع العميل *</label>
+          <select class="form-select" id="f_type">
+            <option value="residential">سكني</option>
+            <option value="commercial">تجاري</option>
+            <option value="agricultural">زراعي</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">مصدر العميل *</label>
+          <select class="form-select" id="f_source">
+            <option value="">موقع / واتساب / مكالمة...</option>
+            <option value="website">الموقع الإلكتروني</option>
+            <option value="whatsapp">واتساب</option>
+            <option value="call">مكالمة واردة</option>
+            <option value="referral">إحالة</option>
+            <option value="social">سوشل ميديا</option>
+            <option value="walk_in">زيارة مباشرة</option>
+            <option value="other">أخرى</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">الإعلان المهتم به / تفاصيل الطلب</label>
+
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button type="button" class="listing-mode-btn active" data-mode="search">🔍 بحث عن إعلان</button>
+          <button type="button" class="listing-mode-btn" data-mode="manual">✏️ كتابة طلب العميل</button>
+        </div>
+
+        <div id="listingSearchMode">
+          <div style="position:relative;">
+            <input class="form-input" id="f_listing_search" placeholder="اكتب رقم الإعلان أو اسم الحي أو نوع العقار...">
+            <div id="listingDropdown" style="display:none;position:absolute;top:100%;right:0;left:0;margin-top:4px;background:var(--sand-50);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(14,26,46,0.12);z-index:60;max-height:220px;overflow-y:auto;"></div>
+          </div>
+          <div id="listingSelected" style="display:none;margin-top:8px;background:var(--emerald-50);border:1px solid var(--emerald-200);border-radius:10px;padding:.75rem 1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-weight:700;font-size:13px;color:var(--ink-800);" id="listingSelectedTitle">—</div>
+                <div style="font-size:11.5px;color:var(--text-2);margin-top:2px;font-family:var(--font-mono);" id="listingSelectedMeta">—</div>
+              </div>
+              <button type="button" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:18px;line-height:1;" id="clearListingBtn">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="listingManualMode" style="display:none;">
+          <div class="form-row-2" style="margin-bottom:8px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">نوع الطلب</label>
+              <select class="form-select" id="req_deal_type">
+                <option value="">اختر...</option>
+                <option value="buy">شراء</option>
+                <option value="rent">إيجار</option>
+                <option value="invest">استثمار</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">نوع العقار</label>
+              <select class="form-select" id="req_property_type">
+                <option value="">اختر...</option>
+                <option value="villa">فيلا</option>
+                <option value="apartment">شقة</option>
+                <option value="duplex">دوبلكس</option>
+                <option value="land">أرض</option>
+                <option value="shop">محل تجاري</option>
+                <option value="office">مكتب</option>
+                <option value="warehouse">مستودع</option>
+                <option value="farm">مزرعة</option>
+                <option value="other">أخرى</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row-2" style="margin-bottom:8px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">الحي / المنطقة المفضلة</label>
+              <input class="form-input" id="req_district" placeholder="مثال: حي النرجس، العليا...">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">المدينة</label>
+              <input class="form-input" id="req_city" placeholder="الرياض، جدة...">
+            </div>
+          </div>
+          <div class="form-row-3" style="margin-bottom:8px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">الميزانية (ر.س)</label>
+              <input class="form-input" id="req_budget" placeholder="2,500,000">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">عدد الغرف</label>
+              <select class="form-select" id="req_rooms">
+                <option value="">—</option>
+                <option>1</option><option>2</option><option>3</option>
+                <option>4</option><option>5</option><option>6+</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">المساحة (م²)</label>
+              <input class="form-input" id="req_area" placeholder="300">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">ملاحظات إضافية عن الطلب</label>
+            <textarea class="form-textarea" id="req_notes" rows="2" placeholder="أي تفاصيل خاصة: دور أرضي، مسبح، قريب من مدرسة..."></textarea>
+          </div>
+        </div>
+
+        <input type="hidden" id="f_listing">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">تعيين العميل</label>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+          <button type="button" class="assign-mode-btn" data-assign-mode="team">📋 توجيه لفريق (قائمة انتظار)</button>
+          <button type="button" class="assign-mode-btn" data-assign-mode="direct">🎯 تعيين مباشر لموظف</button>
+          <button type="button" class="assign-mode-btn" data-assign-mode="none">— بدون تعيين الآن</button>
+        </div>
+
+        <div id="assignTeamMode">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="teamBtns">
+            <button type="button" class="team-btn" data-team="sales">🏷️ فريق التسويق</button>
+            <button type="button" class="team-btn" data-team="rentals">🏠 فريق الإيجارات</button>
+            <button type="button" class="team-btn" data-team="auctions">🔨 فريق المزادات</button>
+            <button type="button" class="team-btn" data-team="evaluation">📋 فريق التقييم</button>
+          </div>
+        </div>
+
+        <div id="assignDirectMode" style="display:none;">
+          <select class="form-select" id="f_direct_employee"></select>
+        </div>
+
+        <input type="hidden" id="f_team">
+        <input type="hidden" id="f_assign_mode" value="team">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ملاحظة أولية</label>
+        <textarea class="form-textarea" id="f_note" rows="2" placeholder="أي ملاحظات عن احتياج العميل..."></textarea>
+      </div>
+
+      <div style="background:var(--sand-200);border-radius:10px;padding:.6rem .9rem;font-size:11.5px;color:var(--text-2);margin-bottom:.85rem;">
+        ⚙️ "توجيه لفريق" يضع العميل في قائمة انتظار الفريق حتى يستلمه أحد أعضائه. "تعيين مباشر" يحدد الموظف المسؤول فورًا بدون قائمة انتظار. إذا كان رقم الجوال مسجّلاً مسبقًا، سيتم فتح ملف العميل القديم تلقائيًا بدل إنشاء سجل مكرر.
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">المرحلة</label>
+          <select class="form-select" id="f_stage">
+            <option value="new">🧑 جديد</option>
+            <option value="negotiating">💬 جاري التفاوض</option>
+            <option value="done">✅ منتهي</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">المدينة</label>
+          <input class="form-input" id="f_city" placeholder="الرياض، جدة...">
+        </div>
+      </div>
+
+      <div class="form-error" id="formError">الرجاء تعبئة الاسم ورقم الجوال.</div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" id="cancelModalBtn">إلغاء</button>
+        <button type="button" class="modal-btn save" id="saveClientBtn">حفظ العميل</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Missed Call Modal -->
+<div class="modal-overlay" id="missedCallsOverlay">
+  <div class="modal-box">
+    <div class="modal-title">📵 المكالمات الفائتة</div>
+
+    <div style="background:var(--sand-100);border:1px solid var(--line);border-radius:12px;padding:1rem;margin-bottom:1.1rem;">
+      <div style="font-size:12px;font-weight:700;color:var(--text-2);margin-bottom:10px;">+ تسجيل مكالمة فائتة جديدة</div>
+      <div class="form-group">
+        <label class="form-label">رقم الجوال *</label>
+        <input class="form-input" id="mc_phone" placeholder="05xxxxxxxx">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--sand-50);border:1px solid var(--line);border-radius:9px;padding:.5rem .7rem;margin-bottom:10px;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="agent-avatar current-employee-avatar" style="width:26px;height:26px;font-size:10px;background:var(--bronze-600);">?</div>
+          <div>
+            <div style="font-size:10px;color:var(--text-2);">ستُسجَّل بإسم</div>
+            <div class="current-employee-name" style="font-weight:700;font-size:12px;color:var(--ink-800);">اختر اسمك</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm" id="mcSwitchIdentityBtn">تبديل</button>
+      </div>
+      <button class="btn btn-primary" id="saveMcFormBtn" style="width:100%;justify-content:center;">تسجيل المكالمة ✓</button>
+    </div>
+
+    <div id="missedCallsList" style="display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;"></div>
+    <div class="empty-state" id="missedCallsEmpty" style="display:none;padding:1.5rem 0;">
+      <div class="empty-state-icon">🔕</div>
+      لا توجد مكالمات فائتة
+    </div>
+
+    <div class="modal-actions" style="margin-top:1rem;">
+      <button type="button" class="modal-btn cancel" id="closeMissedCallsBtn">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- Identity / Switch Employee Modal -->
+<div class="modal-overlay" id="identityModalOverlay">
+  <div class="modal-box">
+    <div class="modal-title">👤 من أنت؟</div>
+    <div class="footnote" style="text-align:right;margin:0 0 14px;">اختر اسمك لتُسجَّل الإجراءات بإسمك — بدون حساب أو كلمة مرور</div>
+    <div id="identityStaffList" style="display:flex;flex-direction:column;gap:16px;"></div>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn cancel" id="closeIdentityBtn">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<input type="hidden" id="mc_client_id">
+
+<script>
+const STORAGE_KEY = 'algnam-crm-pro-v2';
+const IDENTITY_KEY = 'algnam-current-employee';
+const TYPE_TEXT = { residential: 'سكني', commercial: 'تجاري', agricultural: 'زراعي' };
+const TYPE_ICON = { residential: '🏠', commercial: '🏢', agricultural: '🌾' };
+const TYPE_BADGE_CLASS = { residential: 'badge-residential', commercial: 'badge-commercial', agricultural: 'badge-agricultural' };
+const STAGE_TEXT = { new: 'جديد', negotiating: 'جاري التفاوض', done: 'منتهي' };
+const STAGE_DOT = { new: '#185FA5', negotiating: '#B5780F', done: '#0B6B53' };
+const SUB_REASONS = ['تمت الصفقة','السعر مرتفع','لم يجد المطلوب','اشترى من مكان آخر','لم يرد','غير جاد','أخرى'];
+const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const PERIOD_LABELS = { day:'📍 الفترة: اليوم', week:'📍 الفترة: آخر 7 أيام', month:'📍 الفترة: هذا الشهر (من أول الشهر حتى اليوم)', quarter:'📍 الفترة: هذا الربع (من أول الربع حتى اليوم)', all:'📍 الفترة: كل البيانات منذ البداية' };
+
+// ===== Company staff directory (no logins/passwords — just pick your name) =====
+const STAFF_DIRECTORY = {
+  callcenter:  { label:'كول سنتر',        icon:'☎️', members:['بدر السعوي','فيصل الصقري','عمر البجادي'] },
+  sales:       { label:'فريق التسويق',    icon:'🏷️', members:['ابراهيم الناصر','محمد المطلق'] },
+  rentals:     { label:'فريق الإيجارات',  icon:'🏠', members:['محمد التويجري'] },
+  auctions:    { label:'فريق المزادات',   icon:'🔨', members:['انس العجلان'] },
+  evaluation:  { label:'فريق التقييم',    icon:'📋', members:[] }
+};
+function teamLabel(key){ return STAFF_DIRECTORY[key] ? (STAFF_DIRECTORY[key].icon+' '+STAFF_DIRECTORY[key].label) : (key||'—'); }
+
+let clients = [];
+let currentSection = 'board';
+let currentType = 'all';
+let currentStage = 'all';
+let currentSearch = '';
+let activeProfileId = null;
+let editingClientId = null;
+let stageChartInstance = null;
+let typeChartInstance = null;
+let reasonChartInstance = null;
+let currentReportPeriod = 'all';
+let currentEmployee = null;
+let pendingIdentityCallback = null;
+
+function uid(){ return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function noteId(){ return 'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+
+function note(type, text, author){
+  return { id: noteId(), type, text, ts: Date.now(), author: author || currentEmployee || '' };
+}
+
+function addDays(n){
+  const d = new Date();
+  d.setDate(d.getDate()+n);
+  return d.toISOString().slice(0,10);
+}
+
+function tsAgo(days, hours){
+  return Date.now() - (days*24*60*60*1000) - ((hours||0)*60*60*1000);
+}
+
+// Normalize a phone string to digits-only so "0501234567", "050 123 4567"
+// and "050-123-4567" are all recognized as the same number.
+function normalizePhone(p){
+  return (p||'').replace(/\D/g,'');
+}
+
+// Find an existing client by phone number (used to prevent duplicate
+// client records when adding someone who already exists in the system).
+function findClientByPhone(phone){
+  const norm = normalizePhone(phone);
+  if(!norm) return null;
+  return clients.find(c => normalizePhone(c.phone) === norm) || null;
+}
+
+function mk(o){
+  return {
+    id: uid(),
+    name: o.name, phone: o.phone, city: o.city||'', type: o.type, stage: o.stage,
+    employee: o.employee||'', team: o.team||'', addedBy: o.addedBy||'',
+    listing: o.listing||'', lastContact: o.lastContact||'اليوم',
+    notes: o.notes||[], reminder: o.reminder||null, reason: o.reason||'',
+    missedCalls: [], createdAt: o.createdAt||Date.now(), closedAt: o.closedAt||null
+  };
+}
+
+function changeClientStage(client, newStage, customNoteText){
+  const prevStage = client.stage;
+  if(prevStage === newStage) return false;
+  client.stage = newStage;
+  if(newStage === 'done'){
+    client.closedAt = Date.now();
+  } else {
+    client.reason = '';
+    client.closedAt = null;
+  }
+  client.notes.push(note('stage', customNoteText || `تغيير المرحلة من "${STAGE_TEXT[prevStage]}" إلى "${STAGE_TEXT[newStage]}"`));
+  return true;
+}
+
+function getPeriodRange(period){
+  const now = new Date();
+  const end = now.getTime();
+  let start = 0;
+  if(period === 'day'){
+    const d = new Date(now); d.setHours(0,0,0,0);
+    start = d.getTime();
+  } else if(period === 'week'){
+    start = end - 7*24*60*60*1000;
+  } else if(period === 'month'){
+    start = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  } else if(period === 'quarter'){
+    const q = Math.floor(now.getMonth()/3);
+    start = new Date(now.getFullYear(), q*3, 1).getTime();
+  }
+  return { start, end };
+}
+
+const SEED_CLIENTS = [
+  mk({ name:'فهد الرشيد', phone:'0501234567', city:'الرياض', type:'residential', stage:'negotiating',
+       employee:'ابراهيم الناصر', addedBy:'بدر السعوي', listing:'فيلا النرجس', lastContact:'اليوم',
+       notes:[ note('call','اتصال أولي — مهتم بفيلا 5 غرف في النرجس'), note('note','أرسلت له 3 خيارات عبر واتساب') ],
+       reminder: addDays(2), createdAt: tsAgo(1) }),
+  mk({ name:'سالم الغامدي', phone:'0534455667', city:'الرياض', type:'commercial', stage:'negotiating',
+       employee:'محمد المطلق', addedBy:'فيصل الصقري', listing:'محل السليمانية', lastContact:'اليوم',
+       notes:[ note('call','عاين المحل، يفاوض على السعر') ],
+       reminder: addDays(-1), createdAt: tsAgo(4) }),
+  mk({ name:'نورة السبيعي', phone:'0559876543', city:'بريدة', type:'residential', stage:'new',
+       team:'sales', addedBy:'عمر البجادي', listing:'شقة العليا', lastContact:'أمس',
+       notes:[ note('note','تواصلت من الموقع الإلكتروني') ],
+       reminder: addDays(5), createdAt: tsAgo(0,3) }),
+  mk({ name:'عبدالله المطيري', phone:'0541122334', city:'جدة', type:'residential', stage:'done',
+       employee:'ابراهيم الناصر', addedBy:'بدر السعوي', listing:'دوبلكس الملقا', lastContact:'14 يونيو',
+       notes:[ note('stage','تم إغلاق الصفقة بنجاح'), note('call','توقيع العقد النهائي') ],
+       reason:'تمت الصفقة', createdAt: tsAgo(75), closedAt: tsAgo(60) }),
+  mk({ name:'سلطان الدوسري', phone:'0565544332', city:'جدة', type:'agricultural', stage:'done',
+       employee:'محمد المطلق', addedBy:'فيصل الصقري', listing:'مزرعة العليا', lastContact:'10 يونيو',
+       notes:[ note('stage','اشترى من مكتب آخر') ],
+       reason:'اشترى من مكان آخر', createdAt: tsAgo(20), closedAt: tsAgo(14) }),
+  mk({ name:'خالد الحربي', phone:'0512233445', city:'القصيم', type:'agricultural', stage:'new',
+       team:'auctions', addedBy:'عمر البجادي', listing:'مزرعة القصيم', lastContact:'اليوم',
+       reminder: addDays(1), createdAt: tsAgo(0,5) }),
+  mk({ name:'منيرة العتيبي', phone:'0598877665', city:'الدمام', type:'commercial', stage:'negotiating',
+       employee:'محمد التويجري', addedBy:'بدر السعوي', listing:'مكتب الكورنيش', lastContact:'أمس',
+       notes:[ note('call','تفاوض على مدة العقد') ],
+       reminder: addDays(-2), createdAt: tsAgo(2) }),
+  mk({ name:'تركي الزهراني', phone:'0533221144', city:'الرياض', type:'residential', stage:'new',
+       team:'rentals', addedBy:'فيصل الصقري', listing:'شقة الياسمين', lastContact:'اليوم',
+       reminder: addDays(3), createdAt: tsAgo(0,1) })
+];
+
+function setSaveIndicator(state){
+  const el = document.getElementById('saveIndicator');
+  const text = document.getElementById('saveIndicatorText');
+  el.classList.remove('saving','saved');
+  if(state==='saving'){ el.classList.add('saving'); text.textContent='جاري الحفظ...'; }
+  else if(state==='saved'){ el.classList.add('saved'); text.textContent='محفوظ'; }
+  else if(state==='error'){ text.textContent='تعذّر الحفظ — سيُعاد المحاولة'; }
+}
+
+async function loadCurrentEmployee(){
+  try{
+    const result = await window.storage.get(IDENTITY_KEY, false);
+    if(result && result.value){ currentEmployee = result.value; }
+  }catch(err){ /* no identity chosen yet — that's fine */ }
+  updateIdentityDisplay();
+}
+
+async function setCurrentEmployee(name){
+  currentEmployee = name;
+  updateIdentityDisplay();
+  try{ await window.storage.set(IDENTITY_KEY, name, false); }catch(err){ console.error('identity save error', err); }
+  if(pendingIdentityCallback){
+    const cb = pendingIdentityCallback;
+    pendingIdentityCallback = null;
+    cb();
+  }
+}
+
+function updateIdentityDisplay(){
+  document.querySelectorAll('.current-employee-name').forEach(el=>{ el.textContent = currentEmployee || 'اختر اسمك'; });
+  document.querySelectorAll('.current-employee-avatar').forEach(el=>{ el.textContent = currentEmployee ? initials(currentEmployee) : '?'; });
+}
+
+async function loadClients(){
+  try{
+    const result = await window.storage.get(STORAGE_KEY, false);
+    if(result && result.value){
+      const data = JSON.parse(result.value);
+      if(Array.isArray(data)){
+        clients = data;
+        window._missedCalls = [];
+      } else {
+        clients = data.clients || [];
+        window._missedCalls = data.missedCalls || [];
+      }
+    } else {
+      clients = SEED_CLIENTS.slice();
+      window._missedCalls = [];
+      await saveClients();
+    }
+  }catch(err){
+    clients = SEED_CLIENTS.slice();
+    window._missedCalls = [];
+    try{ await saveClients(); }catch(e){ console.error('Initial save failed', e); }
+  }
+
+  // Migration: ensure every client has the fields needed by newer features
+  let migrated = false;
+  clients.forEach(c=>{
+    if(!c.createdAt){ c.createdAt = Date.now(); migrated = true; }
+    if(c.stage === 'done' && !c.closedAt){ c.closedAt = c.createdAt; migrated = true; }
+    if(c.stage !== 'done' && c.closedAt){ c.closedAt = null; migrated = true; }
+    if(c.employee === undefined){ c.employee = ''; migrated = true; }
+    if(c.team === undefined){ c.team = ''; migrated = true; }
+    if(c.addedBy === undefined){ c.addedBy = ''; migrated = true; }
+    if(c.claimedBy !== undefined){ delete c.claimedBy; migrated = true; }
+  });
+  if(migrated) persist();
+
+  renderAll();
+}
+
+let saveTimeout = null;
+async function saveClients(){
+  setSaveIndicator('saving');
+  try{
+    const data = { clients, missedCalls: window._missedCalls||[] };
+    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(data), false);
+    if(!result) throw new Error('No result from storage.set');
+    setSaveIndicator('saved');
+  }catch(err){
+    console.error('Storage save error:', err);
+    setSaveIndicator('error');
+  }
+}
+
+function persist(){
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(saveClients, 300);
+}
+
+function escapeHtml(str){
+  if(str==null) return '';
+  return String(str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+function getFilteredClients(){
+  return clients.filter(c=>{
+    const matchesType = currentType==='all' || c.type===currentType;
+    const matchesStage = currentStage==='all' || c.stage===currentStage;
+    const q = currentSearch.trim();
+    const matchesSearch = q==='' || c.name.includes(q) || c.phone.includes(q);
+    return matchesType && matchesStage && matchesSearch;
+  });
+}
+
+function employeeOrPending(c){
+  if(c.employee) return escapeHtml(c.employee);
+  if(c.team) return `<span class="pending-tag">⏳ ${teamLabel(c.team)}</span>`;
+  return '—';
+}
+
+/* ===== Staff select population (used in modal + profile) ===== */
+function populateStaffSelect(selectEl, currentValue){
+  if(!selectEl) return;
+  selectEl.innerHTML = '<option value="">اختر الموظف...</option>';
+  Object.values(STAFF_DIRECTORY).forEach(group=>{
+    if(!group.members.length) return;
+    const og = document.createElement('optgroup');
+    og.label = group.icon+' '+group.label;
+    group.members.forEach(name=>{
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      og.appendChild(opt);
+    });
+    selectEl.appendChild(og);
+  });
+  if(currentValue){
+    const exists = Array.from(selectEl.options).some(o=>o.value===currentValue);
+    if(!exists){
+      const opt = document.createElement('option');
+      opt.value = currentValue; opt.textContent = currentValue+' (غير مسجّل في القائمة)';
+      selectEl.appendChild(opt);
+    }
+    selectEl.value = currentValue;
+  } else {
+    selectEl.value = '';
+  }
+}
+
+/* ===== Identity modal ===== */
+function renderIdentityModal(){
+  const wrap = document.getElementById('identityStaffList');
+  wrap.innerHTML = Object.values(STAFF_DIRECTORY).map(group=>{
+    if(!group.members.length) return '';
+    return `
+      <div>
+        <div style="font-size:11.5px;font-weight:700;color:var(--text-2);margin-bottom:8px;">${group.icon} ${group.label}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${group.members.map(name=>`
+            <button type="button" class="team-btn identity-pick-btn"
+              data-name="${escapeHtml(name)}"
+              style="${name===currentEmployee?'background:var(--emerald-600);color:#fff;border-color:var(--emerald-600);':''}">
+              ${escapeHtml(initials(name))} · ${escapeHtml(name)}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  wrap.querySelectorAll('.identity-pick-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      setCurrentEmployee(btn.dataset.name);
+      closeIdentityModal();
+    });
+  });
+}
+function openIdentityModal(){
+  renderIdentityModal();
+  document.getElementById('identityModalOverlay').classList.add('open');
+}
+function closeIdentityModal(){
+  document.getElementById('identityModalOverlay').classList.remove('open');
+  // if a pending action was waiting and the user closed without picking, drop it
+  pendingIdentityCallback = null;
+}
+document.getElementById('closeIdentityBtn').addEventListener('click', closeIdentityModal);
+document.getElementById('identityModalOverlay').addEventListener('click', e=>{
+  if(e.target===document.getElementById('identityModalOverlay')) closeIdentityModal();
+});
+document.getElementById('identitySwitchBtn').addEventListener('click', openIdentityModal);
+
+/* ===== Navigation ===== */
+const PAGE_TITLES = {
+  board: ['لوحة المتابعة','clients/board'],
+  table: ['قائمة العملاء','clients/table'],
+  queue: ['قائمة الانتظار','clients/queue'],
+  reminders: ['التذكيرات','clients/reminders'],
+  reports: ['الأداء والإحصائيات','reports/'],
+  profile: ['ملف العميل','clients/profile']
+};
+
+function navigateTo(section){
+  currentSection = section;
+  document.querySelectorAll('.nav-item[data-nav]').forEach(b=>b.classList.toggle('active', b.dataset.nav===section));
+  document.querySelectorAll('.view-section').forEach(s=>s.classList.remove('active'));
+
+  const toolbar = document.querySelector('.toolbar');
+  const statGrid = document.querySelector('.stat-grid');
+
+  if(section==='board' || section==='table'){
+    document.getElementById('section-'+section).classList.add('active');
+    document.querySelectorAll('.view-toggle button').forEach(b=>b.classList.toggle('active', b.dataset.section===section));
+    toolbar.style.display='flex';
+    statGrid.style.display='grid';
+  } else if(section==='profile'){
+    document.getElementById('section-profile').classList.add('active');
+    toolbar.style.display='none';
+    statGrid.style.display='none';
+  } else {
+    document.getElementById('section-'+section).classList.add('active');
+    toolbar.style.display='none';
+    statGrid.style.display='none';
+  }
+
+  const meta = PAGE_TITLES[section] || ['','',''];
+  document.getElementById('pageTitle').textContent = meta[0];
+  document.getElementById('pageMeta').textContent = meta[1];
+
+  if(section==='reports') renderReports();
+  if(section==='reminders') renderReminders();
+  if(section==='queue'){ renderQueue(); renderQueueBadge(); }
+}
+
+document.querySelectorAll('.nav-item[data-nav]').forEach(btn=>{
+  btn.addEventListener('click', ()=> navigateTo(btn.dataset.nav));
+});
+
+document.querySelectorAll('.view-toggle button').forEach(btn=>{
+  btn.addEventListener('click', ()=> navigateTo(btn.dataset.section));
+});
+
+/* ===== Table view ===== */
+function renderTable(){
+  const tbody = document.getElementById('clientsBody');
+  const filtered = getFilteredClients();
+  const emptyState = document.getElementById('emptyStateTable');
+
+  if(filtered.length===0){
+    tbody.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+  tbody.innerHTML = filtered.map(c=>rowTemplate(c)).join('');
+  wireRowEvents();
+}
+
+function rowTemplate(c){
+  const reasonHtml = c.stage==='done'
+    ? `<div class="dd-anchor">
+         <button class="reason-pill${c.reason?' set':''}" data-reason-id="${c.id}">${c.reason || 'سبب الإنهاء'}</button>
+         <div class="dropdown-menu" id="reasonMenu-${c.id}"></div>
+       </div>`
+    : '';
+  return `
+    <tr data-id="${c.id}">
+      <td>
+        <div class="actions-cell">
+          <button class="icon-btn" data-edit-id="${c.id}" title="تعديل">✏️</button>
+          <button class="icon-btn" data-missed-id="${c.id}" title="تسجيل مكالمة فائتة">📵</button>
+        </div>
+      </td>
+      <td>${escapeHtml(c.lastContact||'—')}</td>
+      <td>${employeeOrPending(c)}</td>
+      <td>${escapeHtml(c.listing||'—')}</td>
+      <td>
+        <div class="dd-anchor">
+          <button class="stage-pill stage-${c.stage}" data-stage-id="${c.id}">${STAGE_TEXT[c.stage]}</button>
+          <div class="dropdown-menu" id="menu-${c.id}">
+            <button class="dropdown-item" data-set-stage="${c.id}|new">جديد</button>
+            <button class="dropdown-item" data-set-stage="${c.id}|negotiating">جاري التفاوض</button>
+            <button class="dropdown-item" data-set-stage="${c.id}|done">منتهي</button>
+          </div>
+        </div>
+        <div>${reasonHtml}</div>
+      </td>
+      <td><span class="badge ${TYPE_BADGE_CLASS[c.type]}">${TYPE_ICON[c.type]} ${TYPE_TEXT[c.type]}</span></td>
+      <td>
+        <span class="client-link" data-open-profile="${c.id}">${escapeHtml(c.name)}</span>
+        <div class="client-sub">${escapeHtml(c.city||'')}${c.city?' · ':''}${escapeHtml(c.phone)}</div>
+      </td>
+    </tr>
+  `;
+}
+
+function closeAllMenus(){
+  document.querySelectorAll('.dropdown-menu.open').forEach(m=>m.classList.remove('open'));
+}
+document.addEventListener('click', closeAllMenus);
+
+function wireRowEvents(){
+  document.querySelectorAll('[data-open-profile]').forEach(el=>{
+    el.addEventListener('click', ()=> openProfile(el.dataset.openProfile));
+  });
+
+  document.querySelectorAll('.stage-pill[data-stage-id]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      const id = btn.dataset.stageId;
+      const menu = document.getElementById('menu-'+id);
+      const isOpen = menu.classList.contains('open');
+      closeAllMenus();
+      if(!isOpen) menu.classList.add('open');
+    });
+  });
+
+  document.querySelectorAll('.dropdown-item[data-set-stage]').forEach(item=>{
+    item.addEventListener('click', e=>{
+      e.stopPropagation();
+      const [id, stageKey] = item.dataset.setStage.split('|');
+      const client = clients.find(c=>c.id===id);
+      if(!client) return;
+      changeClientStage(client, stageKey);
+      closeAllMenus();
+      renderAll();
+      persist();
+    });
+  });
+
+  document.querySelectorAll('.reason-pill[data-reason-id]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      const id = btn.dataset.reasonId;
+      const menu = document.getElementById('reasonMenu-'+id);
+      buildReasonMenu(id, menu);
+      const isOpen = menu.classList.contains('open');
+      closeAllMenus();
+      if(!isOpen) menu.classList.add('open');
+    });
+  });
+
+  document.querySelectorAll('[data-edit-id]').forEach(btn=>{
+    btn.addEventListener('click', e=>{ e.stopPropagation(); openEditModal(btn.dataset.editId); });
+  });
+  document.querySelectorAll('[data-missed-id]').forEach(btn=>{
+    btn.addEventListener('click', e=>{ e.stopPropagation(); logMissedCall(btn.dataset.missedId); });
+  });
+}
+
+function buildReasonMenu(id, menu){
+  menu.innerHTML='';
+  SUB_REASONS.forEach(reason=>{
+    const btn=document.createElement('button');
+    btn.className='dropdown-item';
+    btn.textContent=reason;
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      if(reason==='أخرى'){ showOtherReasonNote(id, menu); }
+      else { setReason(id, reason); closeAllMenus(); }
+    });
+    menu.appendChild(btn);
+  });
+}
+
+function showOtherReasonNote(id, menu){
+  menu.innerHTML='';
+  const box=document.createElement('div');
+  box.className='note-box';
+  const client = clients.find(c=>c.id===id);
+  const prefill = client && client.reason && client.reason.startsWith('أخرى — ') ? client.reason.slice(7) : '';
+  box.innerHTML = `<textarea placeholder="اكتب السبب...">${escapeHtml(prefill)}</textarea><button type="button">حفظ</button>`;
+  menu.appendChild(box);
+  const textarea = box.querySelector('textarea');
+  const saveBtn = box.querySelector('button');
+  textarea.focus();
+  saveBtn.addEventListener('click', e=>{
+    e.stopPropagation();
+    const v = textarea.value.trim();
+    setReason(id, v ? 'أخرى — '+v : 'أخرى');
+    closeAllMenus();
+  });
+  box.addEventListener('click', e=>e.stopPropagation());
+}
+
+function setReason(id, label){
+  const client = clients.find(c=>c.id===id);
+  if(!client) return;
+  client.reason = label;
+  client.notes.push(note('stage', `سبب الإنهاء: ${label}`));
+  renderAll();
+  persist();
+}
+
+function renderReminderBadge(){
+  const today = new Date().toISOString().slice(0,10);
+  const count = clients.filter(c=>c.reminder && c.reminder<=today).length;
+  document.getElementById('navReminderBadge').textContent = count;
+  document.getElementById('navReminderBadge').style.display = count>0 ? 'flex' : 'none';
+}
+
+function renderReminders(){
+  const list = document.getElementById('reminderList');
+  const empty = document.getElementById('emptyStateReminders');
+  const withReminders = clients
+    .filter(c=>c.reminder)
+    .sort((a,b)=> a.reminder.localeCompare(b.reminder));
+
+  if(withReminders.length===0){
+    list.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+
+  const today = new Date().toISOString().slice(0,10);
+  list.innerHTML = withReminders.map(c=>{
+    const d = new Date(c.reminder+'T00:00:00');
+    const overdue = c.reminder <= today;
+    return `
+      <div class="reminder-item${overdue?' overdue':''}" data-open-profile="${c.id}" style="cursor:pointer;">
+        <div class="reminder-date">
+          <div class="reminder-day">${d.getDate()}</div>
+          <div class="reminder-month">${MONTHS_AR[d.getMonth()].slice(0,3)}</div>
+        </div>
+        <div class="reminder-body">
+          <div class="reminder-client">${escapeHtml(c.name)}</div>
+          <div class="reminder-note">${escapeHtml(c.listing||'')} · ${TYPE_TEXT[c.type]} · ${STAGE_TEXT[c.stage]}</div>
+        </div>
+        ${overdue ? '<span class="reminder-tag">متأخر</span>' : ''}
+      </div>
+    `;
+  }).join('');
+
+  list.querySelectorAll('[data-open-profile]').forEach(el=>{
+    el.addEventListener('click', ()=> openProfile(el.dataset.openProfile));
+  });
+}
+
+function renderAll(){
+  renderStats();
+  renderBoard();
+  renderTable();
+  renderReminderBadge();
+  renderMissedCallsBadge();
+  renderQueueBadge();
+  if(currentSection==='queue') renderQueue();
+  if(currentSection==='reminders') renderReminders();
+  if(currentSection==='reports') renderReports();
+  if(currentSection==='profile' && activeProfileId) renderProfile(activeProfileId);
+}
+
+function renderStats(){
+  const counts = { new:0, negotiating:0, done:0 };
+  clients.forEach(c=>{ counts[c.stage] = (counts[c.stage]||0)+1; });
+  document.getElementById('statTotal').textContent = clients.length;
+  document.getElementById('statNew').textContent = counts.new;
+  document.getElementById('statNegotiating').textContent = counts.negotiating;
+  document.getElementById('statDone').textContent = counts.done;
+}
+
+document.querySelectorAll('.stat-card[data-stage-filter]').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    currentStage = card.dataset.stageFilter;
+    renderBoard();
+    renderTable();
+  });
+});
+
+/* ===== Filters ===== */
+document.querySelectorAll('.chip-filter[data-type]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentType = btn.dataset.type;
+    document.querySelectorAll('.chip-filter[data-type]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderBoard();
+    renderTable();
+  });
+});
+document.querySelector('.chip-filter[data-type="all"]').classList.add('active');
+
+document.getElementById('searchInput').addEventListener('input', e=>{
+  currentSearch = e.target.value;
+  renderBoard();
+  renderTable();
+});
+
+/* ===== Kanban board ===== */
+const KANBAN_STAGES = ['new','negotiating','done'];
+
+function renderBoard(){
+  const board = document.getElementById('kanbanBoard');
+  const filtered = getFilteredClients();
+  board.innerHTML = KANBAN_STAGES.map(stage=>{
+    const items = filtered.filter(c=>c.stage===stage);
+    return `
+      <div class="kcol" data-stage-col="${stage}">
+        <div class="kcol-head">
+          <div class="kcol-title"><span class="kcol-dot" style="background:${STAGE_DOT[stage]}"></span>${STAGE_TEXT[stage]}</div>
+          <span class="kcol-count">${items.length}</span>
+        </div>
+        ${items.map(c=>kcardTemplate(c)).join('') || '<div style="text-align:center;color:var(--text-3);font-size:12px;padding:1.5rem 0;">لا يوجد عملاء</div>'}
+      </div>
+    `;
+  }).join('');
+  wireKanbanEvents();
+}
+
+function reminderUrgency(c){
+  if(!c.reminder) return null;
+  const today = new Date().toISOString().slice(0,10);
+  return c.reminder <= today ? 'overdue' : 'upcoming';
+}
+
+function kcardTemplate(c){
+  const urgency = reminderUrgency(c);
+  let reminderHtml = '';
+  if(c.reminder){
+    const cls = urgency==='overdue' ? 'kcard-reminder' : 'kcard-reminder ok';
+    reminderHtml = `<span class="${cls}">◷ ${formatDateShort(c.reminder)}</span>`;
+  } else {
+    reminderHtml = '<span></span>';
+  }
+  const empHtml = c.employee
+    ? `<span class="kcard-employee"><span class="kcard-emp-dot">${initials(c.employee)}</span>${escapeHtml(c.employee)}</span>`
+    : (c.team ? `<span class="kcard-pending">⏳ ${teamLabel(c.team)}</span>` : `<span style="color:var(--text-3);">—</span>`);
+  return `
+    <div class="kcard" draggable="true" data-card-id="${c.id}">
+      <div class="kcard-top">
+        <span class="kcard-name">${escapeHtml(c.name)}</span>
+        <span class="kcard-type">${TYPE_ICON[c.type]}</span>
+      </div>
+      <div class="kcard-listing">${escapeHtml(c.listing||'—')}</div>
+      <div class="kcard-foot">
+        ${empHtml}
+        ${reminderHtml}
+      </div>
+    </div>
+  `;
+}
+
+function initials(name){
+  if(!name) return '--';
+  const parts = name.trim().split(' ');
+  return parts.length>1 ? parts[0][0]+parts[1][0] : parts[0].slice(0,2);
+}
+
+function formatDateShort(iso){
+  const d = new Date(iso+'T00:00:00');
+  return d.getDate()+' '+MONTHS_AR[d.getMonth()];
+}
+
+function wireKanbanEvents(){
+  document.querySelectorAll('.kcard').forEach(card=>{
+    card.addEventListener('click', ()=> openProfile(card.dataset.cardId));
+    card.addEventListener('dragstart', e=>{
+      card.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', card.dataset.cardId);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', ()=> card.classList.remove('dragging'));
+  });
+
+  document.querySelectorAll('.kcol').forEach(col=>{
+    col.addEventListener('dragover', e=>{
+      e.preventDefault();
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragleave', ()=> col.classList.remove('drag-over'));
+    col.addEventListener('drop', e=>{
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('text/plain');
+      const newStage = col.dataset.stageCol;
+      const client = clients.find(c=>c.id===id);
+      if(!client) return;
+      const changed = changeClientStage(client, newStage, `انتقل إلى مرحلة "${STAGE_TEXT[newStage]}"`);
+      if(changed){
+        renderAll();
+        persist();
+        if(newStage==='done' && !client.reason){
+          openProfile(client.id);
+        }
+      }
+    });
+  });
+}
+
+/* ===== Client profile ===== */
+function openProfile(id){
+  activeProfileId = id;
+  navigateTo('profile');
+  renderProfile(id);
+}
+
+document.getElementById('profileBackBtn').addEventListener('click', ()=>{
+  navigateTo('board');
+});
+
+function renderProfile(id){
+  const c = clients.find(x=>x.id===id);
+  if(!c){ navigateTo('board'); return; }
+
+  const SOURCE_LABELS = { website:'الموقع الإلكتروني', whatsapp:'واتساب', call:'مكالمة واردة', referral:'إحالة', social:'سوشل ميديا', walk_in:'زيارة مباشرة', other:'أخرى' };
+
+  document.getElementById('profileAvatar').textContent = initials(c.name);
+  document.getElementById('profileName').textContent = c.name;
+  document.getElementById('profilePhone').textContent = c.phone;
+
+  // Type buttons
+  document.querySelectorAll('#profileTypeBtns .stage-change-btn').forEach(btn=>{
+    btn.classList.toggle('active-stage', btn.dataset.type === c.type);
+    btn.onclick = ()=>{
+      c.type = btn.dataset.type;
+      c.notes.push(note('note', `تم تغيير النوع إلى "${TYPE_TEXT[c.type]}"`));
+      renderAll();
+      renderProfile(c.id);
+      persist();
+    };
+  });
+
+  // Stage buttons + reason box
+  function showReasonBox(client){
+    const box = document.getElementById('profileReasonBox');
+    box.style.display = 'block';
+    const selectedEl = document.getElementById('profileReasonSelected');
+    const otherInput = document.getElementById('profileReasonOther');
+
+    document.querySelectorAll('.reason-option-btn').forEach(btn=>{
+      btn.classList.toggle('active-reason', btn.dataset.reason === client.reason);
+      btn.onclick = ()=>{
+        client.reason = btn.dataset.reason;
+        document.querySelectorAll('.reason-option-btn').forEach(b=>b.classList.remove('active-reason'));
+        btn.classList.add('active-reason');
+        otherInput.style.display = 'none';
+        selectedEl.textContent = '✓ ' + client.reason;
+        selectedEl.style.display = 'block';
+        client.notes.push(note('stage', `سبب الإنهاء: ${client.reason}`));
+        renderAll();
+        persist();
+      };
+    });
+
+    const otherBtn = document.querySelector('.reason-option-btn[data-reason="أخرى"]');
+    if(otherBtn){
+      otherBtn.onclick = ()=>{
+        otherInput.style.display = 'block';
+        otherInput.focus();
+        document.querySelectorAll('.reason-option-btn').forEach(b=>b.classList.remove('active-reason'));
+        otherBtn.classList.add('active-reason');
+      };
+      otherInput.onkeydown = e=>{
+        if(e.key==='Enter' && otherInput.value.trim()){
+          client.reason = 'أخرى — ' + otherInput.value.trim();
+          selectedEl.textContent = '✓ ' + client.reason;
+          selectedEl.style.display = 'block';
+          otherInput.style.display = 'none';
+          client.notes.push(note('stage', `سبب الإنهاء: ${client.reason}`));
+          renderAll();
+          persist();
+        }
+      };
+    }
+
+    if(client.reason){
+      selectedEl.textContent = '✓ ' + client.reason;
+      selectedEl.style.display = 'block';
+    } else {
+      selectedEl.style.display = 'none';
+    }
+  }
+
+  if(c.stage === 'done'){
+    showReasonBox(c);
+  } else {
+    document.getElementById('profileReasonBox').style.display = 'none';
+  }
+
+  document.querySelectorAll('#profileStageBtns .stage-change-btn').forEach(btn=>{
+    btn.classList.toggle('active-stage', btn.dataset.stage === c.stage);
+    btn.onclick = ()=>{
+      const newStage = btn.dataset.stage;
+      const changed = changeClientStage(c, newStage);
+      if(!changed) return;
+      renderAll();
+      renderProfile(c.id);
+      if(newStage === 'done') showReasonBox(c);
+      persist();
+    };
+  });
+
+  // Direct employee re-assignment — instantly effective, no other data touched
+  const empSelect = document.getElementById('profileEmployeeSelect');
+  populateStaffSelect(empSelect, c.employee);
+  empSelect.onchange = ()=>{
+    const newEmp = empSelect.value;
+    if(newEmp === (c.employee||'')) return;
+    c.employee = newEmp;
+    if(newEmp){
+      c.notes.push(note('note', `تم تعيين الموظف المسؤول: ${newEmp}`));
+    } else {
+      c.notes.push(note('note', c.team ? `تمت إزالة المسؤول — رجع العميل لقائمة انتظار ${teamLabel(c.team)}` : 'تمت إزالة الموظف المسؤول'));
+    }
+    renderAll();
+    renderProfile(c.id);
+    persist();
+  };
+
+  // Team routing — genuinely re-routes: assigning a team clears current owner
+  // so the client actually appears, unclaimed, in that team's waiting queue.
+  document.querySelectorAll('#profileTeamBtns .stage-change-btn').forEach(btn=>{
+    btn.classList.toggle('active-stage', btn.dataset.team === (c.team||''));
+    btn.onclick = ()=>{
+      const newTeam = btn.dataset.team;
+      if(newTeam === (c.team||'')) return;
+      c.team = newTeam;
+      if(newTeam){
+        const hadEmployee = !!c.employee;
+        c.employee = '';
+        c.notes.push(note('note', `تم توجيه العميل إلى ${teamLabel(newTeam)} — بانتظار استلام أحد أعضاء الفريق${hadEmployee?' (تمت إزالة المسؤول السابق)':''}`));
+      } else {
+        c.notes.push(note('note', 'تم إلغاء توجيه العميل لأي فريق'));
+      }
+      renderAll();
+      renderProfile(c.id);
+      renderQueueBadge();
+      persist();
+    };
+  });
+
+  document.getElementById('profileSource').textContent = SOURCE_LABELS[c.source] || c.source || '—';
+  document.getElementById('profileCity').textContent = c.city || '—';
+  document.getElementById('profileListing').textContent = c.listing || '—';
+  document.getElementById('profileLastContact').textContent = c.lastContact || '—';
+  document.getElementById('profileAddedBy').textContent = c.addedBy || '—';
+
+  const timeline = document.getElementById('profileTimeline');
+  const sortedNotes = (c.notes||[]).slice().sort((a,b)=>b.ts-a.ts);
+  timeline.innerHTML = sortedNotes.length ? sortedNotes.map(n=>`
+    <div class="tl-item">
+      <div class="tl-dot ${n.type}"></div>
+      <div class="tl-text">${escapeHtml(n.text)}</div>
+      <div class="tl-time">${formatTimestamp(n.ts)}${n.author ? ' · '+escapeHtml(n.author) : ''}</div>
+    </div>
+  `).join('') : '<div style="color:var(--text-3);font-size:12.5px;">لا توجد ملاحظات بعد</div>';
+
+  const reminderBox = document.getElementById('profileReminderBox');
+  if(c.reminder){
+    const overdue = reminderUrgency(c)==='overdue';
+    reminderBox.innerHTML = `<span style="color:${overdue?'var(--rose-600)':'var(--text-1)'};font-weight:600;">${overdue?'⚠️ متأخر — ':''}${formatDateShort(c.reminder)}</span>`;
+  } else {
+    reminderBox.innerHTML = 'لا يوجد تذكير مُعيّن';
+  }
+
+  document.getElementById('profileEditBtn').onclick = ()=> openEditModal(c.id);
+  document.getElementById('profileMissedBtn').onclick = ()=> logMissedCall(c.id);
+}
+
+function formatTimestamp(ts){
+  const d = new Date(ts);
+  return d.getDate()+' '+MONTHS_AR[d.getMonth()]+' — '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+
+document.getElementById('addNoteBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('newNoteInput');
+  const val = input.value.trim();
+  if(!val || !activeProfileId) return;
+  const c = clients.find(x=>x.id===activeProfileId);
+  if(!c) return;
+  c.notes.push(note('note', val));
+  c.lastContact = 'اليوم';
+  input.value='';
+  renderProfile(activeProfileId);
+  renderTable();
+  renderBoard();
+  persist();
+});
+document.getElementById('newNoteInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter') document.getElementById('addNoteBtn').click();
+});
+
+document.getElementById('setReminderBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('reminderDateInput');
+  if(!input.value || !activeProfileId) return;
+  const c = clients.find(x=>x.id===activeProfileId);
+  if(!c) return;
+  c.reminder = input.value;
+  c.notes.push(note('note', `تم تعيين تذكير بتاريخ ${formatDateShort(input.value)}`));
+  input.value='';
+  renderProfile(activeProfileId);
+  renderReminderBadge();
+  persist();
+});
+
+/* ===== Add / Edit modal (plain div + buttons — no <form> submission involved) ===== */
+const clientModalOverlay = document.getElementById('clientModalOverlay');
+const formError = document.getElementById('formError');
+
+function setAssignModeUI(mode){
+  document.getElementById('f_assign_mode').value = mode;
+  document.querySelectorAll('.assign-mode-btn').forEach(b=> b.classList.toggle('active', b.dataset.assignMode===mode));
+  document.getElementById('assignTeamMode').style.display = mode==='team' ? 'block':'none';
+  document.getElementById('assignDirectMode').style.display = mode==='direct' ? 'block':'none';
+}
+document.querySelectorAll('.assign-mode-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> setAssignModeUI(btn.dataset.assignMode));
+});
+
+function clearClientFormFields(){
+  ['f_name','f_phone','f_city','f_note'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('f_source').value = '';
+}
+
+function openAddModal(){
+  editingClientId = null;
+  document.getElementById('clientModalTitle').textContent = '+ إضافة عميل جديد';
+  clearClientFormFields();
+  document.getElementById('f_type').value='residential';
+  document.getElementById('f_stage').value = 'new';
+  document.getElementById('f_listing').value='';
+  document.getElementById('f_listing_search').value='';
+  ['req_deal_type','req_property_type','req_district','req_city','req_budget','req_rooms','req_area','req_notes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  selectedListing = null;
+  document.querySelectorAll('.team-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('f_team').value = '';
+  populateStaffSelect(document.getElementById('f_direct_employee'), '');
+  setAssignModeUI('team');
+  document.querySelectorAll('.listing-mode-btn').forEach(b=>b.classList.toggle('active', b.dataset.mode==='search'));
+  document.getElementById('listingSearchMode').style.display='block';
+  document.getElementById('listingManualMode').style.display='none';
+  document.getElementById('listingSelected').style.display='none';
+  formError.style.display='none';
+  clientModalOverlay.classList.add('open');
+  setTimeout(()=> document.getElementById('f_name').focus(), 50);
+}
+
+function openEditModal(id){
+  const c = clients.find(x=>x.id===id);
+  if(!c) return;
+  editingClientId = id;
+  document.getElementById('clientModalTitle').textContent = 'تعديل بيانات العميل';
+  document.getElementById('f_name').value = c.name;
+  document.getElementById('f_phone').value = c.phone;
+  document.getElementById('f_city').value = c.city||'';
+  document.getElementById('f_type').value = c.type;
+  document.getElementById('f_stage').value = c.stage;
+  document.getElementById('f_source').value = c.source||'';
+  document.getElementById('f_note').value = '';
+  document.getElementById('f_listing').value = c.listing||'';
+  document.getElementById('f_listing_search').value = '';
+  document.getElementById('listingSelected').style.display = c.listing ? 'block' : 'none';
+  if(c.listing){
+    document.getElementById('listingSelectedTitle').textContent = c.listing;
+    document.getElementById('listingSelectedMeta').textContent = '';
+  }
+
+  // Determine current assignment mode
+  document.querySelectorAll('.team-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.team===(c.team||''));
+  });
+  document.getElementById('f_team').value = c.team||'';
+  populateStaffSelect(document.getElementById('f_direct_employee'), c.employee||'');
+
+  if(c.employee){ setAssignModeUI('direct'); }
+  else if(c.team){ setAssignModeUI('team'); }
+  else { setAssignModeUI('none'); }
+
+  selectedListing = null;
+  formError.style.display='none';
+  clientModalOverlay.classList.add('open');
+  setTimeout(()=> document.getElementById('f_name').focus(), 50);
+}
+
+function closeClientModal(){
+  clientModalOverlay.classList.remove('open');
+  editingClientId=null;
+}
+
+document.getElementById('openAddTop').addEventListener('click', openAddModal);
+document.getElementById('cancelModalBtn').addEventListener('click', closeClientModal);
+clientModalOverlay.addEventListener('click', e=>{ if(e.target===clientModalOverlay) closeClientModal(); });
+
+function saveClientFromModal(){
+  const name = document.getElementById('f_name').value.trim();
+  const phone = document.getElementById('f_phone').value.trim();
+  if(!name || !phone){ formError.style.display='block'; return; }
+  formError.style.display='none';
+
+  const assignMode = document.getElementById('f_assign_mode').value;
+  let team = '', employee = '';
+  if(assignMode === 'team'){ team = document.getElementById('f_team').value; }
+  else if(assignMode === 'direct'){ employee = document.getElementById('f_direct_employee').value; }
+
+  const data = {
+    name, phone,
+    city: document.getElementById('f_city').value.trim(),
+    type: document.getElementById('f_type').value,
+    stage: document.getElementById('f_stage').value || 'new',
+    source: document.getElementById('f_source').value,
+    team, employee,
+    listing: document.getElementById('f_listing').value.trim(),
+    lastContact: 'اليوم'
+  };
+  const initialNote = document.getElementById('f_note').value.trim();
+
+  // ----- Editing an existing client: just update it, no dedupe logic needed -----
+  if(editingClientId){
+    const c = clients.find(x=>x.id===editingClientId);
+    const stageChanged = c.stage !== data.stage;
+    const newStage = data.stage;
+    Object.assign(c, data);
+    if(newStage === 'done'){
+      if(!c.closedAt) c.closedAt = Date.now();
+    } else {
+      c.reason = '';
+      c.closedAt = null;
+    }
+    if(stageChanged) c.notes.push(note('stage', `تم تعديل المرحلة إلى "${STAGE_TEXT[c.stage]}"`));
+    c.notes.push(note('note','تم تحديث بيانات العميل'));
+    closeClientModal();
+    renderAll();
+    if(activeProfileId === editingClientId) renderProfile(activeProfileId);
+    persist();
+    return;
+  }
+
+  // ----- Adding a new client: never create a duplicate by phone number -----
+  // If this phone number is already in the system, don't add a second record;
+  // open the existing client's file instead.
+  const existing = findClientByPhone(phone);
+  if(existing){
+    existing.notes.push(note('note',
+      `تمت محاولة تسجيله كعميل جديد بنفس رقم الجوال — تم فتح ملفه الحالي بدلاً من إنشاء عميل مكرر${currentEmployee ? ' (بواسطة '+currentEmployee+')' : ''}${initialNote ? ' — ملاحظة: '+initialNote : ''}`
+    ));
+    existing.lastContact = 'اليوم';
+    closeClientModal();
+    renderAll();
+    persist();
+    openProfile(existing.id);
+    return;
+  }
+
+  const initNotes = [note('note','تمت إضافة العميل')];
+  if(initialNote) initNotes.push(note('note', initialNote));
+  clients.unshift({
+    id: uid(), reason:'', notes: initNotes, reminder:null, missedCalls:[],
+    addedBy: currentEmployee || '',
+    createdAt: Date.now(), closedAt: data.stage==='done' ? Date.now() : null,
+    ...data
+  });
+
+  closeClientModal();
+  renderAll();
+  persist();
+}
+
+document.getElementById('saveClientBtn').addEventListener('click', saveClientFromModal);
+['f_name','f_phone'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown', e=>{
+    if(e.key === 'Enter'){ e.preventDefault(); saveClientFromModal(); }
+  });
+});
+
+/* ===== Reports (daily / weekly / monthly / quarterly) ===== */
+function renderReports(){
+  const { start, end } = getPeriodRange(currentReportPeriod);
+  const periodLabelEl = document.getElementById('reportPeriodLabel');
+  if(periodLabelEl) periodLabelEl.textContent = PERIOD_LABELS[currentReportPeriod] || '';
+
+  const createdInPeriod = c => (c.createdAt||0) >= start && (c.createdAt||0) <= end;
+  const closedInPeriod = c => c.stage==='done' && c.closedAt && c.closedAt >= start && c.closedAt <= end;
+
+  const periodClients = clients.filter(createdInPeriod);
+  const closedClients = clients.filter(closedInPeriod);
+  const wonClients = closedClients.filter(c=> c.reason === 'تمت الصفقة');
+  const lostClients = closedClients.filter(c=> c.reason && c.reason !== 'تمت الصفقة');
+  const winRate = closedClients.length ? Math.round((wonClients.length/closedClients.length)*100) : null;
+
+  const perfGrid = document.getElementById('perfStatGrid');
+  perfGrid.innerHTML = `
+    <div class="perf-stat">
+      <div class="perf-stat-label">👥 عملاء جدد</div>
+      <div class="perf-stat-num">${periodClients.length}</div>
+    </div>
+    <div class="perf-stat">
+      <div class="perf-stat-label">✅ صفقات نجحت</div>
+      <div class="perf-stat-num" style="color:var(--emerald-600);">${wonClients.length}</div>
+    </div>
+    <div class="perf-stat">
+      <div class="perf-stat-label">❌ صفقات لم تنجح</div>
+      <div class="perf-stat-num" style="color:var(--rose-600);">${lostClients.length}</div>
+    </div>
+    <div class="perf-stat">
+      <div class="perf-stat-label">📈 معدل النجاح</div>
+      <div class="perf-stat-num">${winRate===null ? '—' : winRate+'%'}</div>
+    </div>
+  `;
+
+  const stageCounts = { new:0, negotiating:0, done:0 };
+  const typeCounts = { residential:0, commercial:0, agricultural:0 };
+  periodClients.forEach(c=>{
+    stageCounts[c.stage] = (stageCounts[c.stage]||0)+1;
+    typeCounts[c.type] = (typeCounts[c.type]||0)+1;
+  });
+
+  if(stageChartInstance) stageChartInstance.destroy();
+  stageChartInstance = new Chart(document.getElementById('stageChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['جديد','جاري التفاوض','منتهي'],
+      datasets: [{ data: [stageCounts.new, stageCounts.negotiating, stageCounts.done],
+        backgroundColor: ['#185FA5','#B5780F','#0B6B53'], borderWidth: 0 }]
+    },
+    options: { plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'IBM Plex Sans Arabic' }, padding:14 } } }, cutout:'62%' }
+  });
+
+  if(typeChartInstance) typeChartInstance.destroy();
+  typeChartInstance = new Chart(document.getElementById('typeChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['سكني','تجاري','زراعي'],
+      datasets: [{ data: [typeCounts.residential, typeCounts.commercial, typeCounts.agricultural],
+        backgroundColor: ['#0B6B53','#B5780F','#639922'], borderWidth: 0 }]
+    },
+    options: { plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'IBM Plex Sans Arabic' }, padding:14 } } }, cutout:'62%' }
+  });
+
+  const reasonCounts = {};
+  closedClients.forEach(c=>{
+    if(!c.reason) return;
+    const key = c.reason.startsWith('أخرى') ? 'أخرى' : c.reason;
+    reasonCounts[key] = (reasonCounts[key]||0)+1;
+  });
+  const reasonLabels = Object.keys(reasonCounts);
+  if(reasonChartInstance) reasonChartInstance.destroy();
+  reasonChartInstance = new Chart(document.getElementById('reasonChart'), {
+    type: 'bar',
+    data: {
+      labels: reasonLabels.length ? reasonLabels : ['لا توجد بيانات لهذه الفترة'],
+      datasets: [{ data: reasonLabels.length ? reasonLabels.map(l=>reasonCounts[l]) : [0],
+        backgroundColor:'#A8412F', borderRadius:6, maxBarThickness:28 }]
+    },
+    options: {
+      indexAxis:'y',
+      plugins:{ legend:{ display:false } },
+      scales:{ x:{ ticks:{ precision:0 } }, y:{ ticks:{ font:{ family:'IBM Plex Sans Arabic', size:11 } } } }
+    }
+  });
+
+  const agentCounts = {};
+  wonClients.forEach(c=>{
+    if(!c.employee) return;
+    agentCounts[c.employee] = (agentCounts[c.employee]||0)+1;
+  });
+  const ranking = Object.entries(agentCounts).sort((a,b)=>b[1]-a[1]);
+  const maxCount = ranking.length ? ranking[0][1] : 1;
+  const rankingEl = document.getElementById('agentRanking');
+  rankingEl.innerHTML = ranking.length ? ranking.map(([name,count],i)=>`
+    <div class="agent-rank">
+      <span class="rank-num">${i+1}</span>
+      <span class="rank-name">${escapeHtml(name)}</span>
+      <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${(count/maxCount*100).toFixed(0)}%"></div></div>
+      <span class="rank-val">${count}</span>
+    </div>
+  `).join('') : '<div style="color:var(--text-3);font-size:12.5px;">لا توجد صفقات ناجحة في هذه الفترة</div>';
+}
+
+document.querySelectorAll('#reportPeriodTabs .report-period-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    currentReportPeriod = tab.dataset.period;
+    document.querySelectorAll('#reportPeriodTabs .report-period-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    renderReports();
+  });
+});
+
+function buildManualListing(){
+  const v = id => { const el=document.getElementById(id); return el ? el.value.trim() : ''; };
+  const DEAL = { buy:'شراء', rent:'إيجار', invest:'استثمار' };
+  const PROP = { villa:'فيلا', apartment:'شقة', duplex:'دوبلكس', land:'أرض', shop:'محل تجاري', office:'مكتب', warehouse:'مستودع', farm:'مزرعة', other:'أخرى' };
+  const parts = [];
+  if(v('req_deal_type')) parts.push(DEAL[v('req_deal_type')]||v('req_deal_type'));
+  if(v('req_property_type')) parts.push(PROP[v('req_property_type')]||v('req_property_type'));
+  if(v('req_rooms')) parts.push(v('req_rooms')+' غرف');
+  if(v('req_district')) parts.push('حي '+v('req_district'));
+  if(v('req_city')) parts.push(v('req_city'));
+  if(v('req_budget')) parts.push('ميزانية '+v('req_budget')+' ر.س');
+  if(v('req_area')) parts.push(v('req_area')+' م²');
+  if(v('req_notes')) parts.push(v('req_notes'));
+  document.getElementById('f_listing').value = parts.join(' · ');
+}
+
+const LISTINGS_DB = [
+  { id:'AD-1001', title:'فيلا النرجس — حي النرجس', type:'residential', city:'الرياض', price:'2,800,000', area:'400م²', rooms:'5+1' },
+  { id:'AD-1002', title:'شقة العليا — برج النخيل', type:'residential', city:'الرياض', price:'650,000', area:'150م²', rooms:'3' },
+  { id:'AD-1003', title:'محل السليمانية — شارع العليا', type:'commercial', city:'الرياض', price:'1,200,000', area:'80م²', rooms:'—' },
+  { id:'AD-1004', title:'دوبلكس الملقا — مجمع الياسمين', type:'residential', city:'جدة', price:'1,500,000', area:'280م²', rooms:'4+1' },
+  { id:'AD-1005', title:'مزرعة العليا — طريق الخرج', type:'agricultural', city:'الرياض', price:'3,500,000', area:'5000م²', rooms:'—' },
+  { id:'AD-1006', title:'مكتب الكورنيش — الواجهة البحرية', type:'commercial', city:'الدمام', price:'900,000', area:'120م²', rooms:'—' },
+  { id:'AD-1007', title:'شقة الياسمين — حي الياسمين', type:'residential', city:'الرياض', price:'480,000', area:'120م²', rooms:'3' },
+  { id:'AD-1008', title:'مزرعة القصيم — الرس', type:'agricultural', city:'القصيم', price:'1,800,000', area:'8000م²', rooms:'—' },
+  { id:'AD-1009', title:'فيلا الواحة — حي الحمراء', type:'residential', city:'جدة', price:'3,200,000', area:'450م²', rooms:'6' },
+  { id:'AD-1010', title:'معرض تجاري — طريق الملك فهد', type:'commercial', city:'الرياض', price:'750,000', area:'200م²', rooms:'—' },
+];
+
+let selectedListing = null;
+
+function initListingSearch(){
+  const searchInput = document.getElementById('f_listing_search');
+  const dropdown = document.getElementById('listingDropdown');
+  if(!searchInput) return;
+
+  document.querySelectorAll('.listing-mode-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.listing-mode-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const isSearch = btn.dataset.mode === 'search';
+      document.getElementById('listingSearchMode').style.display = isSearch ? 'block' : 'none';
+      document.getElementById('listingManualMode').style.display = isSearch ? 'none' : 'block';
+      if(!isSearch){
+        buildManualListing();
+      }
+    });
+  });
+
+  ['req_deal_type','req_property_type','req_district','req_city','req_budget','req_rooms','req_area','req_notes'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input', buildManualListing);
+  });
+  document.querySelectorAll('#listingManualMode select').forEach(el=>{
+    el.addEventListener('change', buildManualListing);
+  });
+
+  searchInput.addEventListener('input', ()=>{
+    const q = searchInput.value.trim();
+    if(q.length < 1){ dropdown.style.display='none'; return; }
+    const results = LISTINGS_DB.filter(l=>
+      l.id.includes(q) || l.title.includes(q) || l.city.includes(q)
+    );
+    if(results.length===0){ dropdown.style.display='none'; return; }
+    dropdown.innerHTML = results.map(l=>`
+      <div class="dropdown-item" data-listing-id="${l.id}" style="padding:.7rem .8rem;border-bottom:1px solid var(--sand-200);">
+        <div style="font-weight:700;font-size:12.5px;">${escapeHtml(l.title)}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:2px;font-family:var(--font-mono);">${l.id} · ${l.city} · ${l.price} ر.س · ${l.area}</div>
+      </div>
+    `).join('');
+    dropdown.style.display='block';
+    dropdown.querySelectorAll('[data-listing-id]').forEach(item=>{
+      item.addEventListener('mousedown', e=>{
+        e.preventDefault();
+        selectListing(item.dataset.listingId);
+      });
+    });
+  });
+
+  searchInput.addEventListener('blur', ()=>{ setTimeout(()=>{ dropdown.style.display='none'; },150); });
+}
+
+function selectListing(id){
+  const l = LISTINGS_DB.find(x=>x.id===id);
+  if(!l) return;
+  selectedListing = l;
+  document.getElementById('f_listing').value = l.id + ' — ' + l.title;
+  document.getElementById('f_listing_search').value = '';
+  document.getElementById('listingDropdown').style.display='none';
+  document.getElementById('listingSelected').style.display='block';
+  document.getElementById('listingSelectedTitle').textContent = l.title;
+  document.getElementById('listingSelectedMeta').textContent = l.id+' · '+l.city+' · '+l.price+' ر.س · '+l.area+(l.rooms!=='—'?' · '+l.rooms+' غرف':'');
+  const typeMap = { residential:'residential', commercial:'commercial', agricultural:'agricultural' };
+  if(typeMap[l.type]) document.getElementById('f_type').value = typeMap[l.type];
+}
+
+document.getElementById('clearListingBtn').addEventListener('click', ()=>{
+  selectedListing = null;
+  document.getElementById('f_listing').value = '';
+  document.getElementById('f_listing_search').value = '';
+  document.getElementById('listingSelected').style.display='none';
+  document.getElementById('listingSelectedTitle').textContent='—';
+  document.getElementById('listingSelectedMeta').textContent='—';
+});
+
+/* Team-routing pill buttons inside Add/Edit modal */
+document.querySelectorAll('.team-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.team-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('f_team').value = btn.dataset.team;
+  });
+});
+
+/* ===== Team Queue ===== */
+let activeQueueTeam = 'sales';
+
+function getQueueClients(team){
+  return clients.filter(c=> c.team === team && !c.employee && c.stage !== 'done')
+    .sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
+}
+
+function renderQueueBadge(){
+  const total = clients.filter(c=> c.team && !c.employee && c.stage!=='done').length;
+  const badge = document.getElementById('navQueueBadge');
+  badge.textContent = total;
+  badge.style.display = total > 0 ? 'flex' : 'none';
+}
+
+function claimClient(clientId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c || !currentEmployee) return;
+  c.employee = currentEmployee;
+  c.notes.push(note('note', `تم استلام العميل بواسطة ${currentEmployee} من ${teamLabel(c.team)}`));
+  renderQueue();
+  renderQueueBadge();
+  renderAll();
+  persist();
+  openProfile(c.id);
+}
+
+function renderQueue(){
+  const list = document.getElementById('queueList');
+  const empty = document.getElementById('queueEmpty');
+  const items = getQueueClients(activeQueueTeam);
+
+  document.querySelectorAll('.queue-team-tab').forEach(tab=>{
+    const count = getQueueClients(tab.dataset.team).length;
+    tab.textContent = teamLabel(tab.dataset.team) + (count > 0 ? ` (${count})` : '');
+    tab.classList.toggle('active', tab.dataset.team === activeQueueTeam);
+  });
+
+  if(items.length === 0){
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const SOURCE_LABELS = {
+    website:'الموقع', whatsapp:'واتساب', call:'مكالمة', referral:'إحالة',
+    social:'سوشل ميديا', walk_in:'زيارة', other:'أخرى'
+  };
+
+  list.innerHTML = items.map(c=>`
+    <div class="queue-card" data-queue-id="${c.id}">
+      <div class="queue-card-avatar">${initials(c.name)}</div>
+      <div class="queue-card-body">
+        <div class="queue-card-name">${escapeHtml(c.name)}</div>
+        <div class="queue-card-meta">
+          <span>📞 ${escapeHtml(c.phone)}</span>
+          ${c.source ? `<span>📥 ${SOURCE_LABELS[c.source]||c.source}</span>` : ''}
+          ${c.listing ? `<span>🏠 ${escapeHtml(c.listing.slice(0,40))}${c.listing.length>40?'...':''}</span>` : ''}
+          <span>${TYPE_ICON[c.type]} ${TYPE_TEXT[c.type]}</span>
+          ${c.addedBy ? `<span>📝 ${escapeHtml(c.addedBy)}</span>` : ''}
+        </div>
+        <div class="queue-card-time">⏱ ${escapeHtml(c.lastContact||'اليوم')}</div>
+      </div>
+      <div class="queue-card-actions">
+        <button class="btn btn-sm" data-queue-profile="${c.id}">📂 ملف</button>
+        <button class="btn btn-sm btn-primary" data-queue-claim="${c.id}">✋ استلمت</button>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('[data-queue-profile]').forEach(btn=>{
+    btn.addEventListener('click', ()=> openProfile(btn.dataset.queueProfile));
+  });
+
+  list.querySelectorAll('[data-queue-claim]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const clientId = btn.dataset.queueClaim;
+      if(!currentEmployee){
+        pendingIdentityCallback = ()=> claimClient(clientId);
+        openIdentityModal();
+        return;
+      }
+      claimClient(clientId);
+    });
+  });
+}
+
+document.querySelectorAll('.queue-team-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    activeQueueTeam = tab.dataset.team;
+    renderQueue();
+  });
+});
+
+document.getElementById('queueSwitchIdentityBtn').addEventListener('click', openIdentityModal);
+
+document.addEventListener('click', e=>{
+  const editBtn = e.target.closest('[data-edit-id]');
+  if(editBtn && !e.target.closest('.modal-overlay')){ e.stopPropagation(); openEditModal(editBtn.dataset.editId); return; }
+
+  const missedBtn = e.target.closest('[data-missed-id]');
+  if(missedBtn){ e.stopPropagation(); logMissedCall(missedBtn.dataset.missedId); return; }
+}, true);
+
+function logMissedCall(id){
+  const c = clients.find(x=>x.id===id);
+  document.getElementById('mc_phone').value = c ? c.phone : '';
+  document.getElementById('mc_client_id').value = id || '';
+  openMissedCallsPopup();
+  setTimeout(()=> document.getElementById('mc_phone').focus(), 100);
+}
+
+function getMissedCallsUnresolved(){
+  if(!window._missedCalls) window._missedCalls = [];
+  return window._missedCalls.filter(m=>!m.resolvedAt);
+}
+
+function renderMissedCallsBadge(){
+  const count = getMissedCallsUnresolved().length;
+  const badge = document.getElementById('missedCallsCount');
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'inline-flex' : 'none';
+}
+
+function renderMissedCallsPopup(){
+  const list = document.getElementById('missedCallsList');
+  const empty = document.getElementById('missedCallsEmpty');
+  const unresolved = getMissedCallsUnresolved().slice().sort((a,b)=>b.ts-a.ts);
+
+  if(unresolved.length === 0){
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.innerHTML = unresolved.map(m=>{
+    const c = clients.find(x=>x.id===m.clientId) || clients.find(x=>x.phone===m.phone);
+    const isNew = c && c.name.startsWith('غير معروف');
+    return `
+      <div style="background:var(--rose-50);border:1px solid var(--rose-200);border-radius:12px;padding:.85rem 1rem;display:flex;align-items:center;gap:12px;">
+        <div style="font-size:20px;">📵</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:14px;color:var(--emerald-600);font-family:var(--font-mono);cursor:pointer;text-decoration:underline;" data-open-mc-profile="${m.id}">${escapeHtml(m.phone)}</div>
+          <div style="font-size:12px;margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;">
+            ${m.employee ? `<span style="color:var(--text-2);">👤 ${escapeHtml(m.employee)}</span>` : ''}
+            ${c ? `<span style="color:${isNew?'var(--amber-600)':'var(--emerald-600)'};font-weight:600;">${isNew?'⚠️ لم تُكمل بياناته':('✓ '+escapeHtml(c.name))}</span>` : ''}
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px;font-family:var(--font-mono);">${formatTimestamp(m.ts)}</div>
+        </div>
+        <button class="btn btn-sm btn-primary" data-resolve-mc="${m.id}" style="font-size:11.5px;white-space:nowrap;">📂 فتح الملف</button>
+      </div>
+    `;
+  }).join('');
+
+  list.querySelectorAll('[data-open-mc-profile]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const mc = window._missedCalls.find(x=>x.id===el.dataset.openMcProfile);
+      if(!mc) return;
+      const c = clients.find(x=>x.id===mc.clientId) || clients.find(x=>x.phone===mc.phone);
+      if(c){ closeMissedCallsPopup(); openProfile(c.id); }
+    });
+  });
+
+  list.querySelectorAll('[data-resolve-mc]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const mc = window._missedCalls.find(x=>x.id===btn.dataset.resolveMc);
+      if(!mc) return;
+      mc.resolvedAt = Date.now();
+      renderMissedCallsBadge();
+      renderMissedCallsPopup();
+      persist();
+
+      const c = clients.find(x=>x.id===mc.clientId) || clients.find(x=>x.phone===mc.phone);
+      if(c){ closeMissedCallsPopup(); openProfile(c.id); }
+    });
+  });
+}
+
+function openMissedCallsPopup(){
+  renderMissedCallsPopup();
+  document.getElementById('missedCallsOverlay').classList.add('open');
+}
+function closeMissedCallsPopup(){
+  document.getElementById('missedCallsOverlay').classList.remove('open');
+}
+
+function saveMissedCall(){
+  const phone = document.getElementById('mc_phone').value.trim();
+  const clientId = document.getElementById('mc_client_id').value;
+  if(!phone){ document.getElementById('mc_phone').focus(); return; }
+  const employee = currentEmployee || '';
+
+  let linkedClient = clientId ? clients.find(x=>x.id===clientId) : null;
+  if(!linkedClient) linkedClient = findClientByPhone(phone);
+
+  if(!linkedClient){
+    linkedClient = {
+      id: uid(), name: 'غير معروف — '+phone, phone, city:'', type:'residential',
+      stage:'new', employee:'', team:'', addedBy: employee, source:'call', listing:'',
+      lastContact:'اليوم', reason:'', reminder:null, missedCalls:[], notes:[],
+      createdAt: Date.now(), closedAt: null
+    };
+    linkedClient.notes.push(note('call', `تمت إضافته تلقائياً من مكالمة فائتة${employee?' — وصلت لـ '+employee:''}`));
+    clients.unshift(linkedClient);
+  }
+
+  if(!linkedClient.missedCalls) linkedClient.missedCalls = [];
+  const entry = { id: uid(), ts: Date.now(), phone, employee, resolvedAt: null, clientId: linkedClient.id };
+  linkedClient.missedCalls.push(entry);
+  linkedClient.notes.push(note('call', `مكالمة فائتة${employee?' — وصلت لـ '+employee:''}`));
+
+  if(!window._missedCalls) window._missedCalls = [];
+  window._missedCalls.push(entry);
+
+  document.getElementById('mc_phone').value = '';
+  document.getElementById('mc_client_id').value = '';
+
+  renderMissedCallsBadge();
+  renderMissedCallsPopup();
+  renderAll();
+  persist();
+}
+
+document.getElementById('saveMcFormBtn').addEventListener('click', ()=>{
+  if(!currentEmployee){
+    pendingIdentityCallback = saveMissedCall;
+    openIdentityModal();
+    return;
+  }
+  saveMissedCall();
+});
+document.getElementById('mcSwitchIdentityBtn').addEventListener('click', openIdentityModal);
+
+document.getElementById('openMissedCallsBtn').addEventListener('click', openMissedCallsPopup);
+document.getElementById('closeMissedCallsBtn').addEventListener('click', closeMissedCallsPopup);
+document.getElementById('missedCallsOverlay').addEventListener('click', e=>{
+  if(e.target === document.getElementById('missedCallsOverlay')) closeMissedCallsPopup();
+});
+
+/* ===== Export ===== */
+document.getElementById('exportExcelBtn').addEventListener('click', ()=>{
+  const rows = clients.map(c=>({
+    'العميل': c.name,
+    'الجوال': c.phone,
+    'المدينة': c.city||'',
+    'النوع': TYPE_TEXT[c.type],
+    'المرحلة': STAGE_TEXT[c.stage],
+    'سبب الإنهاء': c.reason||'',
+    'الموظف المسؤول': c.employee||'',
+    'بانتظار فريق': c.team && !c.employee ? teamLabel(c.team) : '',
+    'أُضيف بواسطة': c.addedBy||'',
+    'الإعلان': c.listing||'',
+    'آخر تواصل': c.lastContact||'',
+    'التذكير القادم': c.reminder||''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:18},{wch:14},{wch:12},{wch:10},{wch:14},{wch:18},{wch:16},{wch:16},{wch:16},{wch:18},{wch:12},{wch:14}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'العملاء');
+  XLSX.writeFile(wb, 'عملاء_الغنام_العقارية.xlsx');
+});
+
+document.getElementById('exportPdfBtn').addEventListener('click', ()=>{
+  if(currentSection!=='table') navigateTo('table');
+  setTimeout(()=> window.print(), 150);
+});
+
+/* ===== Init ===== */
+populateStaffSelect(document.getElementById('f_direct_employee'), '');
+loadCurrentEmployee();
+initListingSearch();
+loadClients();
+
+</script>
+</body>
+</html>

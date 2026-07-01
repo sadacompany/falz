@@ -5,7 +5,7 @@ import { requireAuth, requireRole } from '@/lib/auth-utils'
 import { tenantWhere } from '@/lib/tenant'
 import { logAudit } from '@/lib/audit'
 import { slugify } from '@/lib/utils'
-import type { PropertyStatus, DealType, PropertyType, Prisma } from '@prisma/client'
+import type { PropertyStatus, DealType, PropertyType, PropertyCategory, Prisma } from '@prisma/client'
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -13,10 +13,12 @@ export interface PropertyFilters {
   status?: PropertyStatus
   dealType?: DealType
   propertyType?: PropertyType
+  category?: PropertyCategory
   search?: string
   page?: number
   pageSize?: number
-  sortBy?: string
+  // SEC-3: sortBy is restricted to an allowlist to prevent Prisma query injection
+  sortBy?: 'createdAt' | 'updatedAt' | 'price' | 'status' | 'title'
   sortOrder?: 'asc' | 'desc'
 }
 
@@ -29,6 +31,8 @@ export interface CreatePropertyInput {
   currency?: string
   dealType: DealType
   propertyType: PropertyType
+  category?: PropertyCategory
+  ownerId?: string | null
   area?: number
   bedrooms?: number
   bathrooms?: number
@@ -68,6 +72,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
     status,
     dealType,
     propertyType,
+    category,
     search,
     page = 1,
     pageSize = 20,
@@ -80,6 +85,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
     ...(status && { status }),
     ...(dealType && { dealType }),
     ...(propertyType && { propertyType }),
+    ...(category && { category }),
     ...(search && {
       OR: [
         { title: { contains: search, mode: 'insensitive' as const } },
@@ -90,6 +96,10 @@ export async function getProperties(filters: PropertyFilters = {}) {
     }),
   }
 
+  // SEC-3: Validate sortBy against an explicit allowlist before using as a key
+  const ALLOWED_SORT_FIELDS = ['createdAt', 'updatedAt', 'price', 'status', 'title'] as const
+  const safeSortBy = sortBy && (ALLOWED_SORT_FIELDS as readonly string[]).includes(sortBy) ? sortBy : 'createdAt'
+
   const [properties, total] = await Promise.all([
     prisma.property.findMany({
       where,
@@ -98,6 +108,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
           orderBy: { sortOrder: 'asc' },
           take: 1,
         },
+        owner: true,
         _count: {
           select: {
             leads: true,
@@ -105,7 +116,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
           },
         },
       },
-      orderBy: { [sortBy]: sortOrder },
+      orderBy: { [safeSortBy]: sortOrder },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
@@ -140,6 +151,7 @@ export async function getProperty(id: string) {
       media: {
         orderBy: { sortOrder: 'asc' },
       },
+      owner: true,
     },
   })
 
@@ -182,6 +194,8 @@ export async function createProperty(input: CreatePropertyInput) {
       currency: input.currency || 'SAR',
       dealType: input.dealType,
       propertyType: input.propertyType,
+      category: input.category || 'RESIDENTIAL',
+      ownerId: input.ownerId || null,
       area: input.area || null,
       bedrooms: input.bedrooms || null,
       bathrooms: input.bathrooms || null,
@@ -194,8 +208,9 @@ export async function createProperty(input: CreatePropertyInput) {
       districtAr: input.districtAr || null,
       street: input.street || null,
       streetAr: input.streetAr || null,
-      lat: input.lat || null,
-      lng: input.lng || null,
+      // W-3: Use !== undefined instead of || to avoid erasing valid 0 coordinates
+      lat: input.lat !== undefined ? input.lat : null,
+      lng: input.lng !== undefined ? input.lng : null,
       videoUrl: input.videoUrl || null,
       tour360Url: input.tour360Url || null,
       status: input.status || 'DRAFT',
@@ -243,6 +258,7 @@ export async function updateProperty(id: string, input: Partial<CreatePropertyIn
   if (input.currency !== undefined) data.currency = input.currency
   if (input.dealType !== undefined) data.dealType = input.dealType
   if (input.propertyType !== undefined) data.propertyType = input.propertyType
+  if (input.category !== undefined) data.category = input.category
   if (input.area !== undefined) data.area = input.area
   if (input.bedrooms !== undefined) data.bedrooms = input.bedrooms
   if (input.bathrooms !== undefined) data.bathrooms = input.bathrooms
@@ -259,9 +275,23 @@ export async function updateProperty(id: string, input: Partial<CreatePropertyIn
   if (input.lng !== undefined) data.lng = input.lng
   if (input.videoUrl !== undefined) data.videoUrl = input.videoUrl
   if (input.tour360Url !== undefined) data.tour360Url = input.tour360Url
-  if (input.agentId !== undefined) data.agentId = input.agentId
+  if (input.agentId !== undefined) {
+    if (input.agentId) {
+      data.agent = { connect: { id: input.agentId } }
+    } else {
+      data.agent = { disconnect: true }
+    }
+  }
   if (input.seoTitle !== undefined) data.seoTitle = input.seoTitle
   if (input.seoDescription !== undefined) data.seoDescription = input.seoDescription
+
+  if (input.ownerId !== undefined) {
+    if (input.ownerId) {
+      data.owner = { connect: { id: input.ownerId } }
+    } else {
+      data.owner = { disconnect: true }
+    }
+  }
 
   if (input.status !== undefined) {
     data.status = input.status
@@ -270,8 +300,9 @@ export async function updateProperty(id: string, input: Partial<CreatePropertyIn
     }
   }
 
+  // SEC-1: Include officeId in the final mutation to prevent TOCTOU race condition
   const property = await prisma.property.update({
-    where: { id },
+    where: { id, officeId },
     data,
   })
 
@@ -302,7 +333,8 @@ export async function deleteProperty(id: string) {
 
   if (!property) throw new Error('Property not found')
 
-  await prisma.property.delete({ where: { id } })
+  // SEC-1: Include officeId in the final mutation to prevent TOCTOU race condition
+  await prisma.property.delete({ where: { id, officeId } })
 
   await logAudit({
     officeId,
@@ -341,6 +373,9 @@ export async function bulkPublishProperties(ids: string[]) {
   const officeId = user.memberships[0]?.officeId
   if (!officeId) throw new Error('No office membership found')
 
+  await requireRole(officeId, ['OWNER', 'MANAGER'])
+
+  // SEC-4: Role check added — only OWNER/MANAGER can bulk-publish
   await prisma.property.updateMany({
     where: {
       id: { in: ids },
