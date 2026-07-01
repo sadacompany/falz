@@ -146,7 +146,7 @@ export default function KanbanBoardPage() {
     e.preventDefault()
   }
 
-  const handleDrop = (e: React.DragEvent, targetColumn: 'NEW' | 'CONTACTED_QUALIFIED' | 'CLOSED') => {
+  const handleDrop = (e: React.DragEvent, targetColumn: 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'CLOSED') => {
     e.preventDefault()
     const id = e.dataTransfer.getData('text/plain') || draggedLeadId
     if (!id) return
@@ -158,10 +158,10 @@ export default function KanbanBoardPage() {
     // Map board columns back to Prisma LeadStatus enum values
     if (targetColumn === 'NEW') {
       if (lead.status !== 'NEW') handleMoveLead(id, 'NEW')
-    } else if (targetColumn === 'CONTACTED_QUALIFIED') {
-      if (lead.status !== 'CONTACTED' && lead.status !== 'QUALIFIED') {
-        handleMoveLead(id, 'CONTACTED')
-      }
+    } else if (targetColumn === 'CONTACTED') {
+      if (lead.status !== 'CONTACTED') handleMoveLead(id, 'CONTACTED')
+    } else if (targetColumn === 'QUALIFIED') {
+      if (lead.status !== 'QUALIFIED') handleMoveLead(id, 'QUALIFIED')
     } else if (targetColumn === 'CLOSED') {
       if (lead.status !== 'CLOSED') {
         setPendingLeadId(id)
@@ -195,15 +195,15 @@ export default function KanbanBoardPage() {
 
   // Distribute leads into board columns
   const newColumn = filteredLeads.filter((l) => l.status === 'NEW')
-  const contactedQualifiedColumn = filteredLeads.filter(
-    (l) => l.status === 'CONTACTED' || l.status === 'QUALIFIED'
-  )
+  const contactedColumn = filteredLeads.filter((l) => l.status === 'CONTACTED')
+  const qualifiedColumn = filteredLeads.filter((l) => l.status === 'QUALIFIED')
   const closedColumn = filteredLeads.filter((l) => l.status === 'CLOSED')
 
   // Render columns count labels
   const getColHeaderClass = (col: string) => {
     if (col === 'NEW') return 'border-t-4 border-t-primary'
     if (col === 'CONTACTED') return 'border-t-4 border-t-amber-500'
+    if (col === 'QUALIFIED') return 'border-t-4 border-t-emerald-500'
     return 'border-t-4 border-t-dim'
   }
 
@@ -251,7 +251,7 @@ export default function KanbanBoardPage() {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3 min-h-[600px]">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-4 min-h-[600px]">
           {/* Column 1: جديد */}
           <div
             className={cn(
@@ -297,32 +297,32 @@ export default function KanbanBoardPage() {
             </div>
           </div>
 
-          {/* Column 2: جاري التفاوض */}
+          {/* Column 2: تم التواصل */}
           <div
             className={cn(
               "flex flex-col bg-elevated/45 rounded-xl border border-edge p-4 transition-all",
               getColHeaderClass('CONTACTED')
             )}
             onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 'CONTACTED_QUALIFIED')}
+            onDrop={(e) => handleDrop(e, 'CONTACTED')}
           >
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-edge/60">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-amber-500" />
-                <h3 className="font-bold text-heading text-sm">جاري التفاوض / التواصل</h3>
+                <h3 className="font-bold text-heading text-sm">تم التواصل</h3>
               </div>
               <Badge variant="outline" className="px-2 py-0.5 text-xs text-dim bg-page font-semibold border-edge">
-                {contactedQualifiedColumn.length}
+                {contactedColumn.length}
               </Badge>
             </div>
 
             <div className="flex-1 space-y-3 overflow-y-auto max-h-[700px] scrollbar-thin">
-              {contactedQualifiedColumn.length === 0 ? (
+              {contactedColumn.length === 0 ? (
                 <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed border-edge text-center p-4">
                   <span className="text-xs text-dim">اسحب البطاقات هنا لتغيير الحالة</span>
                 </div>
               ) : (
-                contactedQualifiedColumn.map((lead) => (
+                contactedColumn.map((lead) => (
                   <KanbanCard
                     key={lead.id}
                     lead={lead}
@@ -342,7 +342,52 @@ export default function KanbanBoardPage() {
             </div>
           </div>
 
-          {/* Column 3: منتهي */}
+          {/* Column 3: مؤهل */}
+          <div
+            className={cn(
+              "flex flex-col bg-elevated/45 rounded-xl border border-edge p-4 transition-all",
+              getColHeaderClass('QUALIFIED')
+            )}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, 'QUALIFIED')}
+          >
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-edge/60">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <h3 className="font-bold text-heading text-sm">مؤهل</h3>
+              </div>
+              <Badge variant="outline" className="px-2 py-0.5 text-xs text-dim bg-page font-semibold border-edge">
+                {qualifiedColumn.length}
+              </Badge>
+            </div>
+
+            <div className="flex-1 space-y-3 overflow-y-auto max-h-[700px] scrollbar-thin">
+              {qualifiedColumn.length === 0 ? (
+                <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed border-edge text-center p-4">
+                  <span className="text-xs text-dim">اسحب البطاقات هنا لتغيير الحالة</span>
+                </div>
+              ) : (
+                qualifiedColumn.map((lead) => (
+                  <KanbanCard
+                    key={lead.id}
+                    lead={lead}
+                    getCategoryBadgeLabel={getCategoryBadgeLabel}
+                    onDragStart={handleDragStart}
+                    onMove={(target) => {
+                      if (target === 'CLOSED') {
+                        setPendingLeadId(lead.id)
+                        setShowOutcomeModal(true)
+                      } else {
+                        handleMoveLead(lead.id, target)
+                      }
+                    }}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Column 4: منتهي */}
           <div
             className={cn(
               "flex flex-col bg-elevated/45 rounded-xl border border-edge p-4 transition-all",
@@ -500,13 +545,22 @@ function KanbanCard({ lead, getCategoryBadgeLabel, onDragStart, onMove }: Kanban
               جديد
             </button>
           )}
-          {lead.status !== 'CONTACTED' && lead.status !== 'QUALIFIED' && (
+          {lead.status !== 'CONTACTED' && (
             <button
               onClick={() => onMove('CONTACTED')}
               className="text-[10px] font-bold px-1.5 py-0.5 hover:bg-card-hover rounded text-amber-500"
-              title="نقل إلى التفاوض"
+              title="نقل إلى تم التواصل"
             >
-              متابعة
+              تواصل
+            </button>
+          )}
+          {lead.status !== 'QUALIFIED' && (
+            <button
+              onClick={() => onMove('QUALIFIED')}
+              className="text-[10px] font-bold px-1.5 py-0.5 hover:bg-card-hover rounded text-emerald-500"
+              title="نقل إلى مؤهل"
+            >
+              تأهيل
             </button>
           )}
           {lead.status !== 'CLOSED' && (

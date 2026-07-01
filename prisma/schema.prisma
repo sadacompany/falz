@@ -740,6 +740,7 @@ model PropertyOwner {
   updatedAt  DateTime      @updatedAt
 
   @@unique([officeId, phone])
+  @@unique([officeId, nationalId])
   @@index([officeId])
 }
 

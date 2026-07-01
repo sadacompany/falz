@@ -511,13 +511,14 @@ export function DashboardShell({
             </button>
 
             {/* Search */}
-            <div className="hidden items-center gap-2 rounded-lg border border-edge bg-input px-3 py-2 sm:flex">
+            <div className="hidden items-center gap-2 rounded-lg border border-edge bg-input px-3 py-2 sm:flex opacity-75">
               <Search className="h-4 w-4 text-dim" />
               <input
                 type="text"
-                placeholder={locale === 'ar' ? 'بحث...' : 'Search...'}
+                disabled
+                placeholder={locale === 'ar' ? 'البحث (قريباً)...' : 'Search (Coming soon)...'}
                 aria-label={locale === 'ar' ? 'بحث' : 'Search'}
-                className="w-48 bg-transparent text-sm text-heading placeholder:text-dim focus:outline-none lg:w-64"
+                className="w-48 bg-transparent text-sm text-heading placeholder:text-dim/80 focus:outline-none lg:w-64 cursor-not-allowed"
               />
             </div>
           </div>

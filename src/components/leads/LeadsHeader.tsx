@@ -66,13 +66,14 @@ export function LeadsHeader({ title, description, children }: LeadsHeaderProps) 
 
       {/* Tabs Sub-Navigation */}
       <div className="border-b border-edge">
-        <nav className="flex gap-6 overflow-x-auto" aria-label="Tabs">
+        <nav className="flex gap-6 overflow-x-auto" aria-label="أقسام إدارة العملاء الفرعية">
           {tabs.map((tab) => {
             const Icon = tab.icon
             return (
               <Link
                 key={tab.href}
                 href={tab.href}
+                aria-current={tab.active ? 'page' : undefined}
                 className={cn(
                   'group flex items-center gap-2 border-b-2 px-1 pb-4 text-sm font-medium transition-all duration-200 whitespace-nowrap',
                   tab.active
