@@ -378,6 +378,7 @@ async function main() {
   await prisma.property.deleteMany({ where: { officeId: office1.id } });
   await prisma.propertyOwner.deleteMany({ where: { officeId: office1.id } });
   await prisma.missedCall.deleteMany({ where: { officeId: office1.id } });
+  await prisma.reminder.deleteMany({ where: { officeId: office1.id } });
 
   const o1Owner1 = await prisma.propertyOwner.create({
     data: {
@@ -1191,9 +1192,15 @@ async function main() {
 
   console.log("  Creating Office 2 properties...");
 
+  // Comprehensive cleanup for Office 2 to prevent stale FK entries and accumulation
   await prisma.propertyMedia.deleteMany({ where: { property: { officeId: office2.id } } });
+  await prisma.leadActivity.deleteMany({ where: { lead: { officeId: office2.id } } });
   await prisma.lead.deleteMany({ where: { officeId: office2.id } });
+  await prisma.signboard.deleteMany({ where: { officeId: office2.id } });
   await prisma.property.deleteMany({ where: { officeId: office2.id } });
+  await prisma.propertyOwner.deleteMany({ where: { officeId: office2.id } });
+  await prisma.missedCall.deleteMany({ where: { officeId: office2.id } });
+  await prisma.reminder.deleteMany({ where: { officeId: office2.id } });
 
   const o2PropertiesData = [
     {
@@ -1205,6 +1212,7 @@ async function main() {
       price: BigInt(8500000),
       dealType: "SALE" as const,
       propertyType: "VILLA" as const,
+      category: "RESIDENTIAL" as const,
       area: 750,
       bedrooms: 6,
       bathrooms: 7,
@@ -1234,6 +1242,7 @@ async function main() {
       price: BigInt(85000),
       dealType: "RENT" as const,
       propertyType: "OFFICE" as const,
+      category: "COMMERCIAL" as const,
       area: 200,
       bedrooms: null,
       bathrooms: 2,
@@ -1262,6 +1271,7 @@ async function main() {
       price: BigInt(2200000),
       dealType: "SALE" as const,
       propertyType: "APARTMENT" as const,
+      category: "RESIDENTIAL" as const,
       area: 280,
       bedrooms: 4,
       bathrooms: 4,
@@ -1290,6 +1300,7 @@ async function main() {
       price: BigInt(15000000),
       dealType: "SALE" as const,
       propertyType: "BUILDING" as const,
+      category: "COMMERCIAL" as const,
       area: 1800,
       bedrooms: null,
       bathrooms: 12,

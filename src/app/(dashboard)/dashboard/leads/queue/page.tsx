@@ -43,8 +43,6 @@ interface QueueLead {
 const QUEUE_TABS = [
   { key: 'sales', label: 'قسم المبيعات', desc: 'طلبات الشراء والتعاقدات الجديدة' },
   { key: 'rentals', label: 'قسم الإيجارات', desc: 'طلبات التأجير والاستئجار السكني والتجاري' },
-  { key: 'auctions', label: 'قسم المزادات', desc: 'المزايدين المهتمين بالعقارات المطروحة للمزاد' },
-  { key: 'evaluation', label: 'قسم التقييم والاعتماد', desc: 'طلبات تقييم وتثمين العقارات المعتمدة' },
 ]
 
 export default function QueuePage() {
@@ -52,64 +50,6 @@ export default function QueuePage() {
   const [dbLeads, setDbLeads] = useState<QueueLead[]>([])
   const [loading, setLoading] = useState(true)
   const [claimingId, setClaimingId] = useState<string | null>(null)
-  
-  // Interactive mock leads for auctions and evaluation, plus fallback for empty DB
-  const [mockLeads, setMockLeads] = useState<{ [key: string]: any[] }>({
-    sales: [],
-    rentals: [],
-    auctions: [
-      {
-        id: 'mock-auc-1',
-        name: 'عبدالرحمن آل سعود',
-        phone: '0554321098',
-        email: 'a.alsaud@example.com',
-        message: 'مهتم بالمزايدة على أرض حي النرجس التجارية رقم 44.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 25), // 25 mins ago
-        source: 'MANUAL',
-        propertyTitle: 'أرض النرجس الاستثمارية - مزاد النخبة',
-        propertyType: 'LAND',
-        waitingTime: '25 دقيقة',
-      },
-      {
-        id: 'mock-auc-2',
-        name: 'شركة العليان العقارية',
-        phone: '0501112223',
-        email: 'info@olayan.co',
-        message: 'استفسار عن شروط الدخول في المزاد العلني لبرج العليا السكني.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 120), // 2 hours ago
-        source: 'PROPERTY_INQUIRY',
-        propertyTitle: 'برج العليا السكني المكتمل',
-        propertyType: 'BUILDING',
-        waitingTime: 'ساعتين',
-      }
-    ],
-    evaluation: [
-      {
-        id: 'mock-eval-1',
-        name: 'خالد بن ناصر',
-        phone: '0567890123',
-        email: 'khaled.n@example.com',
-        message: 'طلب تقييم معتمد من الهيئة السعودية للمقيمين العقاريين لفيلا في حي الملقا لغرض التمويل العقاري.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 45), // 45 mins ago
-        source: 'CONTACT_FORM',
-        propertyTitle: 'طلب تقييم فيلا سكنية',
-        propertyType: 'VILLA',
-        waitingTime: '45 دقيقة',
-      },
-      {
-        id: 'mock-eval-2',
-        name: 'مصرف الراجحي - إدارة التمويل',
-        phone: '0545556667',
-        email: 'appraisals@alrajhibank.com.sa',
-        message: 'طلب تثمين عمارة تجارية حي الصحافة، المساحة 800 متر مربع.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 300), // 5 hours ago
-        source: 'MANUAL',
-        propertyTitle: 'عمارة الصحافة التجارية',
-        propertyType: 'BUILDING',
-        waitingTime: '5 ساعات',
-      }
-    ]
-  })
 
   const fetchQueueData = useCallback(async () => {
     setLoading(true)
@@ -138,23 +78,13 @@ export default function QueuePage() {
   )
 
   // Handle claiming a lead
-  const handleAcceptLead = async (leadId: string, isMock = false) => {
+  const handleAcceptLead = async (leadId: string) => {
     setClaimingId(leadId)
     try {
-      if (isMock) {
-        // Simulate claiming in state
-        await new Promise((resolve) => setTimeout(resolve, 800))
-        setMockLeads((prev) => {
-          const updated = { ...prev }
-          updated[activeTab] = updated[activeTab].filter((l) => l.id !== leadId)
-          return updated
-        })
-      } else {
-        // Run database server action
-        await claimLead(leadId)
-        // Refresh queue
-        await fetchQueueData()
-      }
+      // Run database server action
+      await claimLead(leadId)
+      // Refresh queue
+      await fetchQueueData()
     } catch (error) {
       console.error('Failed to claim lead:', error)
     } finally {
@@ -166,8 +96,8 @@ export default function QueuePage() {
   const getActiveQueue = () => {
     if (activeTab === 'sales') return salesQueue
     if (activeTab === 'rentals') return rentalsQueue
-    return mockLeads[activeTab] || []
-  };
+    return []
+  }
 
   const activeLeads = getActiveQueue()
 
@@ -201,13 +131,12 @@ export default function QueuePage() {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 bg-elevated border border-edge p-2 rounded-xl">
+      <div className="grid grid-cols-2 gap-2 max-w-md bg-elevated border border-edge p-2 rounded-xl">
         {QUEUE_TABS.map((tab) => {
           const isSelected = activeTab === tab.key
           let count = 0
           if (tab.key === 'sales') count = salesQueue.length
           else if (tab.key === 'rentals') count = rentalsQueue.length
-          else count = mockLeads[tab.key]?.length || 0
 
           return (
             <button
@@ -252,8 +181,7 @@ export default function QueuePage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {activeLeads.map((lead) => {
-            const isMock = lead.id.startsWith('mock')
-            const waitTime = isMock ? lead.waitingTime : getWaitingTime(lead.createdAt)
+            const waitTime = getWaitingTime(lead.createdAt)
             
             return (
               <Card
@@ -273,10 +201,6 @@ export default function QueuePage() {
                         <span>بانتظار الرد منذ {waitTime}</span>
                       </div>
                     </div>
-                    
-                    <Badge variant="outline" className="text-[10px] bg-card border-edge text-dim py-0 px-2">
-                      مستند: {lead.id.startsWith('mock') ? 'نموذج محاكاة' : 'استفسار حقيقي'}
-                    </Badge>
                   </div>
 
                   {/* Body: Inquiry details */}
@@ -296,13 +220,6 @@ export default function QueuePage() {
                         <Badge variant="outline" className="text-[9px] py-0 px-1 hover:bg-transparent">
                           {lead.property.dealType === 'SALE' ? 'شراء' : 'إيجار'}
                         </Badge>
-                      </div>
-                    )}
-
-                    {isMock && lead.propertyTitle && (
-                      <div className="mt-2.5 pt-2 border-t border-edge flex items-center gap-1.5 text-dim font-medium">
-                        <Building className="h-3.5 w-3.5 text-dim" />
-                        <span className="truncate max-w-[280px]">{lead.propertyTitle}</span>
                       </div>
                     )}
                   </div>
@@ -329,7 +246,7 @@ export default function QueuePage() {
                       size="sm"
                       className="h-8 text-xs font-semibold px-4"
                       isLoading={claimingId === lead.id}
-                      onClick={() => handleAcceptLead(lead.id, isMock)}
+                      onClick={() => handleAcceptLead(lead.id)}
                     >
                       <UserCheck className="h-4 w-4" />
                       استلمت العميل

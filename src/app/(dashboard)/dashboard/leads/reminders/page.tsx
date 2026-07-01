@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { getLeadsReportsData } from '@/lib/actions/leads'
+import { getReminders, createReminder, toggleReminderCompleted, deleteReminder } from '@/lib/actions/reminders'
 import { LeadsHeader } from '@/components/leads/LeadsHeader'
 
 // ─── Types ──────────────────────────────────────────────────
@@ -60,88 +61,23 @@ export default function RemindersPage() {
   const fetchLeadsData = useCallback(async () => {
     setLoading(true)
     try {
-      const data = await getLeadsReportsData()
+      const [data, dbReminders] = await Promise.all([
+        getLeadsReportsData(),
+        getReminders(),
+      ])
       setLeads(data.map((l) => ({ id: l.id, name: l.name, phone: l.phone })))
-
-      // Initialize default reminders based on real leads if localStorage is empty
-      const localStored = localStorage.getItem('crm_reminders')
-      if (localStored) {
-        setReminders(JSON.parse(localStored))
-      } else {
-        const defaultReminders: Reminder[] = []
-        
-        // Add 2 overdue reminders using real leads names if available
-        if (data.length > 0) {
-          defaultReminders.push({
-            id: 'default-rem-1',
-            leadId: data[0].id,
-            leadName: data[0].name,
-            leadPhone: data[0].phone,
-            title: 'اتصال للمتابعة وتحديد الميزانية المناسبة للشراء',
-            dueDate: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-            priority: 'HIGH',
-            completed: false,
-          })
-        } else {
-          defaultReminders.push({
-            id: 'default-rem-1',
-            leadId: null,
-            leadName: 'محمد أحمد العتيبي',
-            leadPhone: '0555123456',
-            title: 'اتصال للمتابعة وتحديد الميزانية المناسبة للشراء',
-            dueDate: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-            priority: 'HIGH',
-            completed: false,
-          })
-        }
-
-        if (data.length > 1) {
-          defaultReminders.push({
-            id: 'default-rem-2',
-            leadId: data[1].id,
-            leadName: data[1].name,
-            leadPhone: data[1].phone,
-            title: 'إرسال ملف عرض الأسعار لفيلا حي النرجس بالواتساب',
-            dueDate: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
-            priority: 'MEDIUM',
-            completed: false,
-          })
-        }
-
-        // Add 3 upcoming reminders
-        const tomorrow = new Date()
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        tomorrow.setHours(10, 0, 0, 0)
-        
-        defaultReminders.push({
-          id: 'default-rem-3',
-          leadId: data[2]?.id || null,
-          leadName: data[2]?.name || 'سارة الشمري',
-          leadPhone: data[2]?.phone || '0509876543',
-          title: 'موعد معاينة شقة حي السليمانية مع العميل وعائلته',
-          dueDate: tomorrow.toISOString(),
-          priority: 'HIGH',
-          completed: false,
-        })
-
-        const inThreeDays = new Date()
-        inThreeDays.setDate(inThreeDays.getDate() + 3)
-        inThreeDays.setHours(16, 30, 0, 0)
-
-        defaultReminders.push({
-          id: 'default-rem-4',
-          leadId: data[3]?.id || null,
-          leadName: data[3]?.name || 'مكتب عقارات الرياض',
-          leadPhone: data[3]?.phone || '0543210987',
-          title: 'مراجعة شروط عقد الاستئجار للتجاري',
-          dueDate: inThreeDays.toISOString(),
-          priority: 'LOW',
-          completed: false,
-        })
-
-        setReminders(defaultReminders)
-        localStorage.setItem('crm_reminders', JSON.stringify(defaultReminders))
-      }
+      setReminders(
+        dbReminders.map((r) => ({
+          id: r.id,
+          leadId: r.leadId,
+          leadName: r.leadName,
+          leadPhone: r.leadPhone,
+          title: r.title,
+          dueDate: r.dueDate.toISOString(),
+          priority: r.priority as 'HIGH' | 'MEDIUM' | 'LOW',
+          completed: r.completed,
+        }))
+      )
     } catch (error) {
       console.error('Failed to load leads for reminders:', error)
     } finally {
@@ -153,28 +89,45 @@ export default function RemindersPage() {
     fetchLeadsData()
   }, [fetchLeadsData])
 
-  // Save reminders to localStorage when they change
-  const saveReminders = (newRems: Reminder[]) => {
-    setReminders(newRems)
-    localStorage.setItem('crm_reminders', JSON.stringify(newRems))
-  }
-
   // Toggle Completion
-  const handleToggleComplete = (id: string) => {
-    const updated = reminders.map((r) =>
-      r.id === id ? { ...r, completed: !r.completed } : r
+  const handleToggleComplete = async (id: string) => {
+    const reminder = reminders.find((r) => r.id === id)
+    if (!reminder) return
+    const newCompleted = !reminder.completed
+
+    // Optimistic update
+    setReminders((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, completed: newCompleted } : r))
     )
-    saveReminders(updated)
+
+    try {
+      await toggleReminderCompleted(id, newCompleted)
+    } catch (error) {
+      console.error('Failed to toggle reminder:', error)
+      // Rollback on failure
+      setReminders((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, completed: !newCompleted } : r))
+      )
+    }
   }
 
   // Delete Reminder
-  const handleDeleteReminder = (id: string) => {
-    const updated = reminders.filter((r) => r.id !== id)
-    saveReminders(updated)
+  const handleDeleteReminder = async (id: string) => {
+    const previous = [...reminders]
+    // Optimistic update
+    setReminders((prev) => prev.filter((r) => r.id !== id))
+
+    try {
+      await deleteReminder(id)
+    } catch (error) {
+      console.error('Failed to delete reminder:', error)
+      // Rollback on failure
+      setReminders(previous)
+    }
   }
 
   // Add new reminder
-  const handleAddReminder = (e: React.FormEvent) => {
+  const handleAddReminder = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newTitle.trim() || !newDate || !newTime) return
 
@@ -184,27 +137,39 @@ export default function RemindersPage() {
 
     const dueDateTime = new Date(`${newDate}T${newTime}`)
 
-    const newReminder: Reminder = {
-      id: `rem-${Date.now()}`,
-      leadId: newLeadId || null,
-      leadName,
-      leadPhone,
-      title: newTitle,
-      dueDate: dueDateTime.toISOString(),
-      priority: newPriority,
-      completed: false,
+    try {
+      const created = await createReminder({
+        leadId: newLeadId || null,
+        leadName,
+        leadPhone: leadPhone || '',
+        title: newTitle,
+        dueDate: dueDateTime,
+        priority: newPriority,
+      })
+
+      const newReminder: Reminder = {
+        id: created.id,
+        leadId: created.leadId,
+        leadName: created.leadName,
+        leadPhone: created.leadPhone,
+        title: created.title,
+        dueDate: created.dueDate.toISOString(),
+        priority: created.priority as 'HIGH' | 'MEDIUM' | 'LOW',
+        completed: created.completed,
+      }
+
+      setReminders((prev) => [newReminder, ...prev])
+
+      // Reset Form
+      setNewTitle('')
+      setNewLeadId('')
+      setNewDate('')
+      setNewTime('')
+      setNewPriority('MEDIUM')
+      setShowAddForm(false)
+    } catch (error) {
+      console.error('Failed to add reminder:', error)
     }
-
-    const updated = [newReminder, ...reminders]
-    saveReminders(updated)
-
-    // Reset Form
-    setNewTitle('')
-    setNewLeadId('')
-    setNewDate('')
-    setNewTime('')
-    setNewPriority('MEDIUM')
-    setShowAddForm(false)
   }
 
   // Split reminders into Overdue, Upcoming, Completed

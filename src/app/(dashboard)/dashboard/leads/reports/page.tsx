@@ -96,7 +96,16 @@ export default function ReportsPage() {
   const processReportsData = (leads: any[]) => {
     const totalLeads = leads.length
     if (totalLeads === 0) {
-      // Empty states fallback
+      setKpis({
+        totalLeads: 0,
+        activeLeads: 0,
+        conversionRate: 0,
+        avgClosingDays: 0,
+      })
+      setStageData([])
+      setCategoryData([])
+      setClosingReasonData([])
+      setAgentPerformanceData([])
       return
     }
 
@@ -146,15 +155,6 @@ export default function ReportsPage() {
         closingReasons[reason] = (closingReasons[reason] || 0) + 1
       }
     })
-    
-    // Supplement with defaults if none are found in the DB (for visual layout excellence)
-    if (Object.keys(closingReasons).length === 0 || (Object.keys(closingReasons).length === 1 && closingReasons['غير محدد'])) {
-      closingReasons['تم الشراء بنجاح'] = Math.max(3, Math.round(totalLeads * 0.15))
-      closingReasons['الميزانية غير مناسبة'] = Math.max(2, Math.round(totalLeads * 0.08))
-      closingReasons['عدم جدية العميل'] = Math.max(1, Math.round(totalLeads * 0.05))
-      closingReasons['عدم توفر عقار مناسب'] = Math.max(2, Math.round(totalLeads * 0.06))
-      if (closingReasons['غير محدد']) delete closingReasons['غير محدد']
-    }
 
     const closingReasonsChart = Object.keys(closingReasons).map((key) => ({
       name: key,
@@ -176,13 +176,6 @@ export default function ReportsPage() {
         agentMap[agentId].closed++
       }
     })
-
-    // Populate with mock agents if DB has no agent assignments to keep charts rich
-    if (Object.keys(agentMap).length === 0) {
-      agentMap['agent-1'] = { name: 'أحمد الحربي', total: 12, closed: 4 }
-      agentMap['agent-2'] = { name: 'سلطان القحطاني', total: 9, closed: 3 }
-      agentMap['agent-3'] = { name: 'فهد المطيري', total: 15, closed: 6 }
-    }
 
     const agentPerformanceChart = Object.values(agentMap).map((agent) => ({
       name: agent.name,
@@ -215,7 +208,7 @@ export default function ReportsPage() {
     })
     const avgClosingDays = closedWithTimelineCount > 0 
       ? Math.round(totalClosingDays / closedWithTimelineCount) 
-      : 8 // default realistic number if activities don't exist
+      : 0
 
     setStageData(stageChart)
     setCategoryData(categoryChart)
@@ -224,8 +217,8 @@ export default function ReportsPage() {
     setKpis({
       totalLeads,
       activeLeads,
-      conversionRate: conversionRate || 32, // default realistic conversion rate if 0
-      avgClosingDays: avgClosingDays || 7,
+      conversionRate,
+      avgClosingDays,
     })
   }
 
@@ -291,6 +284,18 @@ export default function ReportsPage() {
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      ) : leadsData.length === 0 ? (
+        <Card className="border-edge bg-elevated/60 py-16 text-center">
+          <CardContent className="flex flex-col items-center justify-center gap-4">
+            <div className="p-4 rounded-full bg-primary/10 text-primary">
+              <TrendingUp className="h-10 w-10" />
+            </div>
+            <h3 className="text-lg font-bold text-heading">لا توجد بيانات كافية للتحليل</h3>
+            <p className="text-sm text-dim max-w-md mx-auto">
+              لم يتم تسجيل أي عملاء محتملين في هذا المكتب بعد. ابدأ بإضافة عملاء لمشاهدة التحليلات وأداء المبيعات.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-6">
           {/* Charts Row 1: Donut Charts */}

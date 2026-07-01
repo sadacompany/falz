@@ -144,6 +144,7 @@ model Office {
   propertyOwners  PropertyOwner[]
   signboards      Signboard[]
   missedCalls     MissedCall[]
+  reminders       Reminder[]
 
   @@index([slug])
   @@index([customDomain])
@@ -519,6 +520,7 @@ model Lead {
   updatedAt   DateTime   @updatedAt
 
   activities  LeadActivity[]
+  reminders   Reminder[]
 
   @@index([officeId])
   @@index([officeId, status])
@@ -787,4 +789,23 @@ enum SignboardStatus {
 enum MissedCallStatus {
   PENDING
   RESOLVED
+}
+
+model Reminder {
+  id        String   @id @default(cuid())
+  officeId  String
+  office    Office   @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  leadId    String?
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  leadName  String
+  leadPhone String
+  title     String
+  dueDate   DateTime
+  priority  String   @default("MEDIUM") // "HIGH", "MEDIUM", "LOW"
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([officeId])
+  @@index([leadId])
 }

@@ -604,22 +604,30 @@ export async function getCRMStats() {
     },
   })
 
-  const agentRankings = await Promise.all(
-    memberships.map(async (m) => {
-      const count = await prisma.lead.count({
-        where: {
-          officeId,
-          agentId: m.userId,
-          status: 'CLOSED',
-        },
-      })
-      return {
-        id: m.userId,
-        name: m.user.nameAr || m.user.name,
-        value: count,
-      }
-    })
-  )
+  const closedLeadsByAgent = await prisma.lead.groupBy({
+    by: ['agentId'],
+    where: {
+      officeId,
+      status: 'CLOSED',
+      agentId: { not: null },
+    },
+    _count: {
+      id: true,
+    },
+  })
+
+  const agentClosedCountMap = new Map<string, number>()
+  closedLeadsByAgent.forEach((group) => {
+    if (group.agentId) {
+      agentClosedCountMap.set(group.agentId, group._count.id)
+    }
+  })
+
+  const agentRankings = memberships.map((m) => ({
+    id: m.userId,
+    name: m.user.nameAr || m.user.name,
+    value: agentClosedCountMap.get(m.userId) || 0,
+  }))
 
   agentRankings.sort((a, b) => b.value - a.value)
 
@@ -731,6 +739,7 @@ export async function getLeadsReportsData() {
 
   return prisma.lead.findMany({
     where: tenantWhere(officeId),
+    take: 500, // DB-5: Limit returned rows to protect memory
     include: {
       property: {
         select: { id: true, title: true, titleAr: true, slug: true, propertyType: true },
@@ -748,5 +757,6 @@ export async function getLeadsReportsData() {
         },
       },
     },
+    orderBy: { createdAt: 'desc' }, // Order by newest
   })
 }
