@@ -24,6 +24,12 @@ export async function getDashboardStats() {
   const sixtyDaysAgo = new Date(now)
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60)
 
+  // Start of current calendar month
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  // Start of current quarter
+  const currentQuarterMonth = Math.floor(now.getMonth() / 3) * 3
+  const startOfQuarter = new Date(now.getFullYear(), currentQuarterMonth, 1)
+
   const [
     totalProperties,
     totalLeads,
@@ -32,6 +38,8 @@ export async function getDashboardStats() {
     totalViewsPrevious,
     recentLeads,
     topProperties,
+    monthlySalesSum,
+    quarterlySalesSum,
   ] = await Promise.all([
     // Total properties
     prisma.property.count({
@@ -100,6 +108,28 @@ export async function getDashboardStats() {
       orderBy: { _count: { id: 'desc' } },
       take: 5,
     }),
+
+    // Monthly Sales
+    prisma.property.aggregate({
+      where: {
+        ...tenantWhere(officeId),
+        dealType: 'SALE',
+        availability: 'SOLD',
+        soldAt: { gte: startOfMonth },
+      },
+      _sum: { price: true },
+    }),
+
+    // Current Quarter Sales
+    prisma.property.aggregate({
+      where: {
+        ...tenantWhere(officeId),
+        dealType: 'SALE',
+        availability: 'SOLD',
+        soldAt: { gte: startOfQuarter },
+      },
+      _sum: { price: true },
+    }),
   ])
 
   // Fetch property details for top properties
@@ -141,6 +171,9 @@ export async function getDashboardStats() {
     ? (((totalViews - totalViewsPrevious) / totalViewsPrevious) * 100).toFixed(1)
     : totalViews > 0 ? '100.0' : '0.0'
 
+  const monthlySales = monthlySalesSum._sum.price ? monthlySalesSum._sum.price.toString() : '0'
+  const quarterlySales = quarterlySalesSum._sum.price ? quarterlySalesSum._sum.price.toString() : '0'
+
   return {
     totalProperties,
     totalLeads,
@@ -148,6 +181,8 @@ export async function getDashboardStats() {
     totalViews,
     viewsChange: parseFloat(viewsChange),
     conversionRate: parseFloat(conversionRate),
+    monthlySales,
+    quarterlySales,
     recentLeads,
     topProperties: topProperties.map((tp) => {
       const detail = topPropertyDetails.find((p) => p.id === tp.propertyId)

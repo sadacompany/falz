@@ -145,6 +145,7 @@ model Office {
   signboards      Signboard[]
   missedCalls     MissedCall[]
   reminders       Reminder[]
+  propertySubtypes PropertySubtype[]
 
   @@index([slug])
   @@index([customDomain])
@@ -296,6 +297,30 @@ model Property {
   amenities       Json?          // ["parking", "pool", "gym", ...]
   tags            String[]       @default([])
   isFeatured      Boolean        @default(false)
+  builtArea       Float?
+  facing          String?
+  streetWidth     String?
+  age             Int?
+  floorNumber     Int?
+  borderNorth     Float?
+  borderSouth     Float?
+  borderEast      Float?
+  borderWest      Float?
+  internalNotes   String?        @db.Text
+  pricingModel    PricingModel   @default(LIMIT)
+  paymentMethod   PaymentMethod  @default(BANK_AND_CASH)
+  directionalArea String?
+  deedNumber      String?
+  deedFile        String?
+  marketingContractNumber String?
+  contractExpiryDate DateTime?
+  soldAt          DateTime?
+  
+  // Custom subtype
+  subtypeId       String?
+  subtype         PropertySubtype? @relation(fields: [subtypeId], references: [id], onDelete: SetNull)
+  bids            PropertyBid[]
+
   // Address
   city            String?
   cityAr          String?
@@ -809,4 +834,42 @@ model Reminder {
 
   @@index([officeId])
   @@index([leadId])
+}
+
+enum PricingModel {
+  LIMIT
+  BID
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_AND_CASH
+}
+
+model PropertySubtype {
+  id        String           @id @default(cuid())
+  officeId  String
+  office    Office           @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  name      String           // e.g. "Duplex", "Compound"
+  category  PropertyCategory
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  properties Property[]
+
+  @@unique([officeId, name, category])
+  @@index([officeId])
+}
+
+model PropertyBid {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amount      BigInt
+  bidderName  String
+  bidderPhone String
+  bidDate     DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([propertyId])
 }

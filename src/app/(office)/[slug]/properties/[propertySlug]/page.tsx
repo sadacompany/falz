@@ -53,6 +53,8 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
     where: { officeId: office.id, slug: propertySlug },
     include: {
       media: { orderBy: { sortOrder: 'asc' } },
+      subtype: true,
+      bids: { orderBy: { bidDate: 'desc' } },
     },
   })
   if (!property) notFound()
@@ -157,6 +159,26 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
       alt: m.alt,
       altAr: m.altAr,
       type: m.type,
+    })),
+    // Customized specifications
+    subtypeName: property.subtype?.name || null,
+    builtArea: property.builtArea,
+    facing: property.facing,
+    streetWidth: property.streetWidth,
+    age: property.age,
+    floorNumber: property.floorNumber,
+    borderNorth: property.borderNorth,
+    borderSouth: property.borderSouth,
+    borderEast: property.borderEast,
+    borderWest: property.borderWest,
+    pricingModel: property.pricingModel,
+    paymentMethod: property.paymentMethod,
+    directionalArea: property.directionalArea,
+    // Sanitized bids (strictly no bidderName or bidderPhone for public client)
+    bids: property.bids.map((b) => ({
+      id: b.id,
+      amount: b.amount.toString(),
+      bidDate: b.bidDate.toISOString(),
     })),
   }
 

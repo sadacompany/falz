@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import {
@@ -10,8 +10,12 @@ import {
   GripVertical,
   ImageIcon,
   Save,
-  Globe,
   Plus,
+  Trash2,
+  Coins,
+  MapPin,
+  FileText,
+  User,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -20,9 +24,11 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { createProperty, getAgents, type CreatePropertyInput } from '@/lib/actions/properties'
-import { useEffect } from 'react'
-
-// ─── Amenity List ───────────────────────────────────────────
+import { getSubtypes } from '@/lib/actions/subtypes'
+import { getOwners, createOwner } from '@/lib/actions/owners'
+import { MockMapPicker } from '@/components/shared/MockMapPicker'
+import { PropertyCategory, PricingModel, PaymentMethod, Availability } from '@prisma/client'
+import { cn, formatPrice } from '@/lib/utils'
 
 const AMENITIES = [
   'parking', 'pool', 'gym', 'elevator', 'security', 'garden', 'balcony',
@@ -54,61 +60,97 @@ const AMENITY_LABELS: Record<string, string> = {
   fireSystem: 'نظام إطفاء',
 }
 
-const PROPERTY_TYPES = [
-  { value: 'APARTMENT', label: 'شقة' },
-  { value: 'VILLA', label: 'فيلا' },
-  { value: 'LAND', label: 'أرض' },
-  { value: 'OFFICE', label: 'مكتب' },
-  { value: 'COMMERCIAL', label: 'تجاري' },
-  { value: 'BUILDING', label: 'مبنى' },
-  { value: 'COMPOUND', label: 'مجمع' },
-  { value: 'FARM', label: 'مزرعة' },
-  { value: 'OTHER', label: 'أخرى' },
-]
-
-// ─── Component ──────────────────────────────────────────────
-
 export default function NewPropertyPage() {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const deedFileInputRef = useRef<HTMLInputElement>(null)
   const [agents, setAgents] = useState<Array<{ id: string; name: string; role: string }>>([])
 
-  // Form state
+  // Main Form state
   const [title, setTitle] = useState('')
-  const [titleAr, setTitleAr] = useState('')
   const [description, setDescription] = useState('')
-  const [descriptionAr, setDescriptionAr] = useState('')
   const [price, setPrice] = useState('')
-  const [currency, setCurrency] = useState('SAR')
   const [dealType, setDealType] = useState<'SALE' | 'RENT'>('SALE')
-  const [propertyType, setPropertyType] = useState('APARTMENT')
+  const [category, setCategory] = useState<PropertyCategory>('RESIDENTIAL')
+  const [subtypeId, setSubtypeId] = useState('')
+  const [subtypes, setSubtypes] = useState<any[]>([])
   const [area, setArea] = useState('')
+  const [builtArea, setBuiltArea] = useState('')
   const [bedrooms, setBedrooms] = useState('')
   const [bathrooms, setBathrooms] = useState('')
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
+  
+  // Location
   const [city, setCity] = useState('')
-  const [cityAr, setCityAr] = useState('')
   const [district, setDistrict] = useState('')
-  const [districtAr, setDistrictAr] = useState('')
   const [street, setStreet] = useState('')
-  const [streetAr, setStreetAr] = useState('')
-  const [lat, setLat] = useState('')
-  const [lng, setLng] = useState('')
+  const [directionalArea, setDirectionalArea] = useState('')
+  const [lat, setLat] = useState<number | null>(null)
+  const [lng, setLng] = useState<number | null>(null)
+
+  // Media
   const [videoUrl, setVideoUrl] = useState('')
   const [tour360Url, setTour360Url] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
   const [isFeatured, setIsFeatured] = useState(false)
   const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED'>('DRAFT')
+  const [availability, setAvailability] = useState<Availability>('AVAILABLE')
   const [agentId, setAgentId] = useState('')
   const [seoTitle, setSeoTitle] = useState('')
   const [seoDescription, setSeoDescription] = useState('')
   const [mediaFiles, setMediaFiles] = useState<Array<{ file: File; preview: string }>>([])
 
+  // Specifications
+  const [facing, setFacing] = useState('')
+  const [streetWidth, setStreetWidth] = useState('')
+  const [age, setAge] = useState('')
+  const [floorNumber, setFloorNumber] = useState('')
+  const [borderNorth, setBorderNorth] = useState('')
+  const [borderSouth, setBorderSouth] = useState('')
+  const [borderEast, setBorderEast] = useState('')
+  const [borderWest, setBorderWest] = useState('')
+  const [internalNotes, setInternalNotes] = useState('')
+
+  // Pricing & Transaction
+  const [pricingModel, setPricingModel] = useState<PricingModel>('LIMIT')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('BANK_AND_CASH')
+
+  // Bids (if PricingModel === BID)
+  const [newBidAmount, setNewBidAmount] = useState('')
+  const [newBidderName, setNewBidderName] = useState('')
+  const [newBidderPhone, setNewBidderPhone] = useState('')
+  const [newBidDate, setNewBidDate] = useState(new Date().toISOString().split('T')[0])
+
+  // Legal Documents
+  const [deedNumber, setDeedNumber] = useState('')
+  const [deedFile, setDeedFile] = useState('')
+  const [marketingContractNumber, setMarketingContractNumber] = useState('')
+  const [contractExpiryDate, setContractExpiryDate] = useState('')
+
+  // Owners CRM Selection
+  const [owners, setOwners] = useState<any[]>([])
+  const [ownerId, setOwnerId] = useState('')
+  const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false)
+
+  // Owner Modal Fields
+  const [newOwnerName, setNewOwnerName] = useState('')
+  const [newOwnerPhone, setNewOwnerPhone] = useState('')
+  const [newOwnerDob, setNewOwnerDob] = useState('')
+  const [newOwnerNationalId, setNewOwnerNationalId] = useState('')
+  const [ownerModalError, setOwnerModalError] = useState<string | null>(null)
+  const [ownerModalLoading, setOwnerModalLoading] = useState(false)
+
+  // Fetch subtypes, agents, and owners
+  useEffect(() => {
+    getSubtypes(category).then(setSubtypes).catch(() => {})
+  }, [category])
+
   useEffect(() => {
     getAgents().then(setAgents).catch(() => {})
+    getOwners().then((res) => setOwners(res.owners)).catch(() => {})
   }, [])
 
   const handleFileSelect = useCallback((files: FileList | null) => {
@@ -131,6 +173,14 @@ export default function NewPropertyPage() {
     })
   }
 
+  const handleDeedFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Mock saving file name/path
+      setDeedFile(file.name)
+    }
+  }
+
   const toggleAmenity = (amenity: string) => {
     setSelectedAmenities((prev) =>
       prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
@@ -148,9 +198,50 @@ export default function NewPropertyPage() {
     setTags(tags.filter((t) => t !== tag))
   }
 
+  // Check if subtype or name represents Land
+  const isLandSelected = () => {
+    const subTypeName = subtypes.find(s => s.id === subtypeId)?.name || '';
+    return subTypeName === 'أرض سكنية' || subTypeName === 'أرض تجارية' || subTypeName === 'أرض زراعية' || subTypeName.includes('أرض');
+  }
+
+  const handleCreateOwner = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newOwnerName.trim() || !newOwnerPhone.trim() || !newOwnerNationalId.trim()) {
+      setOwnerModalError('يرجى ملء جميع الحقول الإلزامية للمالك')
+      return
+    }
+    setOwnerModalLoading(true)
+    setOwnerModalError(null)
+    try {
+      const owner = await createOwner({
+        name: newOwnerName.trim(),
+        phone: newOwnerPhone.trim(),
+        dob: newOwnerDob ? new Date(newOwnerDob) : null,
+        nationalId: newOwnerNationalId.trim(),
+      })
+      const res = await getOwners()
+      setOwners(res.owners)
+      setOwnerId(owner.id)
+      setIsOwnerModalOpen(false)
+      setNewOwnerName('')
+      setNewOwnerPhone('')
+      setNewOwnerDob('')
+      setNewOwnerNationalId('')
+    } catch (err: any) {
+      console.error(err)
+      setOwnerModalError(err.message || 'فشل في إنشاء المالك')
+    } finally {
+      setOwnerModalLoading(false)
+    }
+  }
+
   const handleSubmit = async (saveStatus: 'DRAFT' | 'PUBLISHED') => {
     if (!title.trim()) {
       setError('العنوان مطلوب')
+      return
+    }
+    if (deedNumber.trim() && !deedFile) {
+      setError('يجب تحميل ملف صك الملكية عند إدخال رقم الصك')
       return
     }
 
@@ -160,37 +251,63 @@ export default function NewPropertyPage() {
     try {
       const input: CreatePropertyInput = {
         title: title.trim(),
-        titleAr: titleAr.trim() || undefined,
+        titleAr: title.trim(),
         description: description.trim() || undefined,
-        descriptionAr: descriptionAr.trim() || undefined,
+        descriptionAr: description.trim() || undefined,
         price: parseInt(price) || 0,
-        currency,
+        currency: 'SAR',
         dealType: dealType as 'SALE' | 'RENT',
-        propertyType: propertyType as CreatePropertyInput['propertyType'],
+        // Fallback property type
+        propertyType: isLandSelected() ? 'LAND' : category === 'AGRICULTURAL' ? 'FARM' : 'OTHER',
+        category,
+        subtypeId: subtypeId || null,
+        ownerId: ownerId || null,
         area: parseFloat(area) || undefined,
-        bedrooms: parseInt(bedrooms) || undefined,
-        bathrooms: parseInt(bathrooms) || undefined,
+        builtArea: isLandSelected() ? undefined : (parseFloat(builtArea) || undefined),
+        bedrooms: isLandSelected() ? 0 : (parseInt(bedrooms) || undefined),
+        bathrooms: isLandSelected() ? 0 : (parseInt(bathrooms) || undefined),
         amenities: selectedAmenities,
         tags,
         isFeatured,
         city: city.trim() || undefined,
-        cityAr: cityAr.trim() || undefined,
+        cityAr: city.trim() || undefined,
         district: district.trim() || undefined,
-        districtAr: districtAr.trim() || undefined,
+        districtAr: district.trim() || undefined,
         street: street.trim() || undefined,
-        streetAr: streetAr.trim() || undefined,
-        lat: parseFloat(lat) || undefined,
-        lng: parseFloat(lng) || undefined,
+        streetAr: street.trim() || undefined,
+        lat: lat !== null ? lat : undefined,
+        lng: lng !== null ? lng : undefined,
         videoUrl: videoUrl.trim() || undefined,
         tour360Url: tour360Url.trim() || undefined,
         status: saveStatus,
+        availability,
         agentId: agentId || undefined,
         seoTitle: seoTitle.trim() || undefined,
         seoDescription: seoDescription.trim() || undefined,
+        facing: facing.trim() || undefined,
+        streetWidth: streetWidth.trim() || undefined,
+        age: parseInt(age) || undefined,
+        floorNumber: isLandSelected() ? undefined : (parseInt(floorNumber) || undefined),
+        borderNorth: parseFloat(borderNorth) || undefined,
+        borderSouth: parseFloat(borderSouth) || undefined,
+        borderEast: parseFloat(borderEast) || undefined,
+        borderWest: parseFloat(borderWest) || undefined,
+        internalNotes: internalNotes.trim() || undefined,
+        pricingModel,
+        paymentMethod,
+        directionalArea: directionalArea.trim() || undefined,
+        deedNumber: deedNumber.trim() || undefined,
+        deedFile: deedFile.trim() || undefined,
+        marketingContractNumber: marketingContractNumber.trim() || undefined,
+        contractExpiryDate: contractExpiryDate ? new Date(contractExpiryDate) : undefined,
+        newBid: (pricingModel === 'BID' && newBidAmount) ? {
+          amount: parseInt(newBidAmount),
+          bidderName: newBidderName.trim(),
+          bidderPhone: newBidderPhone.trim(),
+          bidDate: newBidDate ? new Date(newBidDate) : undefined,
+        } : undefined,
       }
 
-      // TODO: Upload media files first, then pass URLs
-      // For now, create property without media
       await createProperty(input)
       router.push('/dashboard/properties')
     } catch (err) {
@@ -200,17 +317,22 @@ export default function NewPropertyPage() {
     }
   }
 
+  const isLand = isLandSelected()
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-right" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b border-edge pb-4">
         <div className="flex items-center gap-3">
           <Link href="/dashboard/properties">
-            <button className="rounded-lg p-2 text-[#718096] transition-colors hover:bg-[#F7F7F2] hover:text-[#1E3A5F]">
-              <ArrowLeft className="h-5 w-5" />
+            <button className="rounded-lg p-2 text-dim hover:bg-card-hover hover:text-heading transition-colors">
+              <ArrowLeft className="h-5 w-5 rotate-180" />
             </button>
           </Link>
-          <h1 className="text-2xl font-bold text-[#2D3748]">إضافة عقار</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-heading">إضافة عقار جديد</h1>
+            <p className="text-xs text-dim mt-0.5">أدخل تفاصيل ومواصفات العقار</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button
@@ -222,113 +344,128 @@ export default function NewPropertyPage() {
             حفظ كمسودة
           </Button>
           <Button onClick={() => handleSubmit('PUBLISHED')} isLoading={submitting}>
-            نشر
+            نشر العقار
           </Button>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {error}
         </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Content - Left 2 Columns */}
+        {/* Main Content Columns */}
         <div className="space-y-6 lg:col-span-2">
           {/* Basic Info */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">المعلومات الأساسية</CardTitle>
+            <CardHeader className="pb-3 border-b border-edge mb-4">
+              <CardTitle className="text-base text-primary">المعلومات الأساسية</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>العنوان (إنجليزي)</Label>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-2 sm:col-span-2">
+                  <Label className="text-xs font-semibold">عنوان العقار</Label>
                   <Input
+                    required
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Luxury Villa in Riyadh"
-                    dir="ltr"
+                    placeholder="مثال: فيلا فاخرة للبيع بحي الياسمين"
+                    className="bg-page"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>العنوان (عربي)</Label>
-                  <Input
-                    value={titleAr}
-                    onChange={(e) => setTitleAr(e.target.value)}
-                    placeholder="فيلا فاخرة في الرياض"
-                    dir="rtl"
-                  />
+                  <Label className="text-xs font-semibold">التصنيف الرئيسي</Label>
+                  <select
+                    value={category}
+                    onChange={(e) => {
+                      setCategory(e.target.value as PropertyCategory)
+                      setSubtypeId('')
+                    }}
+                    className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dim"
+                  >
+                    <option value="RESIDENTIAL">سكنية</option>
+                    <option value="COMMERCIAL">تجارية</option>
+                    <option value="AGRICULTURAL">زراعية</option>
+                  </select>
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>الوصف (إنجليزي)</Label>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="وصف العقار بالإنجليزية..."
-                    dir="ltr"
-                    rows={4}
-                    className="flex w-full rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748] placeholder:text-[#718096] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A96E]"
-                  />
+                  <Label className="text-xs font-semibold">التصنيف الفرعي</Label>
+                  <select
+                    value={subtypeId}
+                    onChange={(e) => setSubtypeId(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dim"
+                  >
+                    <option value="">اختر تصنيف فرعي</option>
+                    {subtypes.map((sub) => (
+                      <option key={sub.id} value={sub.id}>
+                        {sub.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
                 <div className="space-y-2">
-                  <Label>الوصف (عربي)</Label>
-                  <textarea
-                    value={descriptionAr}
-                    onChange={(e) => setDescriptionAr(e.target.value)}
-                    placeholder="وصف العقار..."
-                    dir="rtl"
-                    rows={4}
-                    className="flex w-full rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748] placeholder:text-[#718096] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A96E]"
-                  />
+                  <Label className="text-xs font-semibold flex items-center justify-between">
+                    <span>مالك العقار</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsOwnerModalOpen(true)}
+                      className="text-xs text-primary hover:underline flex items-center gap-1 font-semibold"
+                    >
+                      <Plus className="h-3 w-3" />
+                      مالك جديد
+                    </button>
+                  </Label>
+                  <select
+                    value={ownerId}
+                    onChange={(e) => setOwnerId(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dim"
+                  >
+                    <option value="">لم يتم ربط مالك</option>
+                    {owners.map((owner) => (
+                      <option key={owner.id} value={owner.id}>
+                        {owner.name} ({owner.phone})
+                      </option>
+                    ))}
+                  </select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">وصف العقار</Label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="وصف تفصيلي للعقار ومميزاته..."
+                  rows={4}
+                  className="flex w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading placeholder:text-dim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dim"
+                />
               </div>
             </CardContent>
           </Card>
 
-          {/* Price & Details */}
+          {/* Pricing & Transaction Rules */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">السعر والتفاصيل</CardTitle>
+            <CardHeader className="pb-3 border-b border-edge mb-4">
+              <CardTitle className="text-base text-primary">التسعير والمعاملات</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <Label>السعر</Label>
-                  <Input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="1000000"
-                    dir="ltr"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>العملة</Label>
-                  <select
-                    value={currency}
-                    onChange={(e) => setCurrency(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748]"
-                  >
-                    <option value="SAR">ر.س</option>
-                    <option value="USD">دولار</option>
-                    <option value="AED">د.إ</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label>نوع الصفقة</Label>
-                  <div className="flex rounded-lg border border-[#E2E8F0] p-1">
+                  <Label className="text-xs font-semibold">نوع الصفقة</Label>
+                  <div className="flex rounded-lg border border-edge p-1 bg-page">
                     <button
                       type="button"
                       onClick={() => setDealType('SALE')}
-                      className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                      className={`flex-1 rounded-md py-1.5 text-xs font-semibold transition-colors ${
                         dealType === 'SALE'
-                          ? 'bg-[#C8A96E] text-[#1E3A5F]'
-                          : 'text-[#718096] hover:text-[#1E3A5F]'
+                          ? 'bg-primary text-white'
+                          : 'text-dim hover:text-heading'
                       }`}
                     >
                       بيع
@@ -336,279 +473,516 @@ export default function NewPropertyPage() {
                     <button
                       type="button"
                       onClick={() => setDealType('RENT')}
-                      className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                      className={`flex-1 rounded-md py-1.5 text-xs font-semibold transition-colors ${
                         dealType === 'RENT'
-                          ? 'bg-[#C8A96E] text-[#1E3A5F]'
-                          : 'text-[#718096] hover:text-[#1E3A5F]'
+                          ? 'bg-primary text-white'
+                          : 'text-dim hover:text-heading'
                       }`}
                     >
                       إيجار
                     </button>
                   </div>
                 </div>
-              </div>
 
-              <div className="grid gap-4 sm:grid-cols-4">
                 <div className="space-y-2">
-                  <Label>نوع العقار</Label>
+                  <Label className="text-xs font-semibold">طريقة الدفع المقبولة</Label>
                   <select
-                    value={propertyType}
-                    onChange={(e) => setPropertyType(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748]"
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none"
                   >
-                    {PROPERTY_TYPES.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
-                    ))}
+                    <option value="BANK_AND_CASH">تقبل التمويل البنكي والكاش</option>
+                    <option value="CASH">كاش فقط</option>
                   </select>
                 </div>
+
                 <div className="space-y-2">
-                  <Label>المساحة (م²)</Label>
+                  <Label className="text-xs font-semibold">إستراتيجية التسعير</Label>
+                  <div className="flex rounded-lg border border-edge p-1 bg-page">
+                    <button
+                      type="button"
+                      onClick={() => setPricingModel('LIMIT')}
+                      className={`flex-1 rounded-md py-1.5 text-xs font-semibold transition-colors ${
+                        pricingModel === 'LIMIT'
+                          ? 'bg-primary text-white'
+                          : 'text-dim hover:text-heading'
+                      }`}
+                    >
+                      حد (سعر ثابت)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPricingModel('BID')}
+                      className={`flex-1 rounded-md py-1.5 text-xs font-semibold transition-colors ${
+                        pricingModel === 'BID'
+                          ? 'bg-primary text-white'
+                          : 'text-dim hover:text-heading'
+                      }`}
+                    >
+                      سوم (مزاد)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {pricingModel === 'LIMIT' ? (
+                <div className="space-y-2 w-full sm:w-1/3">
+                  <Label className="text-xs font-semibold">السعر المطلوب (ر.س)</Label>
+                  <Input
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="1200000"
+                    className="bg-page"
+                  />
+                </div>
+              ) : (
+                <div className="rounded-xl border border-edge bg-alt/10 p-4 space-y-4">
+                  <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                    <Coins className="h-4 w-4" />
+                    <span>تفاصيل السوم الحالي</span>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs">مبلغ السوم (ر.س)</Label>
+                      <Input
+                        type="number"
+                        value={newBidAmount}
+                        onChange={(e) => {
+                          setNewBidAmount(e.target.value)
+                          // also keep price column synchronized with highest bid
+                          setPrice(e.target.value)
+                        }}
+                        placeholder="1100000"
+                        className="bg-page text-xs font-semibold"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">اسم السائم</Label>
+                      <Input
+                        type="text"
+                        value={newBidderName}
+                        onChange={(e) => setNewBidderName(e.target.value)}
+                        placeholder="عبدالله محمد"
+                        className="bg-page text-xs"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">جوال السائم</Label>
+                      <Input
+                        type="tel"
+                        value={newBidderPhone}
+                        onChange={(e) => setNewBidderPhone(e.target.value)}
+                        placeholder="05xxxxxxx"
+                        className="bg-page text-xs"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">تاريخ السوم</Label>
+                      <Input
+                        type="date"
+                        value={newBidDate}
+                        onChange={(e) => setNewBidDate(e.target.value)}
+                        className="bg-page text-xs"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-amber-600 font-medium">
+                    * ملاحظة: أسماء وهواتف السائمين ستبقى سرية تماماً للموظفين فقط ولن تظهر للعملاء.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Location & Mapping */}
+          <Card>
+            <CardHeader className="pb-3 border-b border-edge mb-4">
+              <CardTitle className="text-base text-primary">العنوان والموقع الجغرافي</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">المدينة</Label>
+                  <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="الرياض" className="bg-page" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">الحي</Label>
+                  <Input value={district} onChange={(e) => setDistrict(e.target.value)} placeholder="الياسمين" className="bg-page" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">الاتجاه / المنطقة الجغرافية</Label>
+                  <select
+                    value={directionalArea}
+                    onChange={(e) => setDirectionalArea(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none"
+                  >
+                    <option value="">غير محدد</option>
+                    <option value="شمال">شمال المدينة</option>
+                    <option value="جنوب">جنوب المدينة</option>
+                    <option value="شرق">شرق المدينة</option>
+                    <option value="غرب">غرب المدينة</option>
+                    <option value="وسط">وسط المدينة</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">اسم الشارع</Label>
+                <Input value={street} onChange={(e) => setStreet(e.target.value)} placeholder="طريق الملك عبدالعزيز" className="bg-page" />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5 text-primary" />
+                  <span>تحديد موقع العقار على الخريطة التفاعلية</span>
+                </Label>
+                <MockMapPicker
+                  lat={lat}
+                  lng={lng}
+                  onChange={(newLat, newLng) => {
+                    setLat(newLat)
+                    setLng(newLng)
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Property Specifications */}
+          <Card>
+            <CardHeader className="pb-3 border-b border-edge mb-4">
+              <CardTitle className="text-base text-primary">المواصفات الفنية للعقار</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-4">
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">المساحة الإجمالية (م²)</Label>
                   <Input
                     type="number"
                     value={area}
                     onChange={(e) => setArea(e.target.value)}
-                    placeholder="250"
-                    dir="ltr"
+                    placeholder="350"
+                    className="bg-page"
                   />
                 </div>
+
+                {!isLand && (
+                  <>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold">مسطح البناء (م² - اختياري)</Label>
+                      <Input
+                        type="number"
+                        value={builtArea}
+                        onChange={(e) => setBuiltArea(e.target.value)}
+                        placeholder="280"
+                        className="bg-page"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold">غرف النوم</Label>
+                      <Input
+                        type="number"
+                        value={bedrooms}
+                        onChange={(e) => setBedrooms(e.target.value)}
+                        placeholder="5"
+                        className="bg-page"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold">دورات المياه</Label>
+                      <Input
+                        type="number"
+                        value={bathrooms}
+                        onChange={(e) => setBathrooms(e.target.value)}
+                        placeholder="4"
+                        className="bg-page"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-4">
                 <div className="space-y-2">
-                  <Label>غرف النوم</Label>
+                  <Label className="text-xs font-semibold">الواجهة / اتجاه العقار</Label>
+                  <select
+                    value={facing}
+                    onChange={(e) => setFacing(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none"
+                  >
+                    <option value="">اختر الاتجاه</option>
+                    <option value="شمالية">شمالية</option>
+                    <option value="جنوبية">جنوبية</option>
+                    <option value="شرقية">شرقية</option>
+                    <option value="غربية">غربية</option>
+                    <option value="شمالية شرقية">شمالية شرقية</option>
+                    <option value="شمالية غربية">شمالية غربية</option>
+                    <option value="جنوبية شرقية">جنوبية شرقية</option>
+                    <option value="جنوبية غربية">جنوبية غربية</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">عرض الشارع (متر)</Label>
                   <Input
-                    type="number"
-                    value={bedrooms}
-                    onChange={(e) => setBedrooms(e.target.value)}
-                    placeholder="4"
-                    dir="ltr"
+                    type="text"
+                    value={streetWidth}
+                    onChange={(e) => setStreetWidth(e.target.value)}
+                    placeholder="15م"
+                    className="bg-page"
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label>دورات المياه</Label>
+                  <Label className="text-xs font-semibold">عمر العقار (بالسنوات)</Label>
                   <Input
                     type="number"
-                    value={bathrooms}
-                    onChange={(e) => setBathrooms(e.target.value)}
-                    placeholder="3"
-                    dir="ltr"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="جديد (أدخل 0)"
+                    className="bg-page"
                   />
+                </div>
+
+                {!isLand && (
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold">رقم الطابق (اختياري)</Label>
+                    <Input
+                      type="number"
+                      value={floorNumber}
+                      onChange={(e) => setFloorNumber(e.target.value)}
+                      placeholder="1"
+                      className="bg-page"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Borders Dimensions */}
+              <div className="rounded-xl border border-edge bg-alt/5 p-4 space-y-3">
+                <Label className="text-xs font-bold text-primary block">أطوال حدود العقار (متر)</Label>
+                <div className="grid gap-3 sm:grid-cols-4">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-dim">الحد الشمالي</span>
+                    <Input type="number" value={borderNorth} onChange={(e) => setBorderNorth(e.target.value)} placeholder="20" className="bg-page text-xs font-semibold" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-dim">الحد الجنوبي</span>
+                    <Input type="number" value={borderSouth} onChange={(e) => setBorderSouth(e.target.value)} placeholder="20" className="bg-page text-xs font-semibold" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-dim">الحد الشرقي</span>
+                    <Input type="number" value={borderEast} onChange={(e) => setBorderEast(e.target.value)} placeholder="18" className="bg-page text-xs font-semibold" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-dim">الحد الغربي</span>
+                    <Input type="number" value={borderWest} onChange={(e) => setBorderWest(e.target.value)} placeholder="18" className="bg-page text-xs font-semibold" />
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Address */}
+          {/* Legal Documents, media, and attachments */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">العنوان</CardTitle>
+            <CardHeader className="pb-3 border-b border-edge mb-4">
+              <CardTitle className="text-base text-primary">المستندات والوسائط</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+              {/* Legal fields */}
+              <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <Label>المدينة (إنجليزي)</Label>
-                  <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Riyadh" dir="ltr" />
+                  <Label className="text-xs font-semibold flex items-center gap-1">
+                    <span>رقم صك الملكية</span>
+                    <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    value={deedNumber}
+                    onChange={(e) => setDeedNumber(e.target.value)}
+                    placeholder="أدخل رقم الصك"
+                    className="bg-page"
+                  />
                 </div>
-                <div className="space-y-2">
-                  <Label>المدينة (عربي)</Label>
-                  <Input value={cityAr} onChange={(e) => setCityAr(e.target.value)} placeholder="الرياض" dir="rtl" />
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>الحي (إنجليزي)</Label>
-                  <Input value={district} onChange={(e) => setDistrict(e.target.value)} placeholder="Al Olaya" dir="ltr" />
-                </div>
-                <div className="space-y-2">
-                  <Label>الحي (عربي)</Label>
-                  <Input value={districtAr} onChange={(e) => setDistrictAr(e.target.value)} placeholder="العليا" dir="rtl" />
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>الشارع (إنجليزي)</Label>
-                  <Input value={street} onChange={(e) => setStreet(e.target.value)} placeholder="King Fahd Road" dir="ltr" />
-                </div>
-                <div className="space-y-2">
-                  <Label>الشارع (عربي)</Label>
-                  <Input value={streetAr} onChange={(e) => setStreetAr(e.target.value)} placeholder="طريق الملك فهد" dir="rtl" />
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>خط العرض</Label>
-                  <Input type="number" step="any" value={lat} onChange={(e) => setLat(e.target.value)} placeholder="24.7136" dir="ltr" />
-                </div>
-                <div className="space-y-2">
-                  <Label>خط الطول</Label>
-                  <Input type="number" step="any" value={lng} onChange={(e) => setLng(e.target.value)} placeholder="46.6753" dir="ltr" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Media */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">الوسائط</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Image Upload */}
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault()
-                  handleFileSelect(e.dataTransfer.files)
-                }}
-                className="cursor-pointer rounded-xl border-2 border-dashed border-[#E2E8F0] bg-[#FAFAF7] p-8 text-center transition-all hover:border-[#C8A96E]/40"
-              >
-                <Upload className="mx-auto h-8 w-8 text-[#718096]" />
-                <p className="mt-2 text-sm font-medium text-[#2D3748]">
-                  اسحب الصور هنا أو اضغط للرفع
-                </p>
-                <p className="mt-1 text-xs text-[#718096]">
-                  JPG, PNG, WebP - الحد الأقصى 10MB لكل صورة
-                </p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => handleFileSelect(e.target.files)}
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">رقم عقد التسويق</Label>
+                  <Input
+                    value={marketingContractNumber}
+                    onChange={(e) => setMarketingContractNumber(e.target.value)}
+                    placeholder="مثال: 981726"
+                    className="bg-page"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">تاريخ انتهاء عقد التسويق</Label>
+                  <Input
+                    type="date"
+                    value={contractExpiryDate}
+                    onChange={(e) => setContractExpiryDate(e.target.value)}
+                    className="bg-page"
+                  />
+                </div>
+              </div>
+
+              {/* Deed File upload */}
+              <div className="rounded-xl border border-edge p-4 bg-alt/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <Label className="text-xs font-bold block">تحميل صورة/ملف الصك</Label>
+                  <p className="text-[10px] text-dim mt-0.5">يجب إرفاق ملف إثبات صك ملكية العقار (صيغة PDF أو صور)</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {deedFile ? (
+                    <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs px-3 py-1.5 rounded-lg border border-emerald-200">
+                      <FileText className="h-4 w-4" />
+                      <span className="truncate max-w-[150px]">{deedFile}</span>
+                      <button type="button" onClick={() => setDeedFile('')} className="hover:text-red-500">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => deedFileInputRef.current?.click()}
+                      className="flex items-center gap-1 text-xs"
+                    >
+                      <Upload className="h-3.5 w-3.5" />
+                      اختر الملف
+                    </Button>
+                  )}
+                  <input
+                    ref={deedFileInputRef}
+                    type="file"
+                    accept=".pdf,image/*"
+                    className="hidden"
+                    onChange={handleDeedFileUpload}
+                  />
+                </div>
+              </div>
+
+              {/* Drag and Drop Media files */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">صور العقار (اسحب وأسقط)</Label>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    handleFileSelect(e.dataTransfer.files)
+                  }}
+                  className="cursor-pointer rounded-xl border-2 border-dashed border-edge bg-alt/5 p-6 text-center transition-all hover:border-dim/40"
+                >
+                  <Upload className="mx-auto h-8 w-8 text-dim" />
+                  <p className="mt-2 text-sm font-medium text-heading">اسحب الصور هنا أو اضغط للرفع</p>
+                  <p className="mt-1 text-[10px] text-dim">JPG, PNG, WebP - الحد الأقصى 10MB لكل صورة</p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => handleFileSelect(e.target.files)}
+                  />
+                </div>
+
+                {mediaFiles.length > 0 && (
+                  <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 mt-3">
+                    {mediaFiles.map((media, idx) => (
+                      <div key={idx} className="group relative aspect-square overflow-hidden rounded-lg border border-edge bg-page">
+                        <Image src={media.preview} alt={`صورة ${idx + 1}`} fill className="object-cover" />
+                        <button
+                          onClick={() => removeMedia(idx)}
+                          className="absolute end-1 top-1 rounded-full bg-red-600 p-1 opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                          <X className="h-3 w-3 text-white" />
+                        </button>
+                        {idx === 0 && (
+                          <div className="absolute bottom-0 start-0 end-0 bg-primary py-0.5 text-center text-[9px] font-medium text-white">
+                            صورة الغلاف
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Video links */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">رابط فيديو YouTube</Label>
+                <Input
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="https://youtube.com/watch?v=..."
+                  className="bg-page"
+                  dir="ltr"
                 />
               </div>
-
-              {/* Preview Grid */}
-              {mediaFiles.length > 0 && (
-                <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
-                  {mediaFiles.map((media, idx) => (
-                    <div key={idx} className="group relative aspect-square overflow-hidden rounded-lg border border-[#E2E8F0]">
-                      <Image
-                        src={media.preview}
-                        alt={`صورة ${idx + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                      <button
-                        onClick={() => removeMedia(idx)}
-                        className="absolute end-1 top-1 rounded-full bg-red-600 p-1 opacity-0 transition-opacity group-hover:opacity-100"
-                      >
-                        <X className="h-3 w-3 text-white" />
-                      </button>
-                      {idx === 0 && (
-                        <div className="absolute bottom-0 start-0 end-0 bg-[#C8A96E] py-0.5 text-center text-[10px] font-medium text-[#1E3A5F]">
-                          الغلاف
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Video & 360 */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>رابط الفيديو</Label>
-                  <Input
-                    value={videoUrl}
-                    onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="https://youtube.com/..."
-                    dir="ltr"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>رابط جولة 360°</Label>
-                  <Input
-                    value={tour360Url}
-                    onChange={(e) => setTour360Url(e.target.value)}
-                    placeholder="https://..."
-                    dir="ltr"
-                  />
-                </div>
-              </div>
             </CardContent>
           </Card>
 
-          {/* Amenities */}
+          {/* Internal notes */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">المرافق</CardTitle>
+            <CardHeader className="pb-3 border-b border-edge mb-4">
+              <CardTitle className="text-base text-primary flex items-center gap-1.5">
+                <span>ملاحظات الموظفين (خاصة بالمكتب فقط)</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {AMENITIES.map((amenity) => (
-                  <button
-                    key={amenity}
-                    type="button"
-                    onClick={() => toggleAmenity(amenity)}
-                    className={`rounded-lg border px-3 py-1.5 text-sm transition-all ${
-                      selectedAmenities.includes(amenity)
-                        ? 'border-[#C8A96E] bg-[#C8A96E]/10 text-[#C8A96E]'
-                        : 'border-[#E2E8F0] text-[#718096] hover:border-[#C8A96E]/30 hover:text-[#1E3A5F]'
-                    }`}
-                  >
-                    {AMENITY_LABELS[amenity] || amenity}
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* SEO */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">تحسين محركات البحث (SEO)</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>عنوان SEO</Label>
-                <Input
-                  value={seoTitle}
-                  onChange={(e) => setSeoTitle(e.target.value)}
-                  placeholder="عنوان مخصص لمحركات البحث"
-                  dir="rtl"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>وصف SEO</Label>
-                <textarea
-                  value={seoDescription}
-                  onChange={(e) => setSeoDescription(e.target.value)}
-                  placeholder="وصف مخصص لمحركات البحث..."
-                  dir="rtl"
-                  rows={3}
-                  className="flex w-full rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748] placeholder:text-[#718096] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A96E]"
-                />
-              </div>
+              <textarea
+                value={internalNotes}
+                onChange={(e) => setInternalNotes(e.target.value)}
+                placeholder="أدخل الملاحظات الداخلية الخاصة بالمكتب فقط (مثال: المفاتيح تحت عداد الكهرباء، أو المالك مستعجل للبيع). هذه البيانات لن تظهر للعملاء بتاتاً."
+                rows={3}
+                className="flex w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading placeholder:text-dim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dim"
+              />
             </CardContent>
           </Card>
         </div>
 
-        {/* Sidebar - Right Column */}
+        {/* Sidebar Column */}
         <div className="space-y-6">
           {/* Status */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">الحالة</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold">حالة النشر والتوفر</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as 'DRAFT' | 'PUBLISHED')}
-                className="flex h-10 w-full rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748]"
-              >
-                <option value="DRAFT">مسودة</option>
-                <option value="PUBLISHED">منشور</option>
-              </select>
+              <div className="space-y-1.5">
+                <Label className="text-xs">حالة العقار</Label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as 'DRAFT' | 'PUBLISHED')}
+                  className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none"
+                >
+                  <option value="DRAFT">مسودة (غير ظاهر للعامة)</option>
+                  <option value="PUBLISHED">منشور (ظاهر للعامة)</option>
+                </select>
+              </div>
 
-              <div className="flex items-center justify-between">
-                <Label>مميز</Label>
+              <div className="space-y-1.5">
+                <Label className="text-xs">حالة التوفر</Label>
+                <select
+                  value={availability}
+                  onChange={(e) => setAvailability(e.target.value as Availability)}
+                  className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none"
+                >
+                  <option value="AVAILABLE">متوفر</option>
+                  <option value="SOLD">مباع</option>
+                  <option value="RENTED">مؤجر</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-between border-t border-edge pt-3">
+                <Label className="text-xs">تمييز العقار</Label>
                 <button
                   type="button"
                   onClick={() => setIsFeatured(!isFeatured)}
                   className={`relative h-6 w-11 rounded-full transition-colors ${
-                    isFeatured ? 'bg-[#C8A96E]' : 'bg-[#EBF0F7]'
+                    isFeatured ? 'bg-primary' : 'bg-alt'
                   }`}
                 >
                   <span
@@ -623,14 +997,14 @@ export default function NewPropertyPage() {
 
           {/* Agent Assignment */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">تعيين الوكيل</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold">تعيين الوكيل المسؤول</CardTitle>
             </CardHeader>
             <CardContent>
               <select
                 value={agentId}
                 onChange={(e) => setAgentId(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-[#E2E8F0] bg-[#FAFAF7] px-3 py-2 text-sm text-[#2D3748]"
+                className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none"
               >
                 <option value="">لم يتم تعيين وكيل</option>
                 {agents.map((agent) => (
@@ -644,8 +1018,8 @@ export default function NewPropertyPage() {
 
           {/* Tags */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">الوسوم</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold">الوسوم والكلمات الدلالية</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex gap-2">
@@ -658,8 +1032,8 @@ export default function NewPropertyPage() {
                       addTag()
                     }
                   }}
-                  placeholder="أضف وسم..."
-                  dir="rtl"
+                  placeholder="مثال: واجهة_شرقية"
+                  className="bg-page text-xs"
                 />
                 <Button variant="outline" size="icon" onClick={addTag}>
                   <Plus className="h-4 w-4" />
@@ -668,9 +1042,9 @@ export default function NewPropertyPage() {
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="gap-1">
+                    <Badge key={tag} variant="secondary" className="gap-1 text-xs">
                       {tag}
-                      <button onClick={() => removeTag(tag)}>
+                      <button type="button" onClick={() => removeTag(tag)}>
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
@@ -681,6 +1055,89 @@ export default function NewPropertyPage() {
           </Card>
         </div>
       </div>
+
+      {/* Owner Addition CRM Modal */}
+      {isOwnerModalOpen && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={() => setIsOwnerModalOpen(false)} />
+          <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-edge bg-elevated p-6 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden text-right" dir="rtl">
+            <div className="flex items-center justify-between border-b border-edge pb-4 mb-4">
+              <h3 className="text-lg font-bold text-primary flex items-center gap-1.5">
+                <User className="h-5 w-5 text-primary" />
+                <span>إضافة مالك جديد وعضو CRM</span>
+              </h3>
+              <button
+                onClick={() => setIsOwnerModalOpen(false)}
+                className="rounded-lg p-1.5 text-dim hover:bg-page transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {ownerModalError && (
+              <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400 mb-4">
+                {ownerModalError}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateOwner} className="flex-1 overflow-y-auto space-y-4 pr-1">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">اسم المالك</Label>
+                <Input
+                  required
+                  placeholder="الاسم الكامل"
+                  value={newOwnerName}
+                  onChange={(e) => setNewOwnerName(e.target.value)}
+                  className="bg-page"
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">رقم الجوال</Label>
+                  <Input
+                    required
+                    type="tel"
+                    placeholder="05xxxxxxxx"
+                    value={newOwnerPhone}
+                    onChange={(e) => setNewOwnerPhone(e.target.value)}
+                    className="bg-page"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">رقم الهوية الوطنية (إلزامي للهيئة العامة للعقار)</Label>
+                  <Input
+                    required
+                    placeholder="1xxxxxxxx"
+                    value={newOwnerNationalId}
+                    onChange={(e) => setNewOwnerNationalId(e.target.value)}
+                    className="bg-page"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">تاريخ الميلاد</Label>
+                <Input
+                  type="date"
+                  value={newOwnerDob}
+                  onChange={(e) => setNewOwnerDob(e.target.value)}
+                  className="bg-page"
+                />
+              </div>
+
+              <div className="border-t border-edge pt-4 mt-6 flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsOwnerModalOpen(false)}>
+                  إلغاء
+                </Button>
+                <Button type="submit" isLoading={ownerModalLoading}>
+                  إضافة وحفظ
+                </Button>
+              </div>
+            </form>
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -18,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Upload,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,6 +32,8 @@ import {
   bulkPublishProperties,
   type PropertyFilters,
 } from '@/lib/actions/properties'
+import { getSubtypes, createSubtype, deleteSubtype } from '@/lib/actions/subtypes'
+import { PropertyCategory } from '@prisma/client'
 
 // ─── Status Badge ───────────────────────────────────────────
 
@@ -59,15 +63,68 @@ const propertyTypeLabel: Record<string, string> = {
 // ─── Component ──────────────────────────────────────────────
 
 export default function PropertiesPage() {
+  const searchParams = useSearchParams()
+  const categoryParam = searchParams.get('category') || ''
+
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [dealFilter, setDealFilter] = useState<string>('')
-  const [typeFilter, setTypeFilter] = useState<string>('')
+  const [categoryFilter, setCategoryFilter] = useState<string>(categoryParam)
+  const [subtypeFilter, setSubtypeFilter] = useState<string>('')
+  const [subtypes, setSubtypes] = useState<any[]>([])
+  const [isSubtypeModalOpen, setIsSubtypeModalOpen] = useState(false)
   const [page, setPage] = useState(1)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<Awaited<ReturnType<typeof getProperties>> | null>(null)
+
+  // Sync category state with URL search param changes
+  useEffect(() => {
+    setCategoryFilter(categoryParam)
+    setSubtypeFilter('')
+    setPage(1)
+  }, [categoryParam])
+
+  // Subtype modal management states
+  const [modalCategory, setModalCategory] = useState<PropertyCategory>('RESIDENTIAL')
+  const [modalSubtypes, setModalSubtypes] = useState<any[]>([])
+  const [newSubtypeName, setNewSubtypeName] = useState('')
+  const [modalLoading, setModalLoading] = useState(false)
+  const [modalError, setModalError] = useState<string | null>(null)
+
+  const fetchSubtypes = useCallback(async () => {
+    try {
+      const list = await getSubtypes(categoryFilter ? categoryFilter as PropertyCategory : undefined)
+      setSubtypes(list)
+    } catch (err) {
+      console.error('Failed to fetch subtypes:', err)
+    }
+  }, [categoryFilter])
+
+  const fetchModalSubtypes = useCallback(async () => {
+    setModalLoading(true)
+    setModalError(null)
+    try {
+      const list = await getSubtypes(modalCategory)
+      setModalSubtypes(list)
+    } catch (err) {
+      console.error('Failed to fetch modal subtypes:', err)
+      setModalError('فشل تحميل التصنيفات الفرعية')
+    } finally {
+      setModalLoading(false)
+    }
+  }, [modalCategory])
+
+  useEffect(() => {
+    fetchSubtypes()
+  }, [fetchSubtypes])
+
+  useEffect(() => {
+    if (isSubtypeModalOpen) {
+      fetchModalSubtypes()
+    }
+  }, [isSubtypeModalOpen, fetchModalSubtypes])
 
   const fetchProperties = useCallback(async () => {
     setLoading(true)
@@ -78,7 +135,8 @@ export default function PropertiesPage() {
         ...(search && { search }),
         ...(statusFilter && { status: statusFilter as PropertyFilters['status'] }),
         ...(dealFilter && { dealType: dealFilter as PropertyFilters['dealType'] }),
-        ...(typeFilter && { propertyType: typeFilter as PropertyFilters['propertyType'] }),
+        ...(categoryFilter && { category: categoryFilter as PropertyFilters['category'] }),
+        ...(subtypeFilter && { subtypeId: subtypeFilter }),
       }
       const result = await getProperties(filters)
       setData(result)
@@ -87,11 +145,48 @@ export default function PropertiesPage() {
     } finally {
       setLoading(false)
     }
-  }, [page, search, statusFilter, dealFilter, typeFilter])
+  }, [page, search, statusFilter, dealFilter, categoryFilter, subtypeFilter])
 
   useEffect(() => {
     fetchProperties()
   }, [fetchProperties])
+
+  const handleAddSubtype = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newSubtypeName.trim()) return
+    setModalLoading(true)
+    setModalError(null)
+    try {
+      await createSubtype(newSubtypeName.trim(), modalCategory)
+      setNewSubtypeName('')
+      fetchModalSubtypes()
+      fetchSubtypes()
+    } catch (err: any) {
+      console.error('Failed to add subtype:', err)
+      setModalError(err.message || 'فشل إضافة التصنيف الفرعي')
+    } finally {
+      setModalLoading(false)
+    }
+  }
+
+  const handleDeleteSubtype = async (id: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذا التصنيف الفرعي؟')) return
+    setModalLoading(true)
+    setModalError(null)
+    try {
+      await deleteSubtype(id)
+      fetchModalSubtypes()
+      fetchSubtypes()
+      if (subtypeFilter === id) {
+        setSubtypeFilter('')
+      }
+    } catch (err: any) {
+      console.error('Failed to delete subtype:', err)
+      setModalError(err.message || 'فشل حذف التصنيف الفرعي')
+    } finally {
+      setModalLoading(false)
+    }
+  }
 
   const toggleSelect = (id: string) => {
     const next = new Set(selectedIds)
@@ -226,21 +321,45 @@ export default function PropertiesPage() {
             </select>
 
             <select
-              value={typeFilter}
+              value={categoryFilter}
               onChange={(e) => {
-                setTypeFilter(e.target.value)
+                setCategoryFilter(e.target.value)
+                setSubtypeFilter('') // reset subtype
                 setPage(1)
               }}
               className="rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading"
             >
-              <option value="">جميع الأصناف</option>
-              <option value="APARTMENT">شقة</option>
-              <option value="VILLA">فيلا</option>
-              <option value="LAND">أرض</option>
-              <option value="OFFICE">مكتب</option>
-              <option value="COMMERCIAL">تجاري</option>
-              <option value="BUILDING">مبنى</option>
+              <option value="">جميع التصنيفات</option>
+              <option value="RESIDENTIAL">سكنية</option>
+              <option value="COMMERCIAL">تجارية</option>
+              <option value="AGRICULTURAL">زراعية</option>
             </select>
+
+            <select
+              value={subtypeFilter}
+              onChange={(e) => {
+                setSubtypeFilter(e.target.value)
+                setPage(1)
+              }}
+              className="rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading"
+            >
+              <option value="">جميع الأصناف الفرعية</option>
+              {subtypes.map((sub) => (
+                <option key={sub.id} value={sub.id}>
+                  {sub.name}
+                </option>
+              ))}
+            </select>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSubtypeModalOpen(true)}
+              className="flex items-center gap-1.5"
+            >
+              <Plus className="h-4 w-4" />
+              إدارة الأصناف
+            </Button>
 
             <div className="flex gap-1 border-s border-edge ps-3">
               <button
@@ -388,7 +507,7 @@ export default function PropertiesPage() {
                               {property.title}
                             </p>
                             <p className="text-xs text-dim">
-                              {propertyTypeLabel[property.propertyType] || property.propertyType} - {property.city || 'غير محدد'}
+                              {property.subtype?.name || propertyTypeLabel[property.propertyType] || property.propertyType} - {property.city || 'غير محدد'}
                             </p>
                           </div>
                         </div>
@@ -462,7 +581,7 @@ export default function PropertiesPage() {
                       {formatPrice(BigInt(property.price), property.currency)}
                     </p>
                     <div className="mt-2 flex items-center justify-between text-xs text-dim">
-                      <span>{propertyTypeLabel[property.propertyType] || property.propertyType}</span>
+                      <span>{property.subtype?.name || propertyTypeLabel[property.propertyType] || property.propertyType}</span>
                       <span className="flex items-center gap-1">
                         <Eye className="h-3 w-3" />
                         {property._count.analyticsEvents}
@@ -518,6 +637,105 @@ export default function PropertiesPage() {
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Subtypes Management Modal */}
+      {isSubtypeModalOpen && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={() => setIsSubtypeModalOpen(false)} />
+          <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-edge bg-elevated p-6 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden text-right" dir="rtl">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-edge pb-4 mb-4">
+              <h3 className="text-lg font-bold text-primary">إدارة الأصناف الفرعية</h3>
+              <button
+                onClick={() => setIsSubtypeModalOpen(false)}
+                className="rounded-lg p-1.5 text-dim hover:bg-page transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Error Banner */}
+            {modalError && (
+              <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400 mb-4">
+                {modalError}
+              </div>
+            )}
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto space-y-6 pr-1">
+              {/* Category tabs/selector */}
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-heading">التصنيف الرئيسي</label>
+                <div className="flex rounded-lg border border-edge p-1 bg-page">
+                  {(['RESIDENTIAL', 'COMMERCIAL', 'AGRICULTURAL'] as const).map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setModalCategory(cat)}
+                      className={cn(
+                        "flex-1 rounded-md py-1.5 text-xs font-semibold transition-colors",
+                        modalCategory === cat
+                          ? "bg-primary text-white"
+                          : "text-dim hover:text-heading"
+                      )}
+                    >
+                      {cat === 'RESIDENTIAL' ? 'سكنية' : cat === 'COMMERCIAL' ? 'تجارية' : 'زراعية'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Add form */}
+              <form onSubmit={handleAddSubtype} className="flex gap-2">
+                <Input
+                  type="text"
+                  required
+                  placeholder="اسم الصنف الجديد (مثال: دوبلكس)"
+                  value={newSubtypeName}
+                  onChange={(e) => setNewSubtypeName(e.target.value)}
+                  className="rounded-lg border-edge focus:border-dim bg-page text-heading flex-1"
+                />
+                <Button type="submit" disabled={modalLoading}>
+                  إضافة
+                </Button>
+              </form>
+
+              {/* List */}
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-heading">الأصناف الحالية</label>
+                {modalLoading && modalSubtypes.length === 0 ? (
+                  <div className="flex justify-center py-6">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  </div>
+                ) : modalSubtypes.length === 0 ? (
+                  <p className="text-sm text-dim py-4 text-center">لا توجد أصناف فرعية مضافة بعد.</p>
+                ) : (
+                  <div className="divide-y divide-edge rounded-xl border border-edge bg-page overflow-hidden">
+                    {modalSubtypes.map((sub) => (
+                      <div key={sub.id} className="flex items-center justify-between p-3 transition-colors hover:bg-card-hover">
+                        <span className="text-sm text-heading font-medium">{sub.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSubtype(sub.id)}
+                          className="rounded p-1 text-red-500 hover:bg-red-500/10 transition-colors"
+                          disabled={modalLoading}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-edge pt-4 mt-6 flex justify-end">
+              <Button onClick={() => setIsSubtypeModalOpen(false)}>إغلاق</Button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )

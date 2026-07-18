@@ -13,7 +13,7 @@ import { RequestButtons } from '@/components/public/RequestButtons'
 import {
   MapPin, BedDouble, Bath, Maximize, Calendar, Hash,
   Phone, Mail, ChevronLeft, ChevronRight,
-  Play, View, Check,
+  Play, View, Check, Coins,
 } from 'lucide-react'
 import { WhatsAppIcon } from '@/components/public/WhatsAppIcon'
 
@@ -48,6 +48,20 @@ interface PropertyData {
   publishedAt: string | null
   updatedAt: string
   media: { url: string; alt: string | null; altAr: string | null; type: string }[]
+  subtypeName?: string | null
+  builtArea?: number | null
+  facing?: string | null
+  streetWidth?: string | null
+  age?: number | null
+  floorNumber?: number | null
+  borderNorth?: number | null
+  borderSouth?: number | null
+  borderEast?: number | null
+  borderWest?: number | null
+  pricingModel?: string | null
+  paymentMethod?: string | null
+  directionalArea?: string | null
+  bids?: { id: string; amount: string; bidDate: string }[]
 }
 
 interface AgentData {
@@ -95,7 +109,7 @@ export function PropertyDetailClient({
 
   const price = formatPrice(parseInt(property.price), property.currency)
   const dealTypeLabel = property.dealType === 'SALE' ? dict.property.forSale : dict.property.forRent
-  const propertyTypeLabel = dict.property.types[property.propertyType as keyof typeof dict.property.types] || property.propertyType
+  const propertyTypeLabel = property.subtypeName || dict.property.types[property.propertyType as keyof typeof dict.property.types] || property.propertyType
   const isSoldOrRented = property.availability === 'SOLD' || property.availability === 'RENTED'
 
   const galleryImages = property.media
@@ -226,6 +240,148 @@ export function PropertyDetailClient({
                 <div className="prose max-w-none text-sm leading-relaxed whitespace-pre-wrap text-[#2D3748]">
                   {description}
                 </div>
+              </div>
+            )}
+
+            {/* Detailed Specifications */}
+            <div className="border-t border-[#E2E8F0] pt-6 mt-6">
+              <h2 className="text-xl font-bold mb-4 text-[#1E3A5F]">
+                {locale === 'ar' ? 'مواصفات وتفاصيل العقار' : 'Property Specifications'}
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-[#2D3748]">
+                {property.subtypeName && (
+                  <div className="flex flex-col p-3 rounded-lg bg-white border border-[#E2E8F0]">
+                    <span className="text-xs text-[#718096]">{locale === 'ar' ? 'تصنيف العقار' : 'Property Classification'}</span>
+                    <span className="font-semibold mt-1">{property.subtypeName}</span>
+                  </div>
+                )}
+                {property.builtArea != null && (
+                  <div className="flex flex-col p-3 rounded-lg bg-white border border-[#E2E8F0]">
+                    <span className="text-xs text-[#718096]">{locale === 'ar' ? 'مسطح البناء' : 'Built Area'}</span>
+                    <span className="font-semibold mt-1">{property.builtArea} {dict.common.sqm}</span>
+                  </div>
+                )}
+                {property.facing && (
+                  <div className="flex flex-col p-3 rounded-lg bg-white border border-[#E2E8F0]">
+                    <span className="text-xs text-[#718096]">{locale === 'ar' ? 'الواجهة' : 'Facing'}</span>
+                    <span className="font-semibold mt-1">{property.facing}</span>
+                  </div>
+                )}
+                {property.streetWidth && (
+                  <div className="flex flex-col p-3 rounded-lg bg-white border border-[#E2E8F0]">
+                    <span className="text-xs text-[#718096]">{locale === 'ar' ? 'عرض الشارع' : 'Street Width'}</span>
+                    <span className="font-semibold mt-1">{property.streetWidth}</span>
+                  </div>
+                )}
+                {property.age != null && (
+                  <div className="flex flex-col p-3 rounded-lg bg-white border border-[#E2E8F0]">
+                    <span className="text-xs text-[#718096]">{locale === 'ar' ? 'عمر العقار' : 'Property Age'}</span>
+                    <span className="font-semibold mt-1">
+                      {property.age === 0
+                        ? (locale === 'ar' ? 'جديد (صفر)' : 'New (0 years)')
+                        : `${property.age} ${locale === 'ar' ? 'سنة' : 'years'}`}
+                    </span>
+                  </div>
+                )}
+                {property.floorNumber != null && (
+                  <div className="flex flex-col p-3 rounded-lg bg-white border border-[#E2E8F0]">
+                    <span className="text-xs text-[#718096]">{locale === 'ar' ? 'رقم الطابق' : 'Floor Number'}</span>
+                    <span className="font-semibold mt-1">{property.floorNumber}</span>
+                  </div>
+                )}
+                {property.paymentMethod && (
+                  <div className="flex flex-col p-3 rounded-lg bg-white border border-[#E2E8F0]">
+                    <span className="text-xs text-[#718096]">{locale === 'ar' ? 'طريقة الدفع المقبولة' : 'Payment Method'}</span>
+                    <span className="font-semibold mt-1">
+                      {property.paymentMethod === 'CASH'
+                        ? (locale === 'ar' ? 'كاش فقط' : 'Cash Only')
+                        : (locale === 'ar' ? 'تمويل بنكي أو كاش' : 'Bank or Cash')}
+                    </span>
+                  </div>
+                )}
+                {property.directionalArea && (
+                  <div className="flex flex-col p-3 rounded-lg bg-white border border-[#E2E8F0]">
+                    <span className="text-xs text-[#718096]">{locale === 'ar' ? 'المنطقة الجغرافية' : 'Directional Area'}</span>
+                    <span className="font-semibold mt-1">{property.directionalArea}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Borders Section */}
+            {(property.borderNorth != null || property.borderSouth != null || property.borderEast != null || property.borderWest != null) && (
+              <div className="border-t border-[#E2E8F0] pt-6 mt-6">
+                <h3 className="text-lg font-bold mb-3 text-[#1E3A5F]">
+                  {locale === 'ar' ? 'حدود وأطوال العقار' : 'Property Borders'}
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-[#2D3748]">
+                  {property.borderNorth != null && (
+                    <div className="p-2.5 rounded-lg bg-white border border-[#E2E8F0] text-center">
+                      <span className="text-dim block">{locale === 'ar' ? 'الحد الشمالي' : 'North Border'}</span>
+                      <span className="font-bold text-sm block mt-1">{property.borderNorth}م</span>
+                    </div>
+                  )}
+                  {property.borderSouth != null && (
+                    <div className="p-2.5 rounded-lg bg-white border border-[#E2E8F0] text-center">
+                      <span className="text-dim block">{locale === 'ar' ? 'الحد الجنوبي' : 'South Border'}</span>
+                      <span className="font-bold text-sm block mt-1">{property.borderSouth}م</span>
+                    </div>
+                  )}
+                  {property.borderEast != null && (
+                    <div className="p-2.5 rounded-lg bg-white border border-[#E2E8F0] text-center">
+                      <span className="text-dim block">{locale === 'ar' ? 'الحد الشرقي' : 'East Border'}</span>
+                      <span className="font-bold text-sm block mt-1">{property.borderEast}م</span>
+                    </div>
+                  )}
+                  {property.borderWest != null && (
+                    <div className="p-2.5 rounded-lg bg-white border border-[#E2E8F0] text-center">
+                      <span className="text-dim block">{locale === 'ar' ? 'الحد الغربي' : 'West Border'}</span>
+                      <span className="font-bold text-sm block mt-1">{property.borderWest}م</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Bids history for BID model */}
+            {property.pricingModel === 'BID' && property.bids && (
+              <div className="border-t border-[#E2E8F0] pt-6 mt-6 rounded-xl bg-amber-50/40 p-6 border border-amber-500/10">
+                <div className="flex items-center gap-2 mb-4">
+                  <Coins className="h-5 w-5 text-amber-600 animate-pulse" />
+                  <h2 className="text-xl font-bold text-amber-800">
+                    {locale === 'ar' ? 'مزاد السوم المباشر' : 'Live Bidding / Auction'}
+                  </h2>
+                </div>
+
+                {property.bids.length === 0 ? (
+                  <p className="text-sm text-amber-700">
+                    {locale === 'ar' ? 'لا توجد سومات مسجلة بعد لهذا العقار. كن أول من يسوم بالتواصل معنا!' : 'No bids recorded yet. Place the first bid by contacting us!'}
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-amber-500/20 shadow-sm">
+                      <span className="text-xs text-amber-800 font-semibold">{locale === 'ar' ? 'أعلى سومة حالية' : 'Highest Bid'}</span>
+                      <span className="text-lg font-bold text-amber-600 font-mono">
+                        {formatPrice(parseInt(property.bids[0].amount), property.currency)}
+                      </span>
+                    </div>
+
+                    <div className="divide-y divide-[#E2E8F0] bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+                      {property.bids.map((bid, i) => (
+                        <div key={bid.id} className="flex justify-between items-center p-3 text-xs text-[#2D3748]">
+                          <div className="flex items-center gap-2">
+                            <span className="text-dim font-mono">#{property.bids!.length - i}</span>
+                            <span className="font-semibold text-heading">{locale === 'ar' ? 'مساومة معتمدة' : 'Verified Bid'}</span>
+                          </div>
+                          <span className="font-bold font-mono">{formatPrice(parseInt(bid.amount), property.currency)}</span>
+                          <span className="text-dim">
+                            {new Date(bid.bidDate).toLocaleDateString(locale === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

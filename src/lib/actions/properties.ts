@@ -5,7 +5,7 @@ import { requireAuth, requireRole } from '@/lib/auth-utils'
 import { tenantWhere } from '@/lib/tenant'
 import { logAudit } from '@/lib/audit'
 import { slugify } from '@/lib/utils'
-import type { PropertyStatus, DealType, PropertyType, PropertyCategory, Prisma } from '@prisma/client'
+import type { PropertyStatus, DealType, PropertyType, PropertyCategory, Prisma, Availability, PricingModel, PaymentMethod } from '@prisma/client'
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -14,6 +14,8 @@ export interface PropertyFilters {
   dealType?: DealType
   propertyType?: PropertyType
   category?: PropertyCategory
+  subtypeId?: string
+  paymentMethod?: 'CASH' | 'BANK_AND_CASH'
   search?: string
   page?: number
   pageSize?: number
@@ -32,8 +34,10 @@ export interface CreatePropertyInput {
   dealType: DealType
   propertyType: PropertyType
   category?: PropertyCategory
+  subtypeId?: string | null
   ownerId?: string | null
   area?: number
+  builtArea?: number
   bedrooms?: number
   bathrooms?: number
   amenities?: string[]
@@ -50,9 +54,32 @@ export interface CreatePropertyInput {
   videoUrl?: string
   tour360Url?: string
   status?: PropertyStatus
+  availability?: Availability
   agentId?: string
   seoTitle?: string
   seoDescription?: string
+  facing?: string
+  streetWidth?: string
+  age?: number
+  floorNumber?: number
+  borderNorth?: number
+  borderSouth?: number
+  borderEast?: number
+  borderWest?: number
+  internalNotes?: string
+  pricingModel?: PricingModel
+  paymentMethod?: PaymentMethod
+  directionalArea?: string
+  deedNumber?: string
+  deedFile?: string
+  marketingContractNumber?: string
+  contractExpiryDate?: Date | string
+  newBid?: {
+    amount: number
+    bidderName: string
+    bidderPhone: string
+    bidDate?: Date | string
+  }
 }
 
 // ─── Helper: Get officeId from user ─────────────────────────
@@ -73,6 +100,8 @@ export async function getProperties(filters: PropertyFilters = {}) {
     dealType,
     propertyType,
     category,
+    subtypeId,
+    paymentMethod,
     search,
     page = 1,
     pageSize = 20,
@@ -86,6 +115,8 @@ export async function getProperties(filters: PropertyFilters = {}) {
     ...(dealType && { dealType }),
     ...(propertyType && { propertyType }),
     ...(category && { category }),
+    ...(subtypeId && { subtypeId }),
+    ...(paymentMethod === 'BANK_AND_CASH' && { paymentMethod: 'BANK_AND_CASH' }),
     ...(search && {
       OR: [
         { title: { contains: search, mode: 'insensitive' as const } },
@@ -109,6 +140,11 @@ export async function getProperties(filters: PropertyFilters = {}) {
           take: 1,
         },
         owner: true,
+        subtype: true,
+        bids: {
+          orderBy: { bidDate: 'desc' },
+          take: 1,
+        },
         _count: {
           select: {
             leads: true,
@@ -127,6 +163,10 @@ export async function getProperties(filters: PropertyFilters = {}) {
     properties: properties.map((p) => ({
       ...p,
       price: p.price.toString(),
+      bids: p.bids.map((b) => ({
+        ...b,
+        amount: b.amount.toString(),
+      })),
     })),
     pagination: {
       page,
@@ -152,6 +192,10 @@ export async function getProperty(id: string) {
         orderBy: { sortOrder: 'asc' },
       },
       owner: true,
+      subtype: true,
+      bids: {
+        orderBy: { bidDate: 'desc' },
+      },
     },
   })
 
@@ -160,6 +204,10 @@ export async function getProperty(id: string) {
   return {
     ...property,
     price: property.price.toString(),
+    bids: property.bids.map((b) => ({
+      ...b,
+      amount: b.amount.toString(),
+    })),
   }
 }
 
@@ -182,6 +230,8 @@ export async function createProperty(input: CreatePropertyInput) {
     ? `${slug}-${Date.now().toString(36)}`
     : slug
 
+  const soldAt = input.availability === 'SOLD' ? new Date() : null
+
   const property = await prisma.property.create({
     data: {
       officeId,
@@ -197,6 +247,7 @@ export async function createProperty(input: CreatePropertyInput) {
       category: input.category || 'RESIDENTIAL',
       ownerId: input.ownerId || null,
       area: input.area || null,
+      builtArea: input.builtArea || null,
       bedrooms: input.bedrooms || null,
       bathrooms: input.bathrooms || null,
       amenities: input.amenities || [],
@@ -214,12 +265,44 @@ export async function createProperty(input: CreatePropertyInput) {
       videoUrl: input.videoUrl || null,
       tour360Url: input.tour360Url || null,
       status: input.status || 'DRAFT',
+      availability: input.availability || 'AVAILABLE',
       agentId: input.agentId || null,
       seoTitle: input.seoTitle || null,
       seoDescription: input.seoDescription || null,
       publishedAt: input.status === 'PUBLISHED' ? new Date() : null,
+      soldAt,
+      facing: input.facing || null,
+      streetWidth: input.streetWidth || null,
+      age: input.age || null,
+      floorNumber: input.floorNumber || null,
+      borderNorth: input.borderNorth || null,
+      borderSouth: input.borderSouth || null,
+      borderEast: input.borderEast || null,
+      borderWest: input.borderWest || null,
+      internalNotes: input.internalNotes || null,
+      pricingModel: input.pricingModel || 'LIMIT',
+      paymentMethod: input.paymentMethod || 'BANK_AND_CASH',
+      directionalArea: input.directionalArea || null,
+      deedNumber: input.deedNumber || null,
+      deedFile: input.deedFile || null,
+      marketingContractNumber: input.marketingContractNumber || null,
+      contractExpiryDate: input.contractExpiryDate ? new Date(input.contractExpiryDate) : null,
+      subtypeId: input.subtypeId || null,
     },
   })
+
+  // Create initial bid if provided
+  if (input.pricingModel === 'BID' && input.newBid) {
+    await prisma.propertyBid.create({
+      data: {
+        propertyId: property.id,
+        amount: BigInt(input.newBid.amount),
+        bidderName: input.newBid.bidderName,
+        bidderPhone: input.newBid.bidderPhone,
+        bidDate: input.newBid.bidDate ? new Date(input.newBid.bidDate) : new Date(),
+      },
+    })
+  }
 
   await logAudit({
     officeId,
@@ -243,7 +326,7 @@ export async function updateProperty(id: string, input: Partial<CreatePropertyIn
   // Verify property belongs to office
   const existing = await prisma.property.findFirst({
     where: { id, ...tenantWhere(officeId) },
-    select: { id: true, status: true },
+    select: { id: true, status: true, availability: true },
   })
 
   if (!existing) throw new Error('Property not found')
@@ -260,6 +343,7 @@ export async function updateProperty(id: string, input: Partial<CreatePropertyIn
   if (input.propertyType !== undefined) data.propertyType = input.propertyType
   if (input.category !== undefined) data.category = input.category
   if (input.area !== undefined) data.area = input.area
+  if (input.builtArea !== undefined) data.builtArea = input.builtArea
   if (input.bedrooms !== undefined) data.bedrooms = input.bedrooms
   if (input.bathrooms !== undefined) data.bathrooms = input.bathrooms
   if (input.amenities !== undefined) data.amenities = input.amenities
@@ -300,11 +384,61 @@ export async function updateProperty(id: string, input: Partial<CreatePropertyIn
     }
   }
 
+  // Handle availability transitions and soldAt timestamp
+  if (input.availability !== undefined) {
+    data.availability = input.availability
+    if (input.availability === 'SOLD' && existing.availability !== 'SOLD') {
+      data.soldAt = new Date()
+    } else if (input.availability !== 'SOLD' && existing.availability === 'SOLD') {
+      data.soldAt = null
+    }
+  }
+
+  // Map new custom specifications
+  if (input.facing !== undefined) data.facing = input.facing
+  if (input.streetWidth !== undefined) data.streetWidth = input.streetWidth
+  if (input.age !== undefined) data.age = input.age
+  if (input.floorNumber !== undefined) data.floorNumber = input.floorNumber
+  if (input.borderNorth !== undefined) data.borderNorth = input.borderNorth
+  if (input.borderSouth !== undefined) data.borderSouth = input.borderSouth
+  if (input.borderEast !== undefined) data.borderEast = input.borderEast
+  if (input.borderWest !== undefined) data.borderWest = input.borderWest
+  if (input.internalNotes !== undefined) data.internalNotes = input.internalNotes
+  if (input.pricingModel !== undefined) data.pricingModel = input.pricingModel
+  if (input.paymentMethod !== undefined) data.paymentMethod = input.paymentMethod
+  if (input.directionalArea !== undefined) data.directionalArea = input.directionalArea
+  if (input.deedNumber !== undefined) data.deedNumber = input.deedNumber
+  if (input.deedFile !== undefined) data.deedFile = input.deedFile
+  if (input.marketingContractNumber !== undefined) data.marketingContractNumber = input.marketingContractNumber
+  if (input.contractExpiryDate !== undefined) {
+    data.contractExpiryDate = input.contractExpiryDate ? new Date(input.contractExpiryDate) : null
+  }
+  if (input.subtypeId !== undefined) {
+    if (input.subtypeId) {
+      data.subtype = { connect: { id: input.subtypeId } }
+    } else {
+      data.subtype = { disconnect: true }
+    }
+  }
+
   // SEC-1: Include officeId in the final mutation to prevent TOCTOU race condition
   const property = await prisma.property.update({
     where: { id, officeId },
     data,
   })
+
+  // Create new bid if provided
+  if (input.newBid) {
+    await prisma.propertyBid.create({
+      data: {
+        propertyId: id,
+        amount: BigInt(input.newBid.amount),
+        bidderName: input.newBid.bidderName,
+        bidderPhone: input.newBid.bidderPhone,
+        bidDate: input.newBid.bidDate ? new Date(input.newBid.bidDate) : new Date(),
+      },
+    })
+  }
 
   await logAudit({
     officeId,

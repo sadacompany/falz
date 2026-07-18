@@ -11,8 +11,10 @@ import {
   Plus,
   ExternalLink,
   Target,
+  Coins,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatPrice } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -38,6 +40,8 @@ interface DashboardOverviewProps {
     totalViews: number
     viewsChange: number
     conversionRate: number
+    monthlySales: string
+    quarterlySales: string
     recentLeads: Array<{
       id: string
       name: string
@@ -164,6 +168,8 @@ export function DashboardOverview({
     totalViews: 0,
     viewsChange: 0,
     conversionRate: 0,
+    monthlySales: '0',
+    quarterlySales: '0',
     recentLeads: [],
     topProperties: [],
   }
@@ -197,7 +203,7 @@ export function DashboardOverview({
       </div>
 
       {/* Metric Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <MetricCard
           title="إجمالي العقارات"
           value={safeStats.totalProperties}
@@ -220,6 +226,16 @@ export function DashboardOverview({
           value={safeStats.conversionRate}
           suffix="%"
           icon={Target}
+        />
+        <MetricCard
+          title="مبيعات الشهر الحالي"
+          value={formatPrice(BigInt(safeStats.monthlySales), 'SAR')}
+          icon={Coins}
+        />
+        <MetricCard
+          title="مبيعات الربع الحالي"
+          value={formatPrice(BigInt(safeStats.quarterlySales), 'SAR')}
+          icon={Coins}
         />
       </div>
 

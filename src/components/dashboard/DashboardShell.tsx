@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import {
   LayoutDashboard,
@@ -163,6 +163,7 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const locale = 'ar' as const
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -339,7 +340,10 @@ export function DashboardShell({
                 {hasSubItems ? (
                   <>
                     <button
-                      onClick={() => setExpandedNav(isExpanded ? null : item.href)}
+                      onClick={() => {
+                        setExpandedNav(isExpanded ? null : item.href)
+                        router.push(item.href)
+                      }}
                       aria-expanded={isExpanded}
                       className={cn(
                         'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
