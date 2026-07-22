@@ -539,7 +539,8 @@ export default function PropertiesPage() {
                               e.preventDefault()
                               e.stopPropagation()
                               const propType = property.subtype?.name || propertyTypeLabel[property.propertyType] || ''
-                              const priceText = formatPrice(BigInt(property.price), property.currency)
+                              const priceVal = String(property.price).split('.')[0] || '0'
+                              const priceText = formatPrice(BigInt(priceVal), property.currency)
                               const cityText = property.city || ''
                               const districtText = property.district || ''
                               const areaText = property.area ? `${property.area} م²` : ''
@@ -560,9 +561,13 @@ export default function PropertiesPage() {
                                 '📞 للتواصل والاستفسار',
                               ].filter(Boolean).join('\n')
 
-                              navigator.clipboard.writeText(lines)
-                                .then(() => alert('تم نسخ العرض للواتساب ✅'))
-                                .catch(() => alert('فشل النسخ'))
+                              if (navigator?.clipboard?.writeText) {
+                                navigator.clipboard.writeText(lines)
+                                  .then(() => alert('تم نسخ العرض للواتساب ✅'))
+                                  .catch(() => alert('فشل النسخ'))
+                              } else {
+                                alert('النسخ غير مدعوم في متصفحك')
+                              }
                             }}
                             className="rounded-md p-1.5 text-dim transition-colors hover:bg-card-hover hover:text-heading"
                             title="نسخ للواتساب"

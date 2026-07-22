@@ -217,13 +217,13 @@ export function PropertyDetailClient({
 
             {/* Key Specs Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 rounded-xl bg-[#EBF0F7] border border-[#E2E8F0]">
-              {property.bedrooms != null && (
+              {property.bedrooms != null && property.bedrooms > 0 && (
                 <SpecItem icon={<BedDouble className="h-5 w-5" />} value={property.bedrooms.toString()} label={dict.property.bedrooms} />
               )}
-              {property.bathrooms != null && (
+              {property.bathrooms != null && property.bathrooms > 0 && (
                 <SpecItem icon={<Bath className="h-5 w-5" />} value={property.bathrooms.toString()} label={dict.property.bathrooms} />
               )}
-              {property.area != null && (
+              {property.area != null && property.area > 0 && (
                 <SpecItem icon={<Maximize className="h-5 w-5" />} value={`${property.area} ${dict.common.sqm}`} label={dict.property.area} />
               )}
               {property.publishedAt && (

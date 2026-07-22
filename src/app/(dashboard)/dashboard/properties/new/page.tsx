@@ -198,8 +198,9 @@ export default function NewPropertyPage() {
     setTags(tags.filter((t) => t !== tag))
   }
 
-  // Check if subtype or name represents Land
+  // Check if subtype or category represents Land
   const isLandSelected = () => {
+    if (category === 'AGRICULTURAL') return true;
     const subTypeName = subtypes.find(s => s.id === subtypeId)?.name || '';
     return subTypeName === 'أرض سكنية' || subTypeName === 'أرض تجارية' || subTypeName === 'أرض زراعية' || subTypeName.includes('أرض');
   }

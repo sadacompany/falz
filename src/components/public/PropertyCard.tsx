@@ -159,19 +159,19 @@ export function PropertyCard({ property, officeSlug, showFavorite = true }: Prop
 
         {/* Key Stats */}
         <div className="flex items-center gap-4 pt-3" style={{ borderTop: '1px solid var(--theme-border)' }}>
-          {property.bedrooms != null && (
+          {property.bedrooms != null && property.bedrooms > 0 && (
             <div className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--theme-text)' }}>
               <BedDouble className="h-4 w-4" style={{ color: 'var(--theme-muted)' }} />
               <span>{property.bedrooms}</span>
             </div>
           )}
-          {property.bathrooms != null && (
+          {property.bathrooms != null && property.bathrooms > 0 && (
             <div className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--theme-text)' }}>
               <Bath className="h-4 w-4" style={{ color: 'var(--theme-muted)' }} />
               <span>{property.bathrooms}</span>
             </div>
           )}
-          {property.area != null && (
+          {property.area != null && property.area > 0 && (
             <div className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--theme-text)' }}>
               <Maximize className="h-4 w-4" style={{ color: 'var(--theme-muted)' }} />
               <span>{property.area} {dict.common.sqm}</span>

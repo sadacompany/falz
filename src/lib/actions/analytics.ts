@@ -328,10 +328,25 @@ export async function getViewsByPropertyType() {
     },
   })
 
+  const propertyTypeLabels: Record<string, string> = {
+    APARTMENT: 'شقة',
+    VILLA: 'فيلا',
+    LAND: 'أرض',
+    COMMERCIAL: 'محل تجاري',
+    OFFICE: 'مكتب',
+    BUILDING: 'عمارة',
+    COMPOUND: 'مجمع',
+    FARM: 'مزرعة',
+    REST_HOUSE: 'استراحة',
+    WAREHOUSE: 'مستودع',
+    CHALET: 'شاليه',
+    OTHER: 'أخرى',
+  }
+
   const typeCount = new Map<string, number>()
   events.forEach((e) => {
     if (e.property) {
-      const type = e.property.propertyType
+      const type = propertyTypeLabels[e.property.propertyType] || e.property.propertyType
       typeCount.set(type, (typeCount.get(type) || 0) + 1)
     }
   })

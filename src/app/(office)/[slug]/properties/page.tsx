@@ -41,17 +41,26 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   const browserLocale = acceptLang?.startsWith('ar') ? 'ar' : acceptLang?.startsWith('en') ? 'en' : undefined
   const locale = resolveLocale(cookieLocale || browserLocale || office.defaultLanguage)
 
-  // Parse search params
+  // Parse search params with safety guards
   const dealType = (sp.dealType as string) || undefined
   const propertyType = (sp.propertyType as string) || undefined
   const city = (sp.city as string) || undefined
   const district = (sp.district as string) || undefined
-  const minPrice = sp.minPrice ? parseInt(sp.minPrice as string) : undefined
-  const maxPrice = sp.maxPrice ? parseInt(sp.maxPrice as string) : undefined
-  const bedrooms = sp.bedrooms ? parseInt(sp.bedrooms as string) : undefined
+
+  const rawMin = sp.minPrice ? parseInt(sp.minPrice as string, 10) : undefined
+  const minPrice = rawMin !== undefined && !isNaN(rawMin) && rawMin >= 0 ? rawMin : undefined
+
+  const rawMax = sp.maxPrice ? parseInt(sp.maxPrice as string, 10) : undefined
+  const maxPrice = rawMax !== undefined && !isNaN(rawMax) && rawMax >= 0 ? rawMax : undefined
+
+  const rawBed = sp.bedrooms ? parseInt(sp.bedrooms as string, 10) : undefined
+  const bedrooms = rawBed !== undefined && !isNaN(rawBed) && rawBed > 0 ? rawBed : undefined
+
   const sort = (sp.sort as string) || 'newest'
   const paymentMethod = (sp.paymentMethod as string) || undefined
-  const page = Math.max(1, parseInt((sp.page as string) || '1'))
+
+  const rawPage = sp.page ? parseInt(sp.page as string, 10) : 1
+  const page = !isNaN(rawPage) && rawPage >= 1 ? rawPage : 1
   const pageSize = 12
 
   // Build where clause - always filter by officeId
@@ -81,7 +90,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   if (bedrooms !== undefined) {
     where.bedrooms = { gte: bedrooms }
   }
-  if (paymentMethod === 'BANK_AND_CASH') {
+  if (paymentMethod === 'BANK_AND_CASH' || paymentMethod === 'BANK') {
     where.paymentMethod = 'BANK_AND_CASH'
   }
 
@@ -112,7 +121,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   // Get filter options
   const [citiesRaw, districtsRaw] = await Promise.all([
     prisma.property.findMany({
-      where: { officeId: office.id, status: 'PUBLISHED', city: { not: null } },
+      where: { officeId: office.id, status: 'PUBLISHED', isPrivate: false, city: { not: null } },
       select: { city: true, cityAr: true },
       distinct: ['city'],
       take: 50,
@@ -121,6 +130,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
       where: {
         officeId: office.id,
         status: 'PUBLISHED',
+        isPrivate: false,
         district: { not: null },
         ...(city ? { city } : {}),
       },

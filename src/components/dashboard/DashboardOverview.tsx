@@ -31,6 +31,16 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
+function safeBigInt(val: string | number | null | undefined): bigint {
+  if (!val) return BigInt(0)
+  try {
+    const cleaned = String(val).split('.')[0]
+    return BigInt(cleaned || '0')
+  } catch {
+    return BigInt(0)
+  }
+}
+
 // ─── Types ──────────────────────────────────────────────────
 
 interface DashboardOverviewProps {
@@ -257,16 +267,16 @@ export function DashboardOverview({
         />
         <MetricCard
           title="مبيعات الشهر الحالي"
-          value={formatPrice(BigInt(safeStats.monthlySales), 'SAR')}
+          value={formatPrice(safeBigInt(safeStats.monthlySales), 'SAR')}
           icon={Coins}
         />
         <MetricCard
           title="مبيعات الربع الحالي"
-          value={formatPrice(BigInt(safeStats.quarterlySales), 'SAR')}
+          value={formatPrice(safeBigInt(safeStats.quarterlySales), 'SAR')}
           icon={Coins}
         />
         <MetricCard
-          title="إجمالي السومات"
+          title="إجمالي السومات النشطة"
           value={safeStats.totalBids}
           icon={Gavel}
         />
@@ -396,7 +406,7 @@ export function DashboardOverview({
                         {listing.titleAr || listing.title}
                       </p>
                       <p className="mt-0.5 text-xs text-dim">
-                        {formatPrice(BigInt(listing.price), listing.currency)} — {new Date(listing.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}
+                        {formatPrice(safeBigInt(listing.price), listing.currency)} — {new Date(listing.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}
                       </p>
                     </div>
                     <Badge variant={listing.status === 'PUBLISHED' ? 'success' : listing.status === 'DRAFT' ? 'secondary' : 'warning'}>
@@ -436,7 +446,7 @@ export function DashboardOverview({
                     </div>
                     <div className="ms-3 text-end">
                       <p className="text-sm font-bold text-primary">
-                        {formatPrice(BigInt(bid.amount), 'SAR')}
+                        {formatPrice(safeBigInt(bid.amount), 'SAR')}
                       </p>
                     </div>
                   </Link>

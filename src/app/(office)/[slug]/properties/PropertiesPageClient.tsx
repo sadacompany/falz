@@ -51,9 +51,6 @@ export function PropertiesPageClient({
     const params = new URLSearchParams()
     const merged = { ...currentFilters, ...updates }
 
-    // Reset page when filters change (unless page is explicitly set)
-    if (!updates.page) merged.sort // keep sort
-
     Object.entries(merged).forEach(([key, value]) => {
       if (value && key !== 'page') params.set(key, value)
     })
@@ -194,7 +191,7 @@ export function PropertiesPageClient({
         </div>
 
         {/* Sort Row */}
-        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-[#E2E8F0]">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4 pt-4 border-t border-[#E2E8F0]">
           <span className="text-xs font-medium text-[#718096]">
             {dict.common.sortBy}:
           </span>
