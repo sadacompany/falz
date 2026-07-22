@@ -20,6 +20,8 @@ import {
   ChevronRight,
   Upload,
   X,
+  MessageSquare,
+  FileDown,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -532,6 +534,82 @@ export default function PropertiesPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              const propType = property.subtype?.name || propertyTypeLabel[property.propertyType] || ''
+                              const priceText = formatPrice(BigInt(property.price), property.currency)
+                              const cityText = property.city || ''
+                              const districtText = property.district || ''
+                              const areaText = property.area ? `${property.area} م²` : ''
+                              const bedsText = property.bedrooms && property.bedrooms > 0 ? `${property.bedrooms} غرف` : ''
+                              const bathsText = property.bathrooms && property.bathrooms > 0 ? `${property.bathrooms} دورات مياه` : ''
+                              const dealText = property.dealType === 'SALE' ? 'للبيع' : 'للإيجار'
+
+                              const lines = [
+                                `🏠 *${property.title}*`,
+                                '',
+                                `📍 ${dealText} | ${propType}`,
+                                cityText && `📌 ${cityText}${districtText ? ` - ${districtText}` : ''}`,
+                                `💰 السعر: ${priceText}`,
+                                areaText && `📐 المساحة: ${areaText}`,
+                                bedsText && `🛏️ ${bedsText}`,
+                                bathsText && `🚿 ${bathsText}`,
+                                '',
+                                '📞 للتواصل والاستفسار',
+                              ].filter(Boolean).join('\n')
+
+                              navigator.clipboard.writeText(lines)
+                                .then(() => alert('تم نسخ العرض للواتساب ✅'))
+                                .catch(() => alert('فشل النسخ'))
+                            }}
+                            className="rounded-md p-1.5 text-dim transition-colors hover:bg-card-hover hover:text-heading"
+                            title="نسخ للواتساب"
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              // Dynamic import to keep bundle small
+                              import('@/lib/generate-brochure').then(({ generatePropertyBrochure }) => {
+                                generatePropertyBrochure({
+                                  title: property.title,
+                                  titleAr: property.titleAr || property.title,
+                                  description: property.description || null,
+                                  price: property.price.toString(),
+                                  currency: property.currency,
+                                  dealType: property.dealType,
+                                  propertyType: property.propertyType,
+                                  category: property.category || '',
+                                  city: property.city || null,
+                                  district: property.district || null,
+                                  area: property.area || null,
+                                  builtArea: property.builtArea || null,
+                                  bedrooms: property.bedrooms || null,
+                                  bathrooms: property.bathrooms || null,
+                                  borderNorth: property.borderNorth || null,
+                                  borderSouth: property.borderSouth || null,
+                                  borderEast: property.borderEast || null,
+                                  borderWest: property.borderWest || null,
+                                  streetWidth: property.streetWidth || null,
+                                  age: property.age ?? null,
+                                  facing: property.facing || null,
+                                  deedNumber: property.deedNumber || null,
+                                  slug: property.slug,
+                                  officeSlug: '',
+                                  officeName: 'مكتب عقاري',
+                                  officeFalLicense: null,
+                                })
+                              })
+                            }}
+                            className="rounded-md p-1.5 text-dim transition-colors hover:bg-card-hover hover:text-heading"
+                            title="تحميل بروشور PDF"
+                          >
+                            <FileDown className="h-4 w-4" />
+                          </button>
                           <Link href={`/dashboard/properties/${property.id}`}>
                             <button className="rounded-md p-1.5 text-dim transition-colors hover:bg-card-hover hover:text-heading">
                               <Edit className="h-4 w-4" />

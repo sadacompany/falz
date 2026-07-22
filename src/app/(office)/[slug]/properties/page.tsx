@@ -50,6 +50,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   const maxPrice = sp.maxPrice ? parseInt(sp.maxPrice as string) : undefined
   const bedrooms = sp.bedrooms ? parseInt(sp.bedrooms as string) : undefined
   const sort = (sp.sort as string) || 'newest'
+  const paymentMethod = (sp.paymentMethod as string) || undefined
   const page = Math.max(1, parseInt((sp.page as string) || '1'))
   const pageSize = 12
 
@@ -79,6 +80,9 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   }
   if (bedrooms !== undefined) {
     where.bedrooms = { gte: bedrooms }
+  }
+  if (paymentMethod === 'BANK_AND_CASH') {
+    where.paymentMethod = 'BANK_AND_CASH'
   }
 
   // Sort
@@ -174,6 +178,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
         minPrice: sp.minPrice as string || '',
         maxPrice: sp.maxPrice as string || '',
         bedrooms: sp.bedrooms as string || '',
+        paymentMethod: paymentMethod || '',
         sort,
       }}
     />

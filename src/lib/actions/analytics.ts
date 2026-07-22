@@ -40,6 +40,10 @@ export async function getDashboardStats() {
     topProperties,
     monthlySalesSum,
     quarterlySalesSum,
+    totalBids,
+    totalOwners,
+    recentListings,
+    recentBids,
   ] = await Promise.all([
     // Total properties
     prisma.property.count({
@@ -130,6 +134,55 @@ export async function getDashboardStats() {
       },
       _sum: { price: true },
     }),
+
+    // Total bids
+    prisma.propertyBid.count({
+      where: {
+        property: { ...tenantWhere(officeId) },
+      },
+    }),
+
+    // Total owners
+    prisma.propertyOwner.count({
+      where: { officeId },
+    }),
+
+    // Recent listings
+    prisma.property.findMany({
+      where: { ...tenantWhere(officeId) },
+      select: {
+        id: true,
+        title: true,
+        titleAr: true,
+        status: true,
+        price: true,
+        currency: true,
+        dealType: true,
+        category: true,
+        createdAt: true,
+        media: {
+          orderBy: { sortOrder: 'asc' },
+          take: 1,
+          select: { url: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+    }),
+
+    // Recent bids
+    prisma.propertyBid.findMany({
+      where: {
+        property: { ...tenantWhere(officeId) },
+      },
+      include: {
+        property: {
+          select: { id: true, title: true, titleAr: true },
+        },
+      },
+      orderBy: { bidDate: 'desc' },
+      take: 5,
+    }),
   ])
 
   // Fetch property details for top properties
@@ -195,6 +248,21 @@ export async function getDashboardStats() {
         thumbnail: detail?.media[0]?.url || null,
       }
     }),
+    totalBids,
+    totalOwners,
+    recentListings: recentListings.map((p) => ({
+      ...p,
+      price: p.price.toString(),
+      thumbnail: p.media[0]?.url || null,
+    })),
+    recentBids: recentBids.map((b) => ({
+      id: b.id,
+      amount: b.amount.toString(),
+      bidderName: b.bidderName,
+      bidDate: b.bidDate,
+      propertyTitle: b.property.titleAr || b.property.title,
+      propertyId: b.property.id,
+    })),
   }
 }
 

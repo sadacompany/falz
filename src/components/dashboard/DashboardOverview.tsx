@@ -12,6 +12,8 @@ import {
   ExternalLink,
   Target,
   Coins,
+  Gavel,
+  UserCheck,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatPrice } from '@/lib/utils'
@@ -42,6 +44,28 @@ interface DashboardOverviewProps {
     conversionRate: number
     monthlySales: string
     quarterlySales: string
+    totalBids: number
+    totalOwners: number
+    recentListings: Array<{
+      id: string
+      title: string
+      titleAr: string | null
+      status: string
+      price: string
+      currency: string
+      dealType: string
+      category: string
+      createdAt: Date
+      thumbnail: string | null
+    }>
+    recentBids: Array<{
+      id: string
+      amount: string
+      bidderName: string
+      bidDate: Date
+      propertyTitle: string
+      propertyId: string
+    }>
     recentLeads: Array<{
       id: string
       name: string
@@ -170,6 +194,10 @@ export function DashboardOverview({
     conversionRate: 0,
     monthlySales: '0',
     quarterlySales: '0',
+    totalBids: 0,
+    totalOwners: 0,
+    recentListings: [],
+    recentBids: [],
     recentLeads: [],
     topProperties: [],
   }
@@ -203,7 +231,7 @@ export function DashboardOverview({
       </div>
 
       {/* Metric Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="إجمالي العقارات"
           value={safeStats.totalProperties}
@@ -236,6 +264,16 @@ export function DashboardOverview({
           title="مبيعات الربع الحالي"
           value={formatPrice(BigInt(safeStats.quarterlySales), 'SAR')}
           icon={Coins}
+        />
+        <MetricCard
+          title="إجمالي السومات"
+          value={safeStats.totalBids}
+          icon={Gavel}
+        />
+        <MetricCard
+          title="إجمالي الملاك"
+          value={safeStats.totalOwners}
+          icon={UserCheck}
         />
       </div>
 
@@ -331,6 +369,84 @@ export function DashboardOverview({
                 </div>
               )}
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Listings + Recent Bids */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">آخر العقارات المضافة</CardTitle>
+            <Link href="/dashboard/properties" className="text-xs text-primary hover:underline">
+              عرض الكل
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {safeStats.recentListings.length > 0 ? (
+              <div className="space-y-3">
+                {safeStats.recentListings.map((listing) => (
+                  <Link
+                    key={listing.id}
+                    href={`/dashboard/properties/${listing.id}`}
+                    className="flex items-center justify-between rounded-lg border border-edge bg-elevated p-3 transition-colors hover:border-primary/40 hover:bg-card-hover"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-heading">
+                        {listing.titleAr || listing.title}
+                      </p>
+                      <p className="mt-0.5 text-xs text-dim">
+                        {formatPrice(BigInt(listing.price), listing.currency)} — {new Date(listing.createdAt).toLocaleDateString('ar-SA-u-nu-latn')}
+                      </p>
+                    </div>
+                    <Badge variant={listing.status === 'PUBLISHED' ? 'success' : listing.status === 'DRAFT' ? 'secondary' : 'warning'}>
+                      {listing.status === 'PUBLISHED' ? 'منشور' : listing.status === 'DRAFT' ? 'مسودة' : 'مؤرشف'}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-sm text-dim">
+                لم تُضَف عقارات بعد
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">آخر السومات الواردة</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {safeStats.recentBids.length > 0 ? (
+              <div className="space-y-3">
+                {safeStats.recentBids.map((bid) => (
+                  <Link
+                    key={bid.id}
+                    href={`/dashboard/properties/${bid.propertyId}`}
+                    className="flex items-center justify-between rounded-lg border border-edge bg-elevated p-3 transition-colors hover:border-primary/40 hover:bg-card-hover"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-heading">
+                        {bid.propertyTitle}
+                      </p>
+                      <p className="mt-0.5 text-xs text-dim">
+                        {bid.bidderName} — {new Date(bid.bidDate).toLocaleDateString('ar-SA-u-nu-latn')}
+                      </p>
+                    </div>
+                    <div className="ms-3 text-end">
+                      <p className="text-sm font-bold text-primary">
+                        {formatPrice(BigInt(bid.amount), 'SAR')}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-sm text-dim">
+                لا توجد سومات بعد
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

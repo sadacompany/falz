@@ -25,6 +25,7 @@ interface PropertiesPageClientProps {
     minPrice: string
     maxPrice: string
     bedrooms: string
+    paymentMethod: string
     sort: string
   }
 }
@@ -68,7 +69,7 @@ export function PropertiesPageClient({
 
   const hasActiveFilters = currentFilters.dealType || currentFilters.propertyType ||
     currentFilters.city || currentFilters.district ||
-    currentFilters.minPrice || currentFilters.maxPrice || currentFilters.bedrooms
+    currentFilters.minPrice || currentFilters.maxPrice || currentFilters.bedrooms || currentFilters.paymentMethod
 
   const selectClasses = "h-10 rounded-lg px-3 text-sm bg-white border border-[#E2E8F0] text-[#2D3748]"
 
@@ -102,7 +103,7 @@ export function PropertiesPageClient({
           )}
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
           {/* Deal Type */}
           <select
             value={currentFilters.dealType}
@@ -178,6 +179,17 @@ export function PropertiesPageClient({
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <option key={n} value={n.toString()}>{n}+</option>
             ))}
+          </select>
+
+          {/* Payment Method */}
+          <select
+            value={currentFilters.paymentMethod}
+            onChange={(e) => updateFilters({ paymentMethod: e.target.value })}
+            className={selectClasses}
+          >
+            <option value="">طريقة الدفع</option>
+            <option value="CASH">كاش (جميع العقارات)</option>
+            <option value="BANK_AND_CASH">يقبل البنك فقط</option>
           </select>
         </div>
 

@@ -358,6 +358,41 @@ export default function NewPropertyPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content Columns */}
         <div className="space-y-6 lg:col-span-2">
+          {/* Owner Selection - PRD: Must be first in form */}
+          <Card>
+            <CardHeader className="pb-3 border-b border-edge mb-4">
+              <CardTitle className="text-base text-primary flex items-center gap-1.5">
+                <User className="h-4 w-4" />
+                <span>مالك العقار</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold">اختر المالك</Label>
+                <button
+                  type="button"
+                  onClick={() => setIsOwnerModalOpen(true)}
+                  className="text-xs text-primary hover:underline flex items-center gap-1 font-semibold"
+                >
+                  <Plus className="h-3 w-3" />
+                  + إضافة مالك جديد
+                </button>
+              </div>
+              <select
+                value={ownerId}
+                onChange={(e) => setOwnerId(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dim"
+              >
+                <option value="">لم يتم ربط مالك</option>
+                {owners.map((owner) => (
+                  <option key={owner.id} value={owner.id}>
+                    {owner.name} ({owner.phone})
+                  </option>
+                ))}
+              </select>
+            </CardContent>
+          </Card>
+
           {/* Basic Info */}
           <Card>
             <CardHeader className="pb-3 border-b border-edge mb-4">
@@ -409,31 +444,7 @@ export default function NewPropertyPage() {
                   </select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold flex items-center justify-between">
-                    <span>مالك العقار</span>
-                    <button
-                      type="button"
-                      onClick={() => setIsOwnerModalOpen(true)}
-                      className="text-xs text-primary hover:underline flex items-center gap-1 font-semibold"
-                    >
-                      <Plus className="h-3 w-3" />
-                      مالك جديد
-                    </button>
-                  </Label>
-                  <select
-                    value={ownerId}
-                    onChange={(e) => setOwnerId(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dim"
-                  >
-                    <option value="">لم يتم ربط مالك</option>
-                    {owners.map((owner) => (
-                      <option key={owner.id} value={owner.id}>
-                        {owner.name} ({owner.phone})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+
               </div>
 
               <div className="space-y-2">
