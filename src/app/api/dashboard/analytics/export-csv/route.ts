@@ -128,16 +128,24 @@ export async function GET(request: NextRequest) {
       ['Phone Clicks', String(events.filter((e) => e.eventType === 'phone_click').length)],
     ]
 
+    const sanitizeCsvCell = (val: string) => {
+      if (!val) return ''
+      if (/^[=+\-@\t\r]/.test(val)) {
+        return `'${val}`
+      }
+      return val
+    }
+
     // Sheet 2: Events (detailed)
     const eventRows = [
       ['Date', 'Event Type', 'Page', 'Referrer', 'Referrer Type', 'City', 'Property ID'],
       ...events.map((e) => [
         e.createdAt.toISOString(),
         e.eventType,
-        e.page || '',
-        e.referrer || '',
+        sanitizeCsvCell(e.page || ''),
+        sanitizeCsvCell(e.referrer || ''),
         e.referrerType || 'direct',
-        e.city || '',
+        sanitizeCsvCell(e.city || ''),
         e.propertyId || '',
       ]),
     ]
@@ -147,12 +155,12 @@ export async function GET(request: NextRequest) {
       ['Date', 'Name', 'Email', 'Phone', 'Source', 'Status', 'Property'],
       ...leads.map((l) => [
         l.createdAt.toISOString(),
-        l.name,
-        l.email || '',
-        l.phone || '',
+        sanitizeCsvCell(l.name),
+        sanitizeCsvCell(l.email || ''),
+        sanitizeCsvCell(l.phone || ''),
         l.source,
         l.status,
-        l.property?.title || '',
+        sanitizeCsvCell(l.property?.title || ''),
       ]),
     ]
 

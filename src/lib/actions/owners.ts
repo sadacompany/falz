@@ -98,7 +98,15 @@ export async function getOwner(id: string) {
     },
   })
 
-  return owner
+  if (!owner) return null
+
+  return {
+    ...owner,
+    properties: owner.properties.map((p) => ({
+      ...p,
+      price: p.price.toString(),
+    })),
+  }
 }
 
 // ─── Create Owner ───────────────────────────────────────────

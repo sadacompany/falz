@@ -85,16 +85,8 @@ export function DirectionProvider({ locale, children }: DirectionProviderProps) 
     html.setAttribute('dir', dir)
     html.setAttribute('lang', lang)
 
-    // Clean up on unmount / locale change to avoid stale attributes
-    return () => {
-      // Only reset if the values haven't been changed by another provider
-      if (html.getAttribute('dir') === dir) {
-        html.removeAttribute('dir')
-      }
-      if (html.getAttribute('lang') === lang) {
-        html.removeAttribute('lang')
-      }
-    }
+    // Ensure HTML attributes stay set
+    return () => {}
   }, [dir, lang])
 
   const contextValue = useMemo<DirectionContextValue>(

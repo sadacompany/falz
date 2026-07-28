@@ -150,10 +150,10 @@ export default function ReportsPage() {
     leads.forEach((l) => {
       if (l.status === 'CLOSED') {
         const statusChangeActivity = l.activities?.find(
-          (a: any) => a.type === 'status_change' && a.metadata && (a.metadata as any).closingReason
+          (a: any) => a.type === 'status_change' && a.metadata && ((a.metadata as any).outcome || (a.metadata as any).closingReason)
         )
         const reason = statusChangeActivity 
-          ? (statusChangeActivity.metadata as any).closingReason 
+          ? ((statusChangeActivity.metadata as any).outcome || (statusChangeActivity.metadata as any).closingReason) 
           : 'غير محدد'
         closingReasons[reason] = (closingReasons[reason] || 0) + 1
       }

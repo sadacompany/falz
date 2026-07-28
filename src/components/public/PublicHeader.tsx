@@ -19,11 +19,15 @@ export function PublicHeader() {
   const officeName = office.nameAr || office.name
   const base = `/${office.slug}`
 
+  const vis = (office as any).pageVisibility || { about: true, contact: true, agents: true, blog: true }
+
   const navLinks = [
     { href: base, label: dict.nav.home },
     { href: `${base}/properties`, label: dict.nav.properties },
-    { href: `${base}/about`, label: dict.nav.about },
-    { href: `${base}/contact`, label: dict.nav.contact },
+    ...(vis.agents !== false ? [{ href: `${base}/agents`, label: dict.nav.agents || 'الوكلاء' }] : []),
+    ...(vis.blog !== false ? [{ href: `${base}/blog`, label: dict.nav.blog || 'المدونة' }] : []),
+    ...(vis.about !== false ? [{ href: `${base}/about`, label: dict.nav.about }] : []),
+    ...(vis.contact !== false ? [{ href: `${base}/contact`, label: dict.nav.contact }] : []),
   ]
 
   function isActive(href: string) {
