@@ -29,10 +29,130 @@ function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+async function seedSaudiLocations() {
+  console.log("  Seeding Saudi Cities & Districts...");
+
+  const saudiData = [
+    {
+      name: "Riyadh",
+      nameAr: "الرياض",
+      region: "الرياض",
+      districts: [
+        { name: "Al-Malqa", nameAr: "الملقا", direction: "NORTH" },
+        { name: "Al-Yasmin", nameAr: "الياسمين", direction: "NORTH" },
+        { name: "Al-Narjis", nameAr: "النرجس", direction: "NORTH" },
+        { name: "Al-Olaya", nameAr: "العليا", direction: "CENTER" },
+        { name: "Al-Sahafa", nameAr: "الصحافة", direction: "NORTH" },
+        { name: "Al-Rimal", nameAr: "الرمال", direction: "EAST" },
+        { name: "Al-Suwaidi", nameAr: "السويدي", direction: "SOUTH" },
+        { name: "Tuwaiq", nameAr: "طويق", direction: "WEST" },
+      ],
+    },
+    {
+      name: "Jeddah",
+      nameAr: "جدة",
+      region: "مكة المكرمة",
+      districts: [
+        { name: "Al-Shati", nameAr: "الشاطئ", direction: "WEST" },
+        { name: "Al-Hamra", nameAr: "الحمراء", direction: "WEST" },
+        { name: "Al-Zahra", nameAr: "الزهراء", direction: "NORTH" },
+        { name: "Al-Rawdah", nameAr: "الروضة", direction: "NORTH" },
+        { name: "Al-Naeem", nameAr: "النعيم", direction: "NORTH" },
+        { name: "Al-Safa", nameAr: "الصفا", direction: "EAST" },
+      ],
+    },
+    {
+      name: "Buraidah",
+      nameAr: "بريدة",
+      region: "القصيم",
+      districts: [
+        { name: "Al-Rayyan", nameAr: "الريان", direction: "NORTH" },
+        { name: "Al-Safra", nameAr: "الصفراء", direction: "CENTER" },
+        { name: "Al-Faiziyyah", nameAr: "الفايزية", direction: "EAST" },
+        { name: "Al-Iskan", nameAr: "الإسكان", direction: "NORTH" },
+      ],
+    },
+    {
+      name: "Dammam",
+      nameAr: "الدمام",
+      region: "المنطقة الشرقية",
+      districts: [
+        { name: "Al-Shati", nameAr: "الشاطئ", direction: "NORTH" },
+        { name: "Al-Faisaliyah", nameAr: "الفيصلية", direction: "WEST" },
+        { name: "Al-Nuzha", nameAr: "النزهة", direction: "CENTER" },
+      ],
+    },
+    {
+      name: "Khobar",
+      nameAr: "الخبر",
+      region: "المنطقة الشرقية",
+      districts: [
+        { name: "Al-Hizam Al-Dhahabi", nameAr: "الحزام الذهبي", direction: "NORTH" },
+        { name: "Al-Rakah", nameAr: "الراكة", direction: "NORTH" },
+        { name: "Al-Corniche", nameAr: "الكورنيش", direction: "EAST" },
+      ],
+    },
+    {
+      name: "Makkah",
+      nameAr: "مكة المكرمة",
+      region: "مكة المكرمة",
+      districts: [
+        { name: "Al-Aziziyah", nameAr: "العزيزية", direction: "EAST" },
+        { name: "Al-Showqiyyah", nameAr: "الشوقية", direction: "SOUTH" },
+      ],
+    },
+    {
+      name: "Madinah",
+      nameAr: "المدينة المنورة",
+      region: "المدينة المنورة",
+      districts: [
+        { name: "Al-Ranuna", nameAr: "الرانوناء", direction: "SOUTH" },
+        { name: "Al-Qiblatayn", nameAr: "القبلتين", direction: "WEST" },
+      ],
+    },
+  ];
+
+  for (const cData of saudiData) {
+    const city = await prisma.saudiCity.upsert({
+      where: { nameAr: cData.nameAr },
+      update: { name: cData.name, region: cData.region },
+      create: {
+        name: cData.name,
+        nameAr: cData.nameAr,
+        region: cData.region,
+      },
+    });
+
+    for (const dData of cData.districts) {
+      const existing = await prisma.saudiDistrict.findFirst({
+        where: {
+          cityId: city.id,
+          nameAr: dData.nameAr,
+          officeId: null,
+        },
+      });
+
+      if (!existing) {
+        await prisma.saudiDistrict.create({
+          data: {
+            cityId: city.id,
+            name: dData.name,
+            nameAr: dData.nameAr,
+            direction: dData.direction,
+            officeId: null,
+          },
+        });
+      }
+    }
+  }
+}
+
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
   console.log("🌱 Seeding FALZ database...\n");
+
+  await seedSaudiLocations();
 
   // ─── PLANS ────────────────────────────────────────────────────────────────
 

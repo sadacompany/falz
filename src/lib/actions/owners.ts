@@ -116,6 +116,11 @@ export async function createOwner(input: CreateOwnerInput) {
   const officeId = user.memberships[0]?.officeId
   if (!officeId) throw new Error('No office membership found')
 
+  // REGA Enforcement: nationalId and dob are mandatory for REGA compliance
+  if (!input.name?.trim() || !input.phone?.trim() || !input.nationalId?.trim() || !input.dob) {
+    throw new Error('رقم الهوية وتاريخ الميلاد إجباريان لبلاغات الهيئة العامة للعقار (REGA)')
+  }
+
   // Check for duplicate phone in same office
   const existing = await prisma.propertyOwner.findUnique({
     where: {

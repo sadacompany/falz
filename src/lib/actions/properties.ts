@@ -74,6 +74,13 @@ export interface CreatePropertyInput {
   deedFile?: string
   marketingContractNumber?: string
   contractExpiryDate?: Date | string
+  masterBedrooms?: number
+  entryType?: 'PRIVATE' | 'SHARED'
+  autoArchiveOnExpiry?: boolean
+  showBidDate?: boolean
+  bidAutoHideDuration?: 'ONE_MONTH' | 'TWO_MONTHS' | 'THREE_MONTHS' | 'SIX_MONTHS' | 'ONE_YEAR' | 'NONE'
+  saudiCityId?: string | null
+  saudiDistrictId?: string | null
   newBid?: {
     amount: number
     bidderName: string
@@ -95,6 +102,7 @@ async function getOfficeId(): Promise<string> {
 
 export async function getProperties(filters: PropertyFilters = {}) {
   const officeId = await getOfficeId()
+  await checkAndArchiveExpiredContracts(officeId).catch(() => {})
   const {
     status,
     dealType,
@@ -279,15 +287,21 @@ export async function createProperty(input: CreatePropertyInput) {
       borderSouth: input.borderSouth || null,
       borderEast: input.borderEast || null,
       borderWest: input.borderWest || null,
-      internalNotes: input.internalNotes || null,
       pricingModel: input.pricingModel || 'LIMIT',
       paymentMethod: input.paymentMethod || 'BANK_AND_CASH',
+      showBidDate: input.showBidDate || false,
+      bidAutoHideDuration: input.bidAutoHideDuration || 'NONE',
+      masterBedrooms: input.masterBedrooms || 0,
+      entryType: input.entryType || null,
+      autoArchiveOnExpiry: input.autoArchiveOnExpiry !== undefined ? input.autoArchiveOnExpiry : true,
       directionalArea: input.directionalArea || null,
       deedNumber: input.deedNumber || null,
       deedFile: input.deedFile || null,
       marketingContractNumber: input.marketingContractNumber || null,
       contractExpiryDate: input.contractExpiryDate ? new Date(input.contractExpiryDate) : null,
       subtypeId: input.subtypeId || null,
+      saudiCityId: input.saudiCityId || null,
+      saudiDistrictId: input.saudiDistrictId || null,
     },
   })
 
@@ -384,13 +398,19 @@ export async function updateProperty(id: string, input: Partial<CreatePropertyIn
     }
   }
 
-  // Handle availability transitions and soldAt timestamp
+  // Handle availability transitions and soldAt/reservedAt timestamp
   if (input.availability !== undefined) {
     data.availability = input.availability
     if (input.availability === 'SOLD' && existing.availability !== 'SOLD') {
       data.soldAt = new Date()
     } else if (input.availability !== 'SOLD' && existing.availability === 'SOLD') {
       data.soldAt = null
+    }
+
+    if (input.availability === 'RESERVED' && existing.availability !== 'RESERVED') {
+      data.reservedAt = new Date()
+    } else if (input.availability !== 'RESERVED' && existing.availability === 'RESERVED') {
+      data.reservedAt = null
     }
   }
 
@@ -403,15 +423,33 @@ export async function updateProperty(id: string, input: Partial<CreatePropertyIn
   if (input.borderSouth !== undefined) data.borderSouth = input.borderSouth
   if (input.borderEast !== undefined) data.borderEast = input.borderEast
   if (input.borderWest !== undefined) data.borderWest = input.borderWest
-  if (input.internalNotes !== undefined) data.internalNotes = input.internalNotes
   if (input.pricingModel !== undefined) data.pricingModel = input.pricingModel
   if (input.paymentMethod !== undefined) data.paymentMethod = input.paymentMethod
+  if (input.showBidDate !== undefined) data.showBidDate = input.showBidDate
+  if (input.bidAutoHideDuration !== undefined) data.bidAutoHideDuration = input.bidAutoHideDuration
+  if (input.masterBedrooms !== undefined) data.masterBedrooms = input.masterBedrooms
+  if (input.entryType !== undefined) data.entryType = input.entryType
+  if (input.autoArchiveOnExpiry !== undefined) data.autoArchiveOnExpiry = input.autoArchiveOnExpiry
   if (input.directionalArea !== undefined) data.directionalArea = input.directionalArea
   if (input.deedNumber !== undefined) data.deedNumber = input.deedNumber
   if (input.deedFile !== undefined) data.deedFile = input.deedFile
   if (input.marketingContractNumber !== undefined) data.marketingContractNumber = input.marketingContractNumber
   if (input.contractExpiryDate !== undefined) {
     data.contractExpiryDate = input.contractExpiryDate ? new Date(input.contractExpiryDate) : null
+  }
+  if (input.saudiCityId !== undefined) {
+    if (input.saudiCityId) {
+      data.saudiCity = { connect: { id: input.saudiCityId } }
+    } else {
+      data.saudiCity = { disconnect: true }
+    }
+  }
+  if (input.saudiDistrictId !== undefined) {
+    if (input.saudiDistrictId) {
+      data.saudiDistrict = { connect: { id: input.saudiDistrictId } }
+    } else {
+      data.saudiDistrict = { disconnect: true }
+    }
   }
   if (input.subtypeId !== undefined) {
     if (input.subtypeId) {
@@ -568,4 +606,55 @@ export async function getAgents() {
     avatar: m.user.avatar,
     role: m.role,
   }))
+}
+
+// ─── Auto-Archive Expired Marketing Contracts ───────────────
+
+export async function checkAndArchiveExpiredContracts(officeId: string) {
+  const expiredProperties = await prisma.property.findMany({
+    where: {
+      officeId,
+      status: 'PUBLISHED',
+      autoArchiveOnExpiry: true,
+      contractExpiryDate: {
+        lte: new Date(),
+      },
+    },
+    select: { id: true, title: true, titleAr: true },
+  })
+
+  if (expiredProperties.length === 0) return 0
+
+  const expiredIds = expiredProperties.map((p) => p.id)
+
+  await prisma.property.updateMany({
+    where: { id: { in: expiredIds }, officeId },
+    data: { status: 'ARCHIVED' },
+  })
+
+  // Create Notifications for Office Members
+  const members = await prisma.membership.findMany({
+    where: { officeId, isActive: true },
+    select: { userId: true },
+  })
+
+  for (const prop of expiredProperties) {
+    const propTitle = prop.titleAr || prop.title
+    for (const member of members) {
+      await prisma.notification.create({
+        data: {
+          officeId,
+          userId: member.userId,
+          type: 'property_archived',
+          title: 'أرشفة تلقائية لعقد تسويق منتهي',
+          titleAr: 'أرشفة تلقائية لعقد تسويق منتهي',
+          message: `تم أرشفة العقار "${propTitle}" تلقائيًا لانتهاء تاريخ عقد التسويق.`,
+          messageAr: `تم أرشفة العقار "${propTitle}" تلقائيًا لانتهاء تاريخ عقد التسويق.`,
+          link: `/dashboard/properties/${prop.id}`,
+        },
+      }).catch(() => {})
+    }
+  }
+
+  return expiredProperties.length
 }

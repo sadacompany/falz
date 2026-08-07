@@ -61,7 +61,7 @@ interface PropertyData {
   pricingModel?: string | null
   paymentMethod?: string | null
   directionalArea?: string | null
-  bids?: { id: string; amount: string; bidDate: string }[]
+  bids?: { id: string; amount: string; bidDate: string | null }[]
 }
 
 interface AgentData {
@@ -110,7 +110,7 @@ export function PropertyDetailClient({
   const price = formatPrice(parseInt(property.price), property.currency)
   const dealTypeLabel = property.dealType === 'SALE' ? dict.property.forSale : dict.property.forRent
   const propertyTypeLabel = property.subtypeName || dict.property.types[property.propertyType as keyof typeof dict.property.types] || property.propertyType
-  const isSoldOrRented = property.availability === 'SOLD' || property.availability === 'RENTED'
+  const isNotAvailable = property.availability === 'SOLD' || property.availability === 'RENTED' || property.availability === 'RESERVED'
 
   const galleryImages = property.media
     .filter((m) => m.type === 'IMAGE')
@@ -141,9 +141,9 @@ export function PropertyDetailClient({
   }, [officeId, officeSlug, property.id, property.slug])
 
   return (
-    <div>
+    <div className="min-h-screen bg-[#F7F8FA] pt-6" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ─── Back Navigation ──────────────────────────── */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-4">
         <Link
           href={`/${officeSlug}/properties`}
           className="inline-flex items-center gap-1.5 text-sm transition-colors hover:underline text-[#718096] hover:text-[#1E3A5F]"
@@ -154,11 +154,15 @@ export function PropertyDetailClient({
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
-        {/* ─── Sold/Rented Banner ──────────────────────── */}
-        {isSoldOrRented && (
-          <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-center">
-            <p className="text-lg font-bold text-red-600">
-              {dict.property.availabilities[property.availability as keyof typeof dict.property.availabilities]}
+        {/* ─── Unavailable / Reserved Banner ──────────────────────── */}
+        {isNotAvailable && (
+          <div className={`mb-6 rounded-xl border p-4 text-center text-lg font-bold ${
+            property.availability === 'RESERVED'
+              ? 'bg-amber-50 border-amber-200 text-amber-700'
+              : 'bg-red-50 border-red-200 text-red-600'
+          }`}>
+            <p>
+              {dict.property.availabilities[property.availability as keyof typeof dict.property.availabilities] || (property.availability === 'RESERVED' ? 'محجوز' : 'غير متوفر')}
             </p>
           </div>
         )}
@@ -362,7 +366,9 @@ export function PropertyDetailClient({
                     <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-amber-500/20 shadow-sm">
                       <span className="text-xs text-amber-800 font-semibold">{locale === 'ar' ? 'أعلى سومة حالية' : 'Highest Bid'}</span>
                       <span className="text-lg font-bold text-amber-600 font-mono">
-                        {formatPrice(parseInt(property.bids[0].amount), property.currency)}
+                        {property.bids[0].amount === 'يوجد سوم'
+                          ? 'يوجد سوم'
+                          : formatPrice(parseInt(property.bids[0].amount), property.currency)}
                       </span>
                     </div>
 
@@ -373,10 +379,14 @@ export function PropertyDetailClient({
                             <span className="text-dim font-mono">#{property.bids!.length - i}</span>
                             <span className="font-semibold text-heading">{locale === 'ar' ? 'مساومة معتمدة' : 'Verified Bid'}</span>
                           </div>
-                          <span className="font-bold font-mono">{formatPrice(parseInt(bid.amount), property.currency)}</span>
-                          <span className="text-dim">
-                            {new Date(bid.bidDate).toLocaleDateString(locale === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US')}
+                          <span className="font-bold font-mono">
+                            {bid.amount === 'يوجد سوم' ? 'يوجد سوم' : formatPrice(parseInt(bid.amount), property.currency)}
                           </span>
+                          {bid.bidDate && (
+                            <span className="text-dim">
+                              {new Date(bid.bidDate).toLocaleDateString(locale === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US')}
+                            </span>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -550,13 +560,15 @@ export function PropertyDetailClient({
               </div>
             )}
 
-            {/* Request Buttons */}
-            <div className="rounded-xl p-6 bg-white border border-[#E2E8F0] shadow-sm">
-              <h3 className="text-lg font-semibold mb-4 text-[#1E3A5F]">
-                طلبات
-              </h3>
-              <RequestButtons propertyId={property.id} />
-            </div>
+            {/* Request Buttons (Gated when property is unavailable/reserved) */}
+            {!isNotAvailable && (
+              <div className="rounded-xl p-6 bg-white border border-[#E2E8F0] shadow-sm">
+                <h3 className="text-lg font-semibold mb-4 text-[#1E3A5F]">
+                  طلبات
+                </h3>
+                <RequestButtons propertyId={property.id} />
+              </div>
+            )}
 
           </div>
         </div>

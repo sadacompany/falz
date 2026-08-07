@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/lib/db'
-import { requireAuth } from '@/lib/auth-utils'
+import { requireAuth, requireRole } from '@/lib/auth-utils'
 import { PropertyCategory } from '@prisma/client'
 
 // ─── Default Sub-types for Seeding ──────────────────────────
@@ -75,6 +75,7 @@ export async function getSubtypes(category?: PropertyCategory) {
 // ─── Create Custom Sub-type ─────────────────────────────────
 export async function createSubtype(name: string, category: PropertyCategory) {
   const officeId = await getOfficeId()
+  await requireRole(officeId, ['OWNER', 'MANAGER'])
 
   const trimmedName = name.trim()
   if (!trimmedName) throw new Error('الاسم مطلوب')
@@ -107,6 +108,7 @@ export async function createSubtype(name: string, category: PropertyCategory) {
 // ─── Delete Sub-type ────────────────────────────────────────
 export async function deleteSubtype(id: string) {
   const officeId = await getOfficeId()
+  await requireRole(officeId, ['OWNER', 'MANAGER'])
 
   const existing = await prisma.propertySubtype.findFirst({
     where: { id, officeId },

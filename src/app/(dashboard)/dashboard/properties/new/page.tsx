@@ -79,7 +79,10 @@ export default function NewPropertyPage() {
   const [area, setArea] = useState('')
   const [builtArea, setBuiltArea] = useState('')
   const [bedrooms, setBedrooms] = useState('')
+  const [masterBedrooms, setMasterBedrooms] = useState('')
   const [bathrooms, setBathrooms] = useState('')
+  const [entryType, setEntryType] = useState<'PRIVATE' | 'SHARED' | ''>('')
+  const [autoArchiveOnExpiry, setAutoArchiveOnExpiry] = useState(true)
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
   
   // Location
@@ -117,6 +120,21 @@ export default function NewPropertyPage() {
   // Pricing & Transaction
   const [pricingModel, setPricingModel] = useState<PricingModel>('LIMIT')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('BANK_AND_CASH')
+  const [showBidDate, setShowBidDate] = useState(false)
+  const [bidAutoHideDuration, setBidAutoHideDuration] = useState<'ONE_MONTH' | 'TWO_MONTHS' | 'THREE_MONTHS' | 'SIX_MONTHS' | 'ONE_YEAR' | 'NONE'>('NONE')
+
+  // Saudi Locations
+  const [saudiCities, setSaudiCities] = useState<any[]>([])
+  const [saudiDistricts, setSaudiDistricts] = useState<any[]>([])
+  const [selectedCityId, setSelectedCityId] = useState('')
+  const [selectedDistrictId, setSelectedDistrictId] = useState('')
+
+  // Custom District Modal
+  const [isDistrictModalOpen, setIsDistrictModalOpen] = useState(false)
+  const [newDistrictNameAr, setNewDistrictNameAr] = useState('')
+  const [newDistrictDirection, setNewDistrictDirection] = useState('')
+  const [districtModalError, setDistrictModalError] = useState<string | null>(null)
+  const [districtModalLoading, setDistrictModalLoading] = useState(false)
 
   // Bids (if PricingModel === BID)
   const [newBidAmount, setNewBidAmount] = useState('')
@@ -143,7 +161,7 @@ export default function NewPropertyPage() {
   const [ownerModalError, setOwnerModalError] = useState<string | null>(null)
   const [ownerModalLoading, setOwnerModalLoading] = useState(false)
 
-  // Fetch subtypes, agents, and owners
+  // Fetch subtypes, agents, owners, and Saudi cities
   useEffect(() => {
     getSubtypes(category).then(setSubtypes).catch(() => {})
   }, [category])
@@ -151,7 +169,92 @@ export default function NewPropertyPage() {
   useEffect(() => {
     getAgents().then(setAgents).catch(() => {})
     getOwners().then((res) => setOwners(res.owners)).catch(() => {})
+    fetch('/api/locations/cities')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.cities) setSaudiCities(data.cities)
+      })
+      .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (selectedCityId) {
+      fetch(`/api/locations/districts?cityId=${selectedCityId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.districts) setSaudiDistricts(data.districts)
+        })
+        .catch(() => {})
+    } else {
+      setSaudiDistricts([])
+    }
+  }, [selectedCityId])
+
+  const handleSelectCity = (cityId: string) => {
+    setSelectedCityId(cityId)
+    setSelectedDistrictId('')
+    setDistrict('')
+    const c = saudiCities.find((item) => item.id === cityId)
+    if (c) {
+      setCity(c.nameAr)
+    }
+  }
+
+  const handleSelectDistrict = (districtId: string) => {
+    setSelectedDistrictId(districtId)
+    const dist = saudiDistricts.find((d) => d.id === districtId)
+    if (dist) {
+      setDistrict(dist.nameAr)
+      if (dist.direction) {
+        const dirMap: Record<string, string> = {
+          NORTH: 'شمال',
+          SOUTH: 'جنوب',
+          EAST: 'شرق',
+          WEST: 'غرب',
+          CENTER: 'وسط',
+        }
+        setDirectionalArea(dirMap[dist.direction] || '')
+      }
+    }
+  }
+
+  const handleCreateDistrict = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedCityId || !newDistrictNameAr.trim()) {
+      setDistrictModalError('المدينة واسم الحي إجباريان')
+      return
+    }
+    setDistrictModalLoading(true)
+    setDistrictModalError(null)
+    try {
+      const res = await fetch('/api/locations/districts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cityId: selectedCityId,
+          nameAr: newDistrictNameAr.trim(),
+          direction: newDistrictDirection || null,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'فشل إضافة الحي')
+      setIsDistrictModalOpen(false)
+      setNewDistrictNameAr('')
+      setNewDistrictDirection('')
+      // Refetch districts
+      const updated = await fetch(`/api/locations/districts?cityId=${selectedCityId}`).then((r) => r.json())
+      if (updated.districts) {
+        setSaudiDistricts(updated.districts)
+        handleSelectDistrict(data.district.id)
+      }
+    } catch (err: any) {
+      setDistrictModalError(err.message || 'فشل إضافة الحي')
+    } finally {
+      setDistrictModalLoading(false)
+    }
+  }
+
+  const MAX_MEDIA_LIMIT = 100
 
   const handleFileSelect = useCallback((files: FileList | null) => {
     if (!files) return
@@ -161,7 +264,15 @@ export default function NewPropertyPage() {
         file,
         preview: URL.createObjectURL(file),
       }))
-    setMediaFiles((prev) => [...prev, ...newFiles])
+
+    setMediaFiles((prev) => {
+      if (prev.length + newFiles.length > MAX_MEDIA_LIMIT) {
+        setError(`لا يمكن إرفاق أكثر من ${MAX_MEDIA_LIMIT} صورة لكل عقار.`)
+        const allowedCount = Math.max(0, MAX_MEDIA_LIMIT - prev.length)
+        return [...prev, ...newFiles.slice(0, allowedCount)]
+      }
+      return [...prev, ...newFiles]
+    })
   }, [])
 
   const removeMedia = (index: number) => {
@@ -169,6 +280,26 @@ export default function NewPropertyPage() {
       const copy = [...prev]
       URL.revokeObjectURL(copy[index].preview)
       copy.splice(index, 1)
+      return copy
+    })
+  }
+
+  const setAsCoverPhoto = (index: number) => {
+    if (index === 0) return
+    setMediaFiles((prev) => {
+      const copy = [...prev]
+      const [selected] = copy.splice(index, 1)
+      copy.unshift(selected)
+      return copy
+    })
+  }
+
+  const moveMedia = (fromIndex: number, toIndex: number) => {
+    setMediaFiles((prev) => {
+      if (toIndex < 0 || toIndex >= prev.length) return prev
+      const copy = [...prev]
+      const [moved] = copy.splice(fromIndex, 1)
+      copy.splice(toIndex, 0, moved)
       return copy
     })
   }
@@ -198,6 +329,23 @@ export default function NewPropertyPage() {
     setTags(tags.filter((t) => t !== tag))
   }
 
+  const normalizeDecimal = (val: string): string => {
+    return val.replace(/٫/g, '.').replace(/,/g, '.')
+  }
+
+  const isApartmentSelected = () => {
+    const subTypeName = subtypes.find(s => s.id === subtypeId)?.name || ''
+    return subTypeName === 'شقة' || subTypeName.includes('شقة')
+  }
+
+  const handleBedroomsChange = (val: string) => {
+    setBedrooms(val)
+    const numBeds = parseInt(val)
+    if (!isNaN(numBeds) && numBeds > 0) {
+      setBathrooms(String(numBeds + 1))
+    }
+  }
+
   // Check if subtype or category represents Land
   const isLandSelected = () => {
     if (category === 'AGRICULTURAL') return true;
@@ -207,8 +355,8 @@ export default function NewPropertyPage() {
 
   const handleCreateOwner = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newOwnerName.trim() || !newOwnerPhone.trim() || !newOwnerNationalId.trim()) {
-      setOwnerModalError('يرجى ملء جميع الحقول الإلزامية للمالك')
+    if (!newOwnerName.trim() || !newOwnerPhone.trim() || !newOwnerNationalId.trim() || !newOwnerDob.trim()) {
+      setOwnerModalError('رقم الهوية وتاريخ الميلاد إجباريان لبلاغات الهيئة العامة للعقار (REGA)')
       return
     }
     setOwnerModalLoading(true)
@@ -246,6 +394,13 @@ export default function NewPropertyPage() {
       return
     }
 
+    const numMaster = parseInt(masterBedrooms) || 0
+    const numBaths = parseInt(bathrooms) || 0
+    if (numMaster > 0 && numBaths < numMaster) {
+      setError('عدد دورات المياه يجب أن يكون مساويًا أو أكبر من عدد غرف النوم الماستر')
+      return
+    }
+
     setSubmitting(true)
     setError(null)
 
@@ -259,14 +414,17 @@ export default function NewPropertyPage() {
         currency: 'SAR',
         dealType: dealType as 'SALE' | 'RENT',
         // Fallback property type
-        propertyType: isLandSelected() ? 'LAND' : category === 'AGRICULTURAL' ? 'FARM' : 'OTHER',
+        propertyType: isLandSelected() ? 'LAND' : category === 'AGRICULTURAL' ? 'FARM' : isApartmentSelected() ? 'APARTMENT' : 'OTHER',
         category,
         subtypeId: subtypeId || null,
         ownerId: ownerId || null,
         area: parseFloat(area) || undefined,
         builtArea: isLandSelected() ? undefined : (parseFloat(builtArea) || undefined),
         bedrooms: isLandSelected() ? 0 : (parseInt(bedrooms) || undefined),
-        bathrooms: isLandSelected() ? 0 : (parseInt(bathrooms) || undefined),
+        masterBedrooms: isLandSelected() ? 0 : numMaster,
+        bathrooms: isLandSelected() ? 0 : numBaths,
+        entryType: entryType ? (entryType as 'PRIVATE' | 'SHARED') : undefined,
+        autoArchiveOnExpiry,
         amenities: selectedAmenities,
         tags,
         isFeatured,
@@ -296,6 +454,10 @@ export default function NewPropertyPage() {
         internalNotes: internalNotes.trim() || undefined,
         pricingModel,
         paymentMethod,
+        showBidDate,
+        bidAutoHideDuration,
+        saudiCityId: selectedCityId || undefined,
+        saudiDistrictId: selectedDistrictId || undefined,
         directionalArea: directionalArea.trim() || undefined,
         deedNumber: deedNumber.trim() || undefined,
         deedFile: deedFile.trim() || undefined,
@@ -445,7 +607,20 @@ export default function NewPropertyPage() {
                   </select>
                 </div>
 
-
+                {isApartmentSelected() && (
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold">نوع المدخل (للشقق)</Label>
+                    <select
+                      value={entryType}
+                      onChange={(e) => setEntryType(e.target.value as any)}
+                      className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none"
+                    >
+                      <option value="">غير محدد</option>
+                      <option value="PRIVATE">مدخل خاص</option>
+                      <option value="SHARED">مدخل مشترك</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -602,6 +777,49 @@ export default function NewPropertyPage() {
                   <p className="text-[10px] text-amber-600 font-medium">
                     * ملاحظة: أسماء وهواتف السائمين ستبقى سرية تماماً للموظفين فقط ولن تظهر للعملاء.
                   </p>
+
+                  <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-edge">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold">إخفاء السومة تلقائيًا بعد (للعملاء)</Label>
+                      <select
+                        value={bidAutoHideDuration}
+                        onChange={(e) => setBidAutoHideDuration(e.target.value as any)}
+                        className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading"
+                      >
+                        <option value="NONE">بدون إخفاء (دائم)</option>
+                        <option value="ONE_MONTH">شهر</option>
+                        <option value="TWO_MONTHS">شهرين</option>
+                        <option value="THREE_MONTHS">3 أشهر</option>
+                        <option value="SIX_MONTHS">6 أشهر</option>
+                        <option value="ONE_YEAR">سنة</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-edge bg-page mt-auto">
+                      <div>
+                        <Label className="text-xs font-semibold block">إظهار تاريخ السومة للعميل</Label>
+                        <span className="text-[10px] text-dim">إخفاء التاريخ يظهر المبلغ فقط للزوار</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-dim">{showBidDate ? 'مفعّل' : 'معطّل'}</span>
+                        <button
+                          type="button"
+                          onClick={() => setShowBidDate(!showBidDate)}
+                          className={cn(
+                            'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                            showBidDate ? 'bg-primary' : 'bg-gray-300'
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                              showBidDate ? 'translate-x-5' : 'translate-x-0'
+                            )}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -615,15 +833,52 @@ export default function NewPropertyPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold">المدينة</Label>
-                  <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="الرياض" className="bg-page" />
+                  <Label className="text-xs font-semibold">المدينة (قائمة معتمدة)</Label>
+                  <select
+                    value={selectedCityId}
+                    onChange={(e) => handleSelectCity(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none"
+                  >
+                    <option value="">اختر المدينة...</option>
+                    {saudiCities.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nameAr} {c.region ? `(${c.region})` : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold">الحي</Label>
-                  <Input value={district} onChange={(e) => setDistrict(e.target.value)} placeholder="الياسمين" className="bg-page" />
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-semibold">الحي</Label>
+                    {selectedCityId && (
+                      <button
+                        type="button"
+                        onClick={() => setIsDistrictModalOpen(true)}
+                        className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-0.5"
+                      >
+                        <Plus className="h-3 w-3" />
+                        إضافة حي
+                      </button>
+                    )}
+                  </div>
+                  <select
+                    value={selectedDistrictId}
+                    onChange={(e) => handleSelectDistrict(e.target.value)}
+                    disabled={!selectedCityId}
+                    className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none disabled:opacity-50"
+                  >
+                    <option value="">{selectedCityId ? 'اختر الحي...' : 'اختر المدينة أولاً'}</option>
+                    {saudiDistricts.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.nameAr} {d.officeId ? '(حي مخصص للمكتب)' : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold">الاتجاه / المنطقة الجغرافية</Label>
+                  <Label className="text-xs font-semibold">الاتجاه / المنطقة الجغرافية (تلقائي/يدوي)</Label>
                   <select
                     value={directionalArea}
                     onChange={(e) => setDirectionalArea(e.target.value)}
@@ -679,7 +934,7 @@ export default function NewPropertyPage() {
                   />
                 </div>
 
-                {!isLand && (
+                {!isLandSelected() && (
                   <>
                     <div className="space-y-2">
                       <Label className="text-xs font-semibold">مسطح البناء (م² - اختياري)</Label>
@@ -692,22 +947,32 @@ export default function NewPropertyPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-semibold">غرف النوم</Label>
+                      <Label className="text-xs font-semibold">غرف النوم (الإجمالي)</Label>
                       <Input
                         type="number"
                         value={bedrooms}
-                        onChange={(e) => setBedrooms(e.target.value)}
+                        onChange={(e) => handleBedroomsChange(e.target.value)}
                         placeholder="5"
                         className="bg-page"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-semibold">دورات المياه</Label>
+                      <Label className="text-xs font-semibold">غرف النوم الماستر</Label>
+                      <Input
+                        type="number"
+                        value={masterBedrooms}
+                        onChange={(e) => setMasterBedrooms(e.target.value)}
+                        placeholder="2"
+                        className="bg-page"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold">دورات المياه (≥ غرف الماستر)</Label>
                       <Input
                         type="number"
                         value={bathrooms}
                         onChange={(e) => setBathrooms(e.target.value)}
-                        placeholder="4"
+                        placeholder="6"
                         className="bg-page"
                       />
                     </div>
@@ -757,7 +1022,7 @@ export default function NewPropertyPage() {
                   />
                 </div>
 
-                {!isLand && (
+                {!isLandSelected() && (
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold">رقم الطابق (اختياري)</Label>
                     <Input
@@ -773,23 +1038,23 @@ export default function NewPropertyPage() {
 
               {/* Borders Dimensions */}
               <div className="rounded-xl border border-edge bg-alt/5 p-4 space-y-3">
-                <Label className="text-xs font-bold text-primary block">أطوال حدود العقار (متر)</Label>
+                <Label className="text-xs font-bold text-primary block">أطوال حدود العقار (متر - قبول الفواصل . و , و ٫)</Label>
                 <div className="grid gap-3 sm:grid-cols-4">
                   <div className="space-y-1">
                     <span className="text-[10px] text-dim">الحد الشمالي</span>
-                    <Input type="number" value={borderNorth} onChange={(e) => setBorderNorth(e.target.value)} placeholder="20" className="bg-page text-xs font-semibold" />
+                    <Input type="text" value={borderNorth} onChange={(e) => setBorderNorth(normalizeDecimal(e.target.value))} placeholder="20" className="bg-page text-xs font-semibold" />
                   </div>
                   <div className="space-y-1">
                     <span className="text-[10px] text-dim">الحد الجنوبي</span>
-                    <Input type="number" value={borderSouth} onChange={(e) => setBorderSouth(e.target.value)} placeholder="20" className="bg-page text-xs font-semibold" />
+                    <Input type="text" value={borderSouth} onChange={(e) => setBorderSouth(normalizeDecimal(e.target.value))} placeholder="20" className="bg-page text-xs font-semibold" />
                   </div>
                   <div className="space-y-1">
                     <span className="text-[10px] text-dim">الحد الشرقي</span>
-                    <Input type="number" value={borderEast} onChange={(e) => setBorderEast(e.target.value)} placeholder="18" className="bg-page text-xs font-semibold" />
+                    <Input type="text" value={borderEast} onChange={(e) => setBorderEast(normalizeDecimal(e.target.value))} placeholder="18" className="bg-page text-xs font-semibold" />
                   </div>
                   <div className="space-y-1">
                     <span className="text-[10px] text-dim">الحد الغربي</span>
-                    <Input type="number" value={borderWest} onChange={(e) => setBorderWest(e.target.value)} placeholder="18" className="bg-page text-xs font-semibold" />
+                    <Input type="text" value={borderWest} onChange={(e) => setBorderWest(normalizeDecimal(e.target.value))} placeholder="18" className="bg-page text-xs font-semibold" />
                   </div>
                 </div>
               </div>
@@ -835,6 +1100,31 @@ export default function NewPropertyPage() {
                     onChange={(e) => setContractExpiryDate(e.target.value)}
                     className="bg-page"
                   />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg border border-edge bg-page">
+                <div>
+                  <Label className="text-xs font-semibold block">أرشفة تلقائية عند انتهاء العقد</Label>
+                  <span className="text-[10px] text-dim">أرشفة العقار تلقائيًا وإرسال إشعار للمكتب عند حلول تاريخ الانتهاء</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-dim">{autoArchiveOnExpiry ? 'مفعّل' : 'معطّل'}</span>
+                  <button
+                    type="button"
+                    onClick={() => setAutoArchiveOnExpiry(!autoArchiveOnExpiry)}
+                    className={cn(
+                      'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                      autoArchiveOnExpiry ? 'bg-primary' : 'bg-gray-300'
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                        autoArchiveOnExpiry ? 'translate-x-5' : 'translate-x-0'
+                      )}
+                    />
+                  </button>
                 </div>
               </div>
 
@@ -901,19 +1191,52 @@ export default function NewPropertyPage() {
                 </div>
 
                 {mediaFiles.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 mt-3">
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5 mt-3">
                     {mediaFiles.map((media, idx) => (
-                      <div key={idx} className="group relative aspect-square overflow-hidden rounded-lg border border-edge bg-page">
+                      <div key={idx} className="group relative aspect-square overflow-hidden rounded-lg border border-edge bg-page shadow-sm">
                         <Image src={media.preview} alt={`صورة ${idx + 1}`} fill className="object-cover" />
                         <button
+                          type="button"
                           onClick={() => removeMedia(idx)}
-                          className="absolute end-1 top-1 rounded-full bg-red-600 p-1 opacity-0 transition-opacity group-hover:opacity-100"
+                          className="absolute end-1 top-1 rounded-full bg-red-600 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 shadow"
+                          title="حذف"
                         >
-                          <X className="h-3 w-3 text-white" />
+                          <X className="h-3 w-3" />
                         </button>
-                        {idx === 0 && (
-                          <div className="absolute bottom-0 start-0 end-0 bg-primary py-0.5 text-center text-[9px] font-medium text-white">
-                            صورة الغلاف
+                        
+                        {idx !== 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setAsCoverPhoto(idx)}
+                            className="absolute start-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[9px] text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-primary"
+                          >
+                            تعيين كغلاف
+                          </button>
+                        )}
+
+                        {idx === 0 ? (
+                          <div className="absolute bottom-0 start-0 end-0 bg-primary py-1 text-center text-[9px] font-bold text-white shadow">
+                            صورة الغلاف الرئيسية
+                          </div>
+                        ) : (
+                          <div className="absolute bottom-0 start-0 end-0 flex justify-between bg-black/50 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() => moveMedia(idx, idx - 1)}
+                              className="text-[10px] text-white hover:text-amber-300 font-bold px-1"
+                              title="تقديم"
+                            >
+                              ▶
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveMedia(idx, idx + 1)}
+                              disabled={idx === mediaFiles.length - 1}
+                              className="text-[10px] text-white hover:text-amber-300 font-bold px-1 disabled:opacity-30"
+                              title="تأخير"
+                            >
+                              ◀
+                            </button>
                           </div>
                         )}
                       </div>
@@ -985,6 +1308,7 @@ export default function NewPropertyPage() {
                   <option value="AVAILABLE">متوفر</option>
                   <option value="SOLD">مباع</option>
                   <option value="RENTED">مؤجر</option>
+                  <option value="RESERVED">محجوز</option>
                 </select>
               </div>
 
@@ -1129,8 +1453,9 @@ export default function NewPropertyPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">تاريخ الميلاد</Label>
+                <Label className="text-xs font-semibold">تاريخ الميلاد (إجباري للهيئة العامة للعقار)</Label>
                 <Input
+                  required
                   type="date"
                   value={newOwnerDob}
                   onChange={(e) => setNewOwnerDob(e.target.value)}
@@ -1144,6 +1469,71 @@ export default function NewPropertyPage() {
                 </Button>
                 <Button type="submit" isLoading={ownerModalLoading}>
                   إضافة وحفظ
+                </Button>
+              </div>
+            </form>
+          </div>
+        </>
+      )}
+
+      {/* Custom District Addition Modal (TS-206) */}
+      {isDistrictModalOpen && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={() => setIsDistrictModalOpen(false)} />
+          <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-edge bg-elevated p-6 shadow-2xl flex flex-col text-right" dir="rtl">
+            <div className="flex items-center justify-between border-b border-edge pb-4 mb-4">
+              <h3 className="text-lg font-bold text-primary flex items-center gap-1.5">
+                <MapPin className="h-5 w-5 text-primary" />
+                <span>إضافة حي مخصص للمكتب</span>
+              </h3>
+              <button
+                onClick={() => setIsDistrictModalOpen(false)}
+                className="rounded-lg p-1.5 text-dim hover:bg-page transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {districtModalError && (
+              <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400 mb-4">
+                {districtModalError}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateDistrict} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">اسم الحي بالعربية</Label>
+                <Input
+                  required
+                  placeholder="مثال: النرجس الجديد"
+                  value={newDistrictNameAr}
+                  onChange={(e) => setNewDistrictNameAr(e.target.value)}
+                  className="bg-page"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">الاتجاه (اختر إن وجد)</Label>
+                <select
+                  value={newDistrictDirection}
+                  onChange={(e) => setNewDistrictDirection(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading focus-visible:outline-none"
+                >
+                  <option value="">غير محدد</option>
+                  <option value="NORTH">شمال</option>
+                  <option value="SOUTH">جنوب</option>
+                  <option value="EAST">شرق</option>
+                  <option value="WEST">غرب</option>
+                  <option value="CENTER">وسط</option>
+                </select>
+              </div>
+
+              <div className="border-t border-edge pt-4 mt-6 flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsDistrictModalOpen(false)}>
+                  إلغاء
+                </Button>
+                <Button type="submit" isLoading={districtModalLoading}>
+                  إضافة الحي
                 </Button>
               </div>
             </form>

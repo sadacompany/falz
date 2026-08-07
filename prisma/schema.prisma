@@ -19,7 +19,7 @@ model Plan {
   currency          String         @default("SAR")
   maxListings       Int            @default(10)
   maxAgents         Int            @default(2)
-  maxMediaPerListing Int           @default(5)
+  maxMediaPerListing Int           @default(100)
   features          Json           @default("{}") // { customDomain: false, advancedAnalytics: false, pdfReports: false, blogEnabled: true, ... }
   isActive          Boolean        @default(true)
   sortOrder         Int            @default(0)
@@ -143,6 +143,7 @@ model Office {
   visitors        Visitor[]
   propertyOwners  PropertyOwner[]
   signboards      Signboard[]
+  saudiDistricts  SaudiDistrict[]
   missedCalls     MissedCall[]
   reminders       Reminder[]
   propertySubtypes PropertySubtype[]
@@ -294,6 +295,8 @@ model Property {
   area            Float?         // sqm
   bedrooms        Int?
   bathrooms       Int?
+  masterBedrooms  Int?           @default(0)
+  entryType       EntryType?
   amenities       Json?          // ["parking", "pool", "gym", ...]
   tags            String[]       @default([])
   isFeatured      Boolean        @default(false)
@@ -309,12 +312,16 @@ model Property {
   internalNotes   String?        @db.Text
   pricingModel    PricingModel   @default(LIMIT)
   paymentMethod   PaymentMethod  @default(BANK_AND_CASH)
+  showBidDate          Boolean              @default(false)
+  bidAutoHideDuration  BidAutoHideDuration  @default(NONE)
   directionalArea String?
   deedNumber      String?
   deedFile        String?
   marketingContractNumber String?
   contractExpiryDate DateTime?
+  autoArchiveOnExpiry Boolean              @default(true)
   soldAt          DateTime?
+  reservedAt      DateTime?
   
   // Custom subtype
   subtypeId       String?
@@ -330,6 +337,10 @@ model Property {
   streetAr        String?
   lat             Float?
   lng             Float?
+  saudiCityId     String?
+  saudiCity       SaudiCity?       @relation(fields: [saudiCityId], references: [id])
+  saudiDistrictId String?
+  saudiDistrict   SaudiDistrict?   @relation(fields: [saudiDistrictId], references: [id])
   // Status
   status          PropertyStatus @default(DRAFT)
   availability    Availability   @default(AVAILABLE)
@@ -400,6 +411,48 @@ enum Availability {
   AVAILABLE
   SOLD
   RENTED
+  RESERVED
+}
+
+enum EntryType {
+  PRIVATE
+  SHARED
+}
+
+enum BidAutoHideDuration {
+  ONE_MONTH
+  TWO_MONTHS
+  THREE_MONTHS
+  SIX_MONTHS
+  ONE_YEAR
+  NONE
+}
+
+model SaudiCity {
+  id          String          @id @default(cuid())
+  name        String
+  nameAr      String          @unique
+  region      String?
+  districts   SaudiDistrict[]
+  properties  Property[]
+  createdAt   DateTime        @default(now())
+}
+
+model SaudiDistrict {
+  id          String        @id @default(cuid())
+  cityId      String
+  city        SaudiCity     @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  officeId    String?
+  office      Office?       @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  name        String
+  nameAr      String
+  direction   String?
+  properties  Property[]
+  createdAt   DateTime      @default(now())
+
+  @@unique([cityId, nameAr, officeId])
+  @@index([cityId])
+  @@index([officeId])
 }
 
 model PropertyMedia {

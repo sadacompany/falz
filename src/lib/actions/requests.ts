@@ -119,3 +119,82 @@ export async function getRequestStats() {
 
   return { total, pending, responded, closed }
 }
+
+// ─── Public Action: Visitor Submit Request ─────────────────
+
+export async function createPublicPropertyRequest(input: {
+  propertyId: string
+  name: string
+  phone: string
+  email?: string
+  type?: 'INTEREST' | 'VIEWING' | 'INFO'
+  message?: string
+}) {
+  const { propertyId, name, phone, email, type = 'INTEREST', message } = input
+
+  if (!propertyId || !name || !phone) {
+    throw new Error('بيانات المشتري (الاسم ورقم الجوال) مطلوبة لتسجيل الطلب.')
+  }
+
+  const property = await prisma.property.findUnique({
+    where: { id: propertyId },
+    select: { officeId: true, title: true, titleAr: true, availability: true },
+  })
+
+  if (!property) {
+    throw new Error('العقار غير موجود')
+  }
+
+  if (property.availability === 'RESERVED' || property.availability === 'SOLD' || property.availability === 'RENTED') {
+    throw new Error('عذرًا، العقار غير متوفر حاليًا لتلقي الطلبات.')
+  }
+
+  // Find or create visitor for this office
+  let visitor = await prisma.visitor.findFirst({
+    where: { phone, officeId: property.officeId },
+  })
+
+  if (!visitor) {
+    visitor = await prisma.visitor.create({
+      data: {
+        officeId: property.officeId,
+        name,
+        phone,
+        email: email || null,
+      },
+    })
+  }
+
+  const newRequest = await prisma.propertyRequest.create({
+    data: {
+      visitorId: visitor.id,
+      propertyId,
+      type,
+      message: message || null,
+    },
+  })
+
+  // Create notification for office staff
+  const members = await prisma.membership.findMany({
+    where: { officeId: property.officeId, isActive: true },
+    select: { userId: true },
+  })
+
+  const propTitle = property.titleAr || property.title
+  for (const member of members) {
+    await prisma.notification.create({
+      data: {
+        officeId: property.officeId,
+        userId: member.userId,
+        type: 'new_request',
+        title: 'طلب جديد على عقار',
+        titleAr: 'طلب جديد على عقار',
+        message: `تم استقبال طلب جديد من ${name} (${phone}) على العقار "${propTitle}".`,
+        messageAr: `تم استقبال طلب جديد من ${name} (${phone}) على العقار "${propTitle}".`,
+        link: `/dashboard/requests`,
+      },
+    }).catch(() => {})
+  }
+
+  return newRequest
+}

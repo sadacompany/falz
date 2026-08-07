@@ -270,6 +270,7 @@ const en: Dictionary = {
       AVAILABLE: 'Available',
       SOLD: 'Sold',
       RENTED: 'Rented',
+      RESERVED: 'Reserved',
     },
 
     // Media

@@ -25,7 +25,7 @@ export interface PropertyCardData {
   bathrooms: number | null
   area: number | null
   isFeatured: boolean
-  availability: 'AVAILABLE' | 'SOLD' | 'RENTED'
+  availability: 'AVAILABLE' | 'SOLD' | 'RENTED' | 'RESERVED'
   media: { url: string; alt: string | null; altAr: string | null }[]
 }
 

@@ -104,6 +104,10 @@ export default function OwnersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!name.trim() || !phone.trim() || !nationalId.trim() || !dob.trim()) {
+      setError('رقم الهوية وتاريخ الميلاد إجباريان لبلاغات الهيئة العامة للعقار (REGA)')
+      return
+    }
     setSaving(true)
     setError(null)
     try {
@@ -347,7 +351,7 @@ export default function OwnersPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-heading mb-1">الهوية الوطنية / الإقامة</label>
+                  <label className="block text-xs font-semibold text-heading mb-1">رقم الهوية / الإقامة (إجباري REGA)</label>
                   <Input
                     type="text"
                     required
@@ -361,7 +365,7 @@ export default function OwnersPage() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-heading mb-1">تاريخ الميلاد</label>
+                  <label className="block text-xs font-semibold text-heading mb-1">تاريخ الميلاد (إجباري REGA)</label>
                   <Input
                     type="date"
                     required

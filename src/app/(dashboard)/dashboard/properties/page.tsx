@@ -67,11 +67,12 @@ const propertyTypeLabel: Record<string, string> = {
 export default function PropertiesPage() {
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get('category') || ''
+  const tabParam = searchParams.get('tab') || searchParams.get('dealType') || ''
 
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('')
-  const [dealFilter, setDealFilter] = useState<string>('')
+  const [dealFilter, setDealFilter] = useState<string>(tabParam === 'RENT' || tabParam === 'rent' ? 'RENT' : 'SALE')
   const [categoryFilter, setCategoryFilter] = useState<string>(categoryParam)
   const [subtypeFilter, setSubtypeFilter] = useState<string>('')
   const [subtypes, setSubtypes] = useState<any[]>([])
@@ -278,6 +279,44 @@ export default function PropertiesPage() {
         </div>
       </div>
 
+      {/* Sale / Rent Separation Tabs (PRD Q1 & F1) */}
+      <div className="flex border-b border-edge">
+        <button
+          onClick={() => {
+            setDealFilter('SALE')
+            setPage(1)
+          }}
+          className={cn(
+            'flex items-center gap-2 px-6 py-3 text-base font-bold transition-all border-b-2 -mb-px',
+            dealFilter === 'SALE'
+              ? 'border-primary text-primary bg-primary/5'
+              : 'border-transparent text-dim hover:text-heading hover:border-edge'
+          )}
+        >
+          <span>للبيع</span>
+          <Badge variant={dealFilter === 'SALE' ? 'default' : 'secondary'} className="text-xs">
+            عقارات للبيع
+          </Badge>
+        </button>
+        <button
+          onClick={() => {
+            setDealFilter('RENT')
+            setPage(1)
+          }}
+          className={cn(
+            'flex items-center gap-2 px-6 py-3 text-base font-bold transition-all border-b-2 -mb-px',
+            dealFilter === 'RENT'
+              ? 'border-primary text-primary bg-primary/5'
+              : 'border-transparent text-dim hover:text-heading hover:border-edge'
+          )}
+        >
+          <span>للإيجار</span>
+          <Badge variant={dealFilter === 'RENT' ? 'default' : 'secondary'} className="text-xs">
+            عقارات للإيجار
+          </Badge>
+        </button>
+      </div>
+
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
@@ -307,19 +346,6 @@ export default function PropertiesPage() {
               <option value="DRAFT">مسودة</option>
               <option value="PUBLISHED">منشور</option>
               <option value="ARCHIVED">مؤرشف</option>
-            </select>
-
-            <select
-              value={dealFilter}
-              onChange={(e) => {
-                setDealFilter(e.target.value)
-                setPage(1)
-              }}
-              className="rounded-md border border-edge bg-page px-3 py-2 text-sm text-heading"
-            >
-              <option value="">جميع الأنواع</option>
-              <option value="SALE">بيع</option>
-              <option value="RENT">إيجار</option>
             </select>
 
             <select

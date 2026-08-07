@@ -123,6 +123,22 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
     take: 3,
   })
 
+  // Check Som Auto-Hide
+  const latestBid = property.bids[0]
+  const isBidExpired = latestBid ? (() => {
+    const dur = property.bidAutoHideDuration
+    if (!dur || dur === 'NONE') return false
+    const diffDays = (Date.now() - new Date(latestBid.bidDate).getTime()) / (1000 * 60 * 60 * 24)
+    switch (dur) {
+      case 'ONE_MONTH': return diffDays >= 30
+      case 'TWO_MONTHS': return diffDays >= 60
+      case 'THREE_MONTHS': return diffDays >= 90
+      case 'SIX_MONTHS': return diffDays >= 180
+      case 'ONE_YEAR': return diffDays >= 365
+      default: return false
+    }
+  })() : false
+
   // Serialize
   const serializedProperty = {
     id: property.id,
@@ -131,7 +147,7 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
     titleAr: property.titleAr,
     description: property.description,
     descriptionAr: property.descriptionAr,
-    price: property.price.toString(),
+    price: isBidExpired && property.pricingModel === 'BID' ? 'يوجد سوم' : property.price.toString(),
     currency: property.currency,
     dealType: property.dealType,
     propertyType: property.propertyType,
@@ -174,11 +190,13 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
     pricingModel: property.pricingModel,
     paymentMethod: property.paymentMethod,
     directionalArea: property.directionalArea,
+    showBidDate: property.showBidDate,
+    isBidExpired,
     // Sanitized bids (strictly no bidderName or bidderPhone for public client)
     bids: property.bids.map((b) => ({
       id: b.id,
-      amount: b.amount.toString(),
-      bidDate: b.bidDate.toISOString(),
+      amount: isBidExpired ? 'يوجد سوم' : b.amount.toString(),
+      bidDate: property.showBidDate ? b.bidDate.toISOString() : null,
     })),
   }
 

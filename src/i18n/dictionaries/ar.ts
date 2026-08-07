@@ -268,6 +268,7 @@ const ar = {
       AVAILABLE: 'متاح',
       SOLD: 'مباع',
       RENTED: 'مؤجر',
+      RESERVED: 'محجوز',
     },
 
     // Media
