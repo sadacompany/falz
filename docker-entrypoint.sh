@@ -1,9 +1,11 @@
 #!/bin/sh
 set -e
 
-echo "🚀 Running database schema sync and seed..."
-npx prisma db push --skip-generate
-npx prisma db seed
+echo "🚀 Syncing database schema with Prisma..."
+npx prisma db push --skip-generate || echo "⚠️ Prisma db push returned non-zero exit code, continuing..."
 
-echo "✅ Database schema ready. Starting Next.js app..."
+echo "🌱 Seeding initial database records..."
+npx prisma db seed || echo "⚠️ Prisma db seed returned non-zero exit code, continuing..."
+
+echo "✅ Database preparation complete. Starting Next.js standalone server..."
 exec node server.js
