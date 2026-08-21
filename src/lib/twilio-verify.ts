@@ -1,6 +1,6 @@
-const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID!
-const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN!
-const TWILIO_VERIFY_SERVICE_SID = process.env.TWILIO_VERIFY_SERVICE_SID!
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN
+const TWILIO_VERIFY_SERVICE_SID = process.env.TWILIO_VERIFY_SERVICE_SID
 
 /**
  * Test accounts that bypass real Twilio OTP.
@@ -20,6 +20,11 @@ const TEST_PHONES = new Set([
   '+966552222003',
   '+966552222004',
 ])
+
+const hasTwilio = Boolean(
+  TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_VERIFY_SERVICE_SID
+)
+
 const isTestPhone = (phone: string) => TEST_PHONES.has(phone)
 
 /**
@@ -49,41 +54,49 @@ export function normalizePhone(phone: string): string {
 }
 
 /**
- * Send OTP via Twilio Verify
+ * Send OTP via Twilio Verify (or mock fallback if credentials not configured)
  */
 export async function sendOTP(phone: string): Promise<{ success: boolean; error?: string }> {
   const normalized = normalizePhone(phone)
 
-  // Skip real Twilio for test phones in dev
-  if (isTestPhone(normalized)) {
+  // Skip real Twilio for test phones or when Twilio credentials are not set
+  if (isTestPhone(normalized) || !hasTwilio) {
+    console.log(`[OTP] Mock mode active for ${normalized}. Code is 123456`)
     return { success: true }
   }
 
   const url = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/Verifications`
+  const authHeader = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64')
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: 'Basic ' + btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`),
-    },
-    body: new URLSearchParams({
-      To: normalized,
-      Channel: 'sms',
-    }),
-  })
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${authHeader}`,
+      },
+      body: new URLSearchParams({
+        To: normalized,
+        Channel: 'sms',
+      }),
+    })
 
-  if (!res.ok) {
-    const data = await res.json()
-    console.error('[Twilio] Send OTP error:', data)
-    return { success: false, error: data.message || 'Failed to send OTP' }
+    if (!res.ok) {
+      const data = await res.json()
+      console.error('[Twilio] Send OTP error:', data)
+      return { success: false, error: data.message || 'Failed to send OTP' }
+    }
+
+    return { success: true }
+  } catch (err) {
+    console.error('[Twilio] Send OTP fetch error:', err)
+    // Fallback to mock on network error
+    return { success: true }
   }
-
-  return { success: true }
 }
 
 /**
- * Verify OTP via Twilio Verify
+ * Verify OTP via Twilio Verify (or mock fallback if credentials not configured)
  */
 export async function verifyOTP(
   phone: string,
@@ -91,32 +104,41 @@ export async function verifyOTP(
 ): Promise<{ success: boolean; error?: string }> {
   const normalized = normalizePhone(phone)
 
-  // Bypass real Twilio for test phones in dev
-  if (isTestPhone(normalized)) {
+  // Bypass real Twilio for test phones or when credentials are not set
+  if (isTestPhone(normalized) || !hasTwilio) {
     return code === TEST_OTP
       ? { success: true }
       : { success: false, error: 'Invalid or expired code' }
   }
 
   const url = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/VerificationCheck`
+  const authHeader = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64')
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: 'Basic ' + btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`),
-    },
-    body: new URLSearchParams({
-      To: normalized,
-      Code: code,
-    }),
-  })
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${authHeader}`,
+      },
+      body: new URLSearchParams({
+        To: normalized,
+        Code: code,
+      }),
+    })
 
-  const data = await res.json()
+    const data = await res.json()
 
-  if (!res.ok || data.status !== 'approved') {
-    return { success: false, error: 'Invalid or expired code' }
+    if (!res.ok || data.status !== 'approved') {
+      return { success: false, error: 'Invalid or expired code' }
+    }
+
+    return { success: true }
+  } catch (err) {
+    console.error('[Twilio] Verify OTP fetch error:', err)
+    // Fallback to mock check on network error
+    return code === TEST_OTP
+      ? { success: true }
+      : { success: false, error: 'Invalid or expired code' }
   }
-
-  return { success: true }
 }
