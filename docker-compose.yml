@@ -29,6 +29,8 @@ services:
     restart: unless-stopped
     ports:
       - "${APP_PORT:-3000}:3000"
+    volumes:
+      - falz_uploads:/app/public/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -63,4 +65,6 @@ services:
 
 volumes:
   falz_pgdata:
+    driver: local
+  falz_uploads:
     driver: local
