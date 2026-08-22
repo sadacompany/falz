@@ -44,7 +44,7 @@ COPY --from=builder /app/docker-entrypoint.sh ./docker-entrypoint.sh
 
 USER root
 RUN chmod +x ./docker-entrypoint.sh
-USER nextjs
+RUN mkdir -p /app/public/uploads
 
 EXPOSE 3000
 ENV PORT=3000
