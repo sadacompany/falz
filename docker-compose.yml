@@ -10,7 +10,7 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     volumes:
-      - falz_pgdata:/var/lib/postgresql/data
+      - falz_pgdata_v2:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-falz}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
@@ -64,7 +64,7 @@ services:
       MOYASAR_PUBLISHABLE_KEY: ${MOYASAR_PUBLISHABLE_KEY:-}
 
 volumes:
-  falz_pgdata:
+  falz_pgdata_v2:
     driver: local
   falz_uploads:
     driver: local
