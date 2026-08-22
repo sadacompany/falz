@@ -81,6 +81,7 @@ export interface CreatePropertyInput {
   bidAutoHideDuration?: 'ONE_MONTH' | 'TWO_MONTHS' | 'THREE_MONTHS' | 'SIX_MONTHS' | 'ONE_YEAR' | 'NONE'
   saudiCityId?: string | null
   saudiDistrictId?: string | null
+  images?: string[]
   newBid?: {
     amount: number
     bidderName: string
@@ -305,6 +306,18 @@ export async function createProperty(input: CreatePropertyInput) {
     },
   })
 
+  // Create property media (images) if provided
+  if (input.images && input.images.length > 0) {
+    await prisma.propertyMedia.createMany({
+      data: input.images.map((url, i) => ({
+        propertyId: property.id,
+        url,
+        type: 'IMAGE',
+        sortOrder: i,
+      })),
+    })
+  }
+
   // Create initial bid if provided
   if (input.pricingModel === 'BID' && input.newBid) {
     await prisma.propertyBid.create({
@@ -464,6 +477,23 @@ export async function updateProperty(id: string, input: Partial<CreatePropertyIn
     where: { id, officeId },
     data,
   })
+
+  // Update property media (images) if provided
+  if (input.images !== undefined) {
+    await prisma.propertyMedia.deleteMany({
+      where: { propertyId: id },
+    })
+    if (input.images.length > 0) {
+      await prisma.propertyMedia.createMany({
+        data: input.images.map((url, i) => ({
+          propertyId: id,
+          url,
+          type: 'IMAGE',
+          sortOrder: i,
+        })),
+      })
+    }
+  }
 
   // Create new bid if provided
   if (input.newBid) {

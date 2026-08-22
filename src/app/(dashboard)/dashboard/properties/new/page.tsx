@@ -471,6 +471,29 @@ export default function NewPropertyPage() {
         } : undefined,
       }
 
+      // Upload media files to storage
+      const uploadedImages: string[] = []
+      for (const item of mediaFiles) {
+        if (item.file) {
+          const formData = new FormData()
+          formData.append('file', item.file)
+          formData.append('directory', 'properties')
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          })
+          const uploadData = await res.json()
+          if (res.ok && uploadData.success && uploadData.data?.url) {
+            uploadedImages.push(uploadData.data.url)
+          } else {
+            throw new Error(uploadData.message || 'فشل رفع الصور')
+          }
+        } else if (item.preview) {
+          uploadedImages.push(item.preview)
+        }
+      }
+      input.images = uploadedImages
+
       await createProperty(input)
       router.push('/dashboard/properties')
     } catch (err) {

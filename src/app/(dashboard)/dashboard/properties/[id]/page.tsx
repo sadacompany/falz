@@ -208,6 +208,10 @@ export default function EditPropertyPage() {
         setSeoDescription(property.seoDescription || '')
         setSlug(property.slug || '')
 
+        if (property.media && property.media.length > 0) {
+          setMediaFiles(property.media.map((m: any) => ({ preview: m.url })))
+        }
+
         // Specs
         setFacing(property.facing || '')
         setStreetWidth(property.streetWidth || '')
@@ -408,6 +412,29 @@ export default function EditPropertyPage() {
           bidDate: newBidDate ? new Date(newBidDate) : undefined,
         } : undefined,
       }
+
+      // Upload media files to storage
+      const uploadedImages: string[] = []
+      for (const item of mediaFiles) {
+        if (item.file) {
+          const formData = new FormData()
+          formData.append('file', item.file)
+          formData.append('directory', 'properties')
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          })
+          const uploadData = await res.json()
+          if (res.ok && uploadData.success && uploadData.data?.url) {
+            uploadedImages.push(uploadData.data.url)
+          } else {
+            throw new Error(uploadData.message || 'فشل رفع الصور')
+          }
+        } else if (item.preview) {
+          uploadedImages.push(item.preview)
+        }
+      }
+      input.images = uploadedImages
 
       await updateProperty(propertyId, input)
       router.push('/dashboard/properties')
